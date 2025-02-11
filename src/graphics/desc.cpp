@@ -44,3 +44,42 @@ WGPURenderPassDescriptor createRenderPassDesc(const WGPURenderPassColorAttachmen
 	
 	return renderPassDesc;
 }
+
+WGPUCommandBufferDescriptor createCmdBufferDesc()
+{
+	WGPUCommandBufferDescriptor cmdBufferDesc = {};
+	
+	cmdBufferDesc.nextInChain = nullptr;
+	cmdBufferDesc.label = "Command buffer";
+	
+	return cmdBufferDesc;
+}
+
+WGPUShaderModuleWGSLDescriptor createShaderCodeDesc(const char* shaderCode)
+{
+	WGPUShaderModuleWGSLDescriptor shaderCodeDesc = {};
+
+	// Set the chained struct's header
+	shaderCodeDesc.chain.next = nullptr;
+	shaderCodeDesc.chain.sType = WGPUSType_ShaderModuleWGSLDescriptor;
+	// Set the Shader Code
+	shaderCodeDesc.code = shaderCode;
+
+	return shaderCodeDesc;
+}
+
+WGPUShaderModuleDescriptor createShaderModDesc(const WGPUChainedStruct* shaderCodeChain)
+{
+	WGPUShaderModuleDescriptor shaderModDesc = {};
+
+	shaderModDesc.label = "Shader";
+	#ifdef WEBGPU_BACKEND_WGPU
+	shaderModDesc.hintCount = 0;
+	shaderModDesc.hints = nullptr;
+	#endif
+
+	// Connect the chain
+	shaderModDesc.nextInChain = shaderCodeChain;
+
+	return shaderModDesc;
+}

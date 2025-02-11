@@ -7,5 +7,8 @@
 WGPUDeviceDescriptor createDeviceDesc();
 WGPUCommandEncoderDescriptor createEncoderDesc();
 WGPURenderPassDescriptor createRenderPassDesc(const WGPURenderPassColorAttachment& renderPassColorAttach);
+WGPUCommandBufferDescriptor createCmdBufferDesc();
+WGPUShaderModuleWGSLDescriptor createShaderCodeDesc(const char* shaderCode);
+WGPUShaderModuleDescriptor createShaderModDesc(const WGPUChainedStruct* shaderCodeChain);
 
 #endif	// DESC_HPP_INCLUDED

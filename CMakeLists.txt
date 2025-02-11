@@ -16,8 +16,9 @@ add_executable(App
 	src/graphics/desc.cpp
 	src/graphics/config.cpp
 	src/graphics/attach.cpp
-	src/graphics/callback.cpp
 	src/graphics/texture.cpp
+	src/graphics/shader.cpp
+	src/error/callback.cpp
 	src/env/gpuenv.cpp
 	src/glfw3webgpu/glfw3webgpu.c
 )
@@ -26,7 +27,7 @@ set_target_properties(App PROPERTIES
     CXX_STANDARD 17
     CXX_STANDARD_REQUIRED ON
     CXX_EXTENSIONS OFF
-    COMPILE_WARNING_AS_ERROR ON
+    COMPILE_WARNING_AS_ERROR OFF
 )
 
 if (MSVC)
@@ -54,6 +55,7 @@ endif()
 
 target_include_directories(App PRIVATE
 	include
+	include/error
 	include/graphics
 	include/glfw3webgpu
 	external/include

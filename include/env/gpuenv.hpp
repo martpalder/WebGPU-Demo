@@ -10,6 +10,7 @@ typedef struct {
 	WGPUSurface surf;
 	WGPUDevice dev;
 	WGPUQueue queue;
+	WGPURenderPipeline pipeline;
 } GPUEnv;
 
 GPUEnv initGPUEnv(GLFWwindow* wnd);

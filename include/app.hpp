@@ -3,6 +3,7 @@
 #define APP_HPP_INCLUDED
 
 #include "./env/gpuenv.hpp"
+#include "./shader.hpp"
 #include <GLFW/glfw3.h>
 
 class App
@@ -17,12 +18,22 @@ private:
 	WGPUCommandBufferDescriptor m_cmdBufferDesc;
 	// Attachments
 	WGPURenderPassColorAttachment m_renderPassColorAttach;
+	// Target View
+	WGPUTextureView m_targetView;
+	// Shaders
+	WGPUShaderModule m_shaderMod;
+	
+	// Getters
+	bool IsRunning();
 	
 	// Methods
 	void CreateAttachments();
 	void CreateDescriptors();
+	void CreateRenderPipeline();
+	void LoadShader();
 	void EventLoop();
 	void RenderPass();
+	void Display();
 
 public:
 	// Constructor/Destructor
