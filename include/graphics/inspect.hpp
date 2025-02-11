@@ -4,7 +4,7 @@
 
 #include <webgpu/webgpu.h>
 
-void inspectAdapter(WGPUAdapter adapter);
-void inspectDevice(WGPUDevice device);
+void inspectAdapter(const WGPUAdapter& adapter);
+void inspectDevice(const WGPUDevice& device);
 
 #endif	// INSPECT_HPP_INCLUDED

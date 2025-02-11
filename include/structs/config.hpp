@@ -4,6 +4,6 @@
 
 #include <webgpu/webgpu.h>
 
-WGPUSurfaceConfiguration createSurfConfig(WGPUDevice device);
+WGPUSurfaceConfiguration createSurfConfig(const WGPUDevice& device);
 
 #endif	// CONFIG_HPP_INCLUDED

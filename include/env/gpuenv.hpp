@@ -14,6 +14,6 @@ typedef struct {
 } GPUEnv;
 
 GPUEnv initGPUEnv(GLFWwindow* wnd);
-void quitGPUEnv(GPUEnv gpuEnv);
+void quitGPUEnv(const GPUEnv& gpuEnv);
 
 #endif	// GPUENV_HPP_INCLUDED

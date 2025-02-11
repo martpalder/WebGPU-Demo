@@ -22,7 +22,7 @@ public:
     WGPUShaderModule& GetShaderMod();
 
     // Methods
-    void Load(WGPUDevice device, const char* PATH);
+    void Load(WGPUDevice device, const char* fileName);
 };
 
 WGPUShaderModule createShaderMod(WGPUDevice device, const char* SHADER_CODE);

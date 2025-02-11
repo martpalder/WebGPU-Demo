@@ -44,7 +44,7 @@ GPUEnv initGPUEnv(GLFWwindow* wnd)
 	return gpuEnv;
 }
 
-void quitGPUEnv(GPUEnv gpuEnv)
+void quitGPUEnv(const GPUEnv& gpuEnv)
 {
 	// Release the Render Pipeline
 	wgpuRenderPipelineRelease(gpuEnv.pipeline);

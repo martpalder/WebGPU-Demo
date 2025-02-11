@@ -4,6 +4,7 @@
 #include "./freader.hpp"
 
 #include <iostream>
+#include <cstring>
 
 Shader::Shader()
 {
@@ -22,21 +23,26 @@ WGPUShaderModule& Shader::GetShaderMod()
 
 void Shader::Release()
 {
+	// Release the Shader Module
 	wgpuShaderModuleRelease(m_shaderMod);
 	m_shaderMod = nullptr;
 	puts("Released the Shader Module");
 }
 
-void Shader::Load(WGPUDevice device, const char* PATH)
+void Shader::Load(WGPUDevice device, const char* fileName)
 {
-	// Release previous Module
+	// Release the previous Module
 	if (m_shaderMod != nullptr)
 	{
 		this->Release();
 	}
-
+	
+	// Set the Filepath
+	char path[48];
+	sprintf(path, "./shaders/%s", fileName);
+	
 	// Read the Code and create the Shader Module
-	const char* code = readFileText(PATH);
+	const char* code = readFileText(path);
 	m_shaderMod = createShaderMod(device, code);
 
 	// Release the Code

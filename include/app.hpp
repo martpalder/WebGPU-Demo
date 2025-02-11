@@ -22,6 +22,8 @@ private:
 	WGPUTextureView m_targetView;
 	// Shaders
 	Shader m_shader;
+	// Vertex Buffer
+	WGPUBuffer m_vertexBuffer;
 	
 	// Getters
 	bool IsRunning();
@@ -30,8 +32,10 @@ private:
 	void CreateAttachments();
 	void CreateDescriptors();
 	void EventLoop();
-	void RenderPass();
-	void Display();
+	void Cls();
+	void Flip();
+	void RenderPass(const WGPUCommandEncoder& encoder);
+	void Draw();
 
 public:
 	// Constructor/Destructor

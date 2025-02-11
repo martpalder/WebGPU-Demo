@@ -10,5 +10,6 @@ WGPURenderPassDescriptor createRenderPassDesc(const WGPURenderPassColorAttachmen
 WGPUCommandBufferDescriptor createCmdBufferDesc();
 WGPUShaderModuleWGSLDescriptor createShaderCodeDesc(const char* shaderCode);
 WGPUShaderModuleDescriptor createShaderModDesc(const WGPUChainedStruct* shaderCodeChain);
+WGPURenderPipelineDescriptor createRenderPipelineDesc(const WGPUShaderModule& shaderMod, const WGPUFragmentState& fragmentState);
 
 #endif	// DESC_HPP_INCLUDED

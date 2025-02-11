@@ -4,6 +4,6 @@
 
 #include <webgpu/webgpu.h>
 
-WGPUTextureView getNextTextureView(WGPUSurface surf);
+WGPUTextureView getNextTextureView(const WGPUSurface& surf);
 
 #endif	// TEXTURE_HPP_INCLUDED

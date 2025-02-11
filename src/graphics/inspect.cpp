@@ -3,7 +3,7 @@
 #include <iostream>
 #include <vector>
 
-void inspectAdapter(WGPUAdapter adapter)
+void inspectAdapter(const WGPUAdapter& adapter)
 {
 	#ifndef __EMSCRIPTEN__
 	WGPUSupportedLimits supportedLimits = {};
@@ -27,7 +27,7 @@ void inspectAdapter(WGPUAdapter adapter)
 }
 
 // We also add an inspect device function:
-void inspectDevice(WGPUDevice device)
+void inspectDevice(const WGPUDevice& device)
 {
     std::vector<WGPUFeatureName> features;
     size_t featureCount = wgpuDeviceEnumerateFeatures(device, nullptr);

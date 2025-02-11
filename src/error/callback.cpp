@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-void errorCallback(WGPUErrorType type, const char* message, void* userData)
+void errorCallback(WGPUErrorType type, const char* message, void* /* pUserData */)
 {
 	switch (type)
 	{

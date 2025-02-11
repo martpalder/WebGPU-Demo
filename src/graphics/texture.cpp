@@ -1,6 +1,6 @@
 #include "./texture.hpp"
 
-WGPUTextureView getNextTextureView(WGPUSurface surf)
+WGPUTextureView getNextTextureView(const WGPUSurface& surf)
 {
     // {{Get the next surface texture}}
 	WGPUSurfaceTexture surfaceTexture;

@@ -6,30 +6,9 @@
 #include "./attach.hpp"
 #include "./texture.hpp"
 #include "./pipeline.hpp"
+#include "./buffer.hpp"
 
 #include <cstdio>
-
-const char* SHADER_CODE = R"(
-	@vertex
-	fn vs_main(@builtin(vertex_index) in_vertex_index: u32) -> @builtin(position) vec4f
-	{
-		var p = vec2f(0.0, 0.0);
-		if (in_vertex_index == 0u) {
-			p = vec2f(-0.5, -0.5);
-		} else if (in_vertex_index == 1u) {
-			p = vec2f(0.5, -0.5);
-		} else {
-			p = vec2f(0.0, 0.5);
-		}
-		return vec4f(p, 0.0, 1.0);
-	}
-
-	@fragment
-	fn fs_main() -> @location(0) vec4f
-	{
-		return vec4f(0.0, 0.4, 1.0, 1.0);
-	}
-)";
 
 App::App()
 {
@@ -50,10 +29,12 @@ App::App()
 	this->CreateDescriptors();
 
 	// Load a Shader
-	m_shader.Load(m_gpuEnv.dev, "./shaders/triangle.wgsl");
-	
+	m_shader.Load(m_gpuEnv.dev, "basic.wgsl");
 	// Create the Render Pipeline
 	m_gpuEnv.pipeline = createRenderPipeline(m_gpuEnv.dev, m_shader.GetShaderMod());
+	
+	// Create a Vertex Buffer
+	m_vertexBuffer = createBufferVert(m_gpuEnv.dev, m_gpuEnv.queue);
 	puts("Started the App");
 }
 
@@ -106,23 +87,48 @@ void App::EventLoop()
 	#endif
 }
 
-void App::RenderPass()
+void App::Cls()
 {
-	// {{Create a Command Encoder}}
-	WGPUCommandEncoder encoder = wgpuDeviceCreateCommandEncoder(m_gpuEnv.dev, &m_encoderDesc);
-	
+	// Get the next Target Texture View
+	m_targetView = getNextTextureView(m_gpuEnv.surf);
+	// Set the Target Texture View to Color Attachment
+	m_renderPassColorAttach.view = m_targetView;
+}
+
+void App::Flip()
+{
+	wgpuTextureViewRelease(m_targetView);
+	#ifndef __EMSCRIPTEN__
+	wgpuSurfacePresent(m_gpuEnv.surf);
+	#endif
+}
+
+void App::RenderPass(const WGPUCommandEncoder& encoder)
+{
 	// {{Begin the Render Pass}}
 	WGPURenderPassEncoder renderPass = wgpuCommandEncoderBeginRenderPass(encoder, &m_renderPassDesc);
+	// {{Set the Render Pipeline}}
+	wgpuRenderPassEncoderSetPipeline(renderPass, m_gpuEnv.pipeline);
 	
 	// {{Draw}}
-	// Select which render pipeline to use
-	wgpuRenderPassEncoderSetPipeline(renderPass, m_gpuEnv.pipeline);
+	// Set the Vertex Buffer
+	wgpuRenderPassEncoderSetVertexBuffer(renderPass, 0, m_vertexBuffer, 0, wgpuBufferGetSize(m_vertexBuffer));
 	// Draw 1 instance of a 3-vertices shape
 	wgpuRenderPassEncoderDraw(renderPass, 3, 1, 0, 0);
 
 	// {{End and release the Render Pass}}
 	wgpuRenderPassEncoderEnd(renderPass);
 	wgpuRenderPassEncoderRelease(renderPass);
+}
+
+void App::Draw()
+{
+	// {{Create a Command Encoder}}
+	WGPUCommandEncoder encoder = wgpuDeviceCreateCommandEncoder(m_gpuEnv.dev, &m_encoderDesc);
+	
+	// {{Do a Render Pass}}
+	this->RenderPass(encoder);
+	
 	// {{Finish encoding the Command}}
 	WGPUCommandBuffer command = wgpuCommandEncoderFinish(encoder, &m_cmdBufferDesc);
 	// {{Release the Command Encoder}}
@@ -135,14 +141,6 @@ void App::RenderPass()
 	//puts("Command submitted.");
 }
 
-void App::Display()
-{
-	wgpuTextureViewRelease(m_targetView);
-	#ifndef __EMSCRIPTEN__
-	wgpuSurfacePresent(m_gpuEnv.surf);
-	#endif
-}
-
 void App::Run()
 {
 	// MAIN LOOP
@@ -151,15 +149,13 @@ void App::Run()
 		// Run Event Loop
 		this->EventLoop();
 		
-		// Get the next Target Texture View
-		m_targetView = getNextTextureView(m_gpuEnv.surf);
-		// Set the Target Texture View to Color Attachment
-		m_renderPassColorAttach.view = m_targetView;
+		// Clear
+		this->Cls();
 		
-		// Submit a Render Pass
-		this->RenderPass();
+		// Draw
+		this->Draw();
 		
-		// At the End of Frame: display
-		this->Display();
+		// Flip
+		this->Flip();
 	}
 }

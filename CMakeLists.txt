@@ -17,9 +17,12 @@ add_executable(App
 	src/graphics/texture.cpp
 	src/graphics/shader.cpp
 	src/graphics/pipeline.cpp
+	src/graphics/buffer.cpp
 	src/structs/desc.cpp
 	src/structs/config.cpp
 	src/structs/attach.cpp
+	src/structs/state.cpp
+	src/structs/layout.cpp
 	src/error/callback.cpp
 	src/util/freader.cpp
 	src/glfw3webgpu/glfw3webgpu.c

@@ -1,6 +1,6 @@
 #include "./config.hpp"
 
-WGPUSurfaceConfiguration createSurfConfig(WGPUDevice device)
+WGPUSurfaceConfiguration createSurfConfig(const WGPUDevice& device)
 {
 	WGPUSurfaceConfiguration config = {};
 	
