@@ -1,32 +1,50 @@
 #include "./shader.hpp"
 #include "./desc.hpp"
 #include "./callback.hpp"
+#include "./freader.hpp"
 
 #include <iostream>
 
-const char* SHADER_CODE = R"(
-	@vertex
-	fn vs_main(@builtin(vertex_index) in_vertex_index: u32) -> @builtin(position) vec4f
+Shader::Shader()
+{
+	m_shaderMod = nullptr;
+}
+
+Shader::~Shader()
+{
+	this->Release();
+}
+
+WGPUShaderModule& Shader::GetShaderMod()
+{
+	return m_shaderMod;
+}
+
+void Shader::Release()
+{
+	wgpuShaderModuleRelease(m_shaderMod);
+	m_shaderMod = nullptr;
+	puts("Released the Shader Module");
+}
+
+void Shader::Load(WGPUDevice device, const char* PATH)
+{
+	// Release previous Module
+	if (m_shaderMod != nullptr)
 	{
-		var p = vec2f(0.0, 0.0);
-		if (in_vertex_index == 0u) {
-			p = vec2f(-0.5, -0.5);
-		} else if (in_vertex_index == 1u) {
-			p = vec2f(0.5, -0.5);
-		} else {
-			p = vec2f(0.0, 0.5);
-		}
-		return vec4f(p, 0.0, 1.0);
+		this->Release();
 	}
 
-	@fragment
-	fn fs_main() -> @location(0) vec4f
-	{
-		return vec4f(0.0, 0.4, 1.0, 1.0);
-	}
-)";
+	// Read the Code and create the Shader Module
+	const char* code = readFileText(PATH);
+	m_shaderMod = createShaderMod(device, code);
 
-WGPUShaderModule createShaderMod(WGPUDevice device)
+	// Release the Code
+	free((void*)code);
+	code = NULL;
+}
+
+WGPUShaderModule createShaderMod(WGPUDevice device, const char* SHADER_CODE)
 {
 	WGPUShaderModule shaderMod;
 

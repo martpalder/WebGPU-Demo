@@ -18,8 +18,14 @@ void errorCallback(WGPUErrorType type, const char* message, void* userData)
 	case WGPUErrorType_Internal:
 		std::cerr << "[Internal Error]: " << message << std::endl;
 		break;
+	case WGPUErrorType_Unknown:
+		std::cerr << "[Unknown Error]: " << message << std::endl;
+		break;
 	case WGPUErrorFilter_Force32:
 		std::cerr << "[Force32 Error]: " << message << std::endl;
+		break;
+	case WGPUErrorType_DeviceLost:
+		std::cerr << "[DeviceLost Error]: " << message << std::endl;
 		break;
 	}
 }

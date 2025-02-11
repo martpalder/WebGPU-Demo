@@ -21,7 +21,7 @@ private:
 	// Target View
 	WGPUTextureView m_targetView;
 	// Shaders
-	WGPUShaderModule m_shaderMod;
+	Shader m_shader;
 	
 	// Getters
 	bool IsRunning();
@@ -29,8 +29,6 @@ private:
 	// Methods
 	void CreateAttachments();
 	void CreateDescriptors();
-	void CreateRenderPipeline();
-	void LoadShader();
 	void EventLoop();
 	void RenderPass();
 	void Display();
