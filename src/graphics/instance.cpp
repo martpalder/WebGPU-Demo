@@ -1,12 +1,13 @@
 #include "./instance.hpp"
 
 #include <iostream>
-#include <cassert>
+#include <cstdio>
+
 #define WGPU_DEBUG_LEVEL 1
 
 WGPUInstance createInstance()
 {
-	WGPUInstance instance;
+	WGPUInstance instance = nullptr;
 
 	// Set the log level to 'Trace' for detailed logging
 	//wgpuSetLog(WGPULogLevel_Trace);
@@ -27,7 +28,7 @@ WGPUInstance createInstance()
     // We can check whether there is actually an instance created
 	if (instance == nullptr)
 	{
-		std::cerr << "Could not initialize WebGPU!" << std::endl;
+		perror("[ERROR]: Could not initialize WebGPU!");
 	}
 	else
 	{

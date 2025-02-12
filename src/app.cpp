@@ -1,45 +1,66 @@
 #include "./app.hpp"
-
 #include "./window.hpp"
+#include "./attach.hpp"
 #include "./desc.hpp"
 #include "./config.hpp"
-#include "./attach.hpp"
-#include "./texture.hpp"
+#include "./bind.hpp"
 #include "./pipeline.hpp"
-#include "./buffer.hpp"
+#include "./texture.hpp"
 
 #include <cstdio>
+#include <emscripten/emscripten.h>
 
-App::App()
+App::App(int w, int h, const char* title)
 {
 	// INITIALIZATION
+	this->Init(w, h, title);
+}
+
+App::~App()
+{
+	// QUIT
+	this->Quit();
+}
+
+void App::Init(int w, int h, const char* title)
+{
+	#ifndef __EMSCRIPTEN__
 	// Create the window
-	m_wnd = createWindow();
+	m_wnd = createWindow(w, h, title);
 	if (m_wnd == nullptr){ this->~App(); }
+	#endif
 	
 	// Initialize WebGPU
 	m_gpuEnv = initGPUEnv(m_wnd);
 	
 	// Configure the Surface
-	WGPUSurfaceConfiguration config = createSurfConfig(m_gpuEnv.dev);
+	WGPUSurfaceConfiguration config = createSurfConfig(w, h, m_gpuEnv.dev);
 	wgpuSurfaceConfigure(m_gpuEnv.surf, &config);
 	
-	// Create the Attachments and Descriptors
+	// Create Attachments, Descriptors and Bindings
 	this->CreateAttachments();
 	this->CreateDescriptors();
+	//this->CreateBindings();
 
 	// Load a Shader
-	m_shader.Load(m_gpuEnv.dev, "basic.wgsl");
+	m_shader.Load(m_gpuEnv.dev, "basic3d.wgsl");
 	// Create the Render Pipeline
-	m_gpuEnv.pipeline = createRenderPipeline(m_gpuEnv.dev, m_shader.GetShaderMod());
+	this->CreatePipeline();
 	
-	// Create a Vertex Buffer
-	m_vertexBuffer = createBufferVert(m_gpuEnv.dev, m_gpuEnv.queue);
-	puts("Started the App");
+	// Create a Projection Matrix
+	this->CreateProjection();
+	
+	// Load a Mesh
+	m_mesh.Load(m_gpuEnv.dev, m_gpuEnv.queue);
+	puts("Initialized the App");
 }
 
-App::~App()
+void App::Quit()
 {
+	// Release the Projection Buffer
+	wgpuBufferRelease(m_projBuffer);
+	m_projBuffer = nullptr;
+	
 	// Quit WebGPU
 	quitGPUEnv(m_gpuEnv);
 	// Destroy the Window
@@ -50,7 +71,19 @@ App::~App()
 
 bool App::IsRunning()
 {
+	#ifndef __EMSCRIPTEN__
 	return (glfwWindowShouldClose(m_wnd) == false);
+	#else
+	return true;
+	#endif
+}
+
+void App::SetBindGroup(const WGPURenderPassEncoder& renderPass)
+{
+	if (m_bindGroup != nullptr)
+	{
+		wgpuRenderPassEncoderSetBindGroup(renderPass, 0, m_bindGroup, 0, nullptr);
+	}
 }
 
 void App::CreateAttachments()
@@ -73,11 +106,32 @@ void App::CreateDescriptors()
 	puts("Created the Descriptors");
 }
 
+void App::CreateBindings()
+{
+	m_bindGroup = createBindGroup(m_gpuEnv.dev, sizeof(mat4x4), m_projBuffer);
+}
+
+void App::CreatePipeline()
+{
+	m_gpuEnv.pipeline = createRenderPipeline(m_gpuEnv.dev, m_shader.GetShaderMod(), (m_bindGroup == nullptr));
+}
+
+void App::CreateProjection()
+{
+	float fov = 60.0f;
+	float aspect = 4 / 3.0f;
+	float n = 0.1f;
+	float f = 100.0f;
+	mat4x4_perspective(m_proj, fov, aspect, n, f);
+}
+
 void App::EventLoop()
 {
+	#ifndef __EMSCRIPTEN__
 	// Check whether the user clicked on the close button (and any other
 	// mouse/key event, which we don't use so far)
 	glfwPollEvents();
+	#endif
 	
 	// Poll WebGPU Events
 	#if defined(WEBGPU_BACKEND_DAWN)
@@ -110,11 +164,11 @@ void App::RenderPass(const WGPUCommandEncoder& encoder)
 	// {{Set the Render Pipeline}}
 	wgpuRenderPassEncoderSetPipeline(renderPass, m_gpuEnv.pipeline);
 	
+	// {{Set the binding group here!}}
+	//this->SetBindGroup(renderPass);
+	
 	// {{Draw}}
-	// Set the Vertex Buffer
-	wgpuRenderPassEncoderSetVertexBuffer(renderPass, 0, m_vertexBuffer, 0, wgpuBufferGetSize(m_vertexBuffer));
-	// Draw 1 instance of a 3-vertices shape
-	wgpuRenderPassEncoderDraw(renderPass, 3, 1, 0, 0);
+	m_mesh.Draw(renderPass);
 
 	// {{End and release the Render Pass}}
 	wgpuRenderPassEncoderEnd(renderPass);
@@ -141,21 +195,50 @@ void App::Draw()
 	//puts("Command submitted.");
 }
 
-void App::Run()
+void App::MainLoopGLFW()
 {
-	// MAIN LOOP
+	// Main Loop for GLFW
 	while (this->IsRunning())
 	{
-		// Run Event Loop
+		// Run the Event Loop
 		this->EventLoop();
 		
 		// Clear
 		this->Cls();
-		
 		// Draw
 		this->Draw();
-		
 		// Flip
 		this->Flip();
 	}
+}
+
+void App::MainLoopEM()
+{
+	// Equivalent of the Main Loop when using Emscripten:
+	auto callback = [](void *arg)
+	{
+		App* pApp = reinterpret_cast<App*>(arg);
+		// Run the Event Loop
+		pApp->EventLoop();
+		
+		// Clear
+		pApp->Cls();
+		// Draw
+		pApp->Draw();
+		// Flip
+		pApp->Flip();
+	};
+	
+	// Set the Main Loop
+	//emscripten_set_main_loop_arg(callback, this, 0, true);
+}
+
+void App::Run()
+{
+	// MAIN LOOP
+	#ifdef __EMSCRIPTEN__
+	this->MainLoopEM();
+	#else
+	this->MainLoopGLFW();
+	#endif
 }

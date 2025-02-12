@@ -39,7 +39,7 @@ void Shader::Load(WGPUDevice device, const char* fileName)
 	
 	// Set the Filepath
 	char path[48];
-	sprintf(path, "./shaders/%s", fileName);
+	sprintf(path, SHADER_DIR, fileName);
 	
 	// Read the Code and create the Shader Module
 	const char* code = readFileText(path);
@@ -48,14 +48,19 @@ void Shader::Load(WGPUDevice device, const char* fileName)
 	// Release the Code
 	free((void*)code);
 	code = NULL;
+	
+	if (m_shaderMod != nullptr)
+	{
+		printf("Loaded a Shader: '%s'\n", fileName);
+	}
 }
 
-WGPUShaderModule createShaderMod(WGPUDevice device, const char* SHADER_CODE)
+WGPUShaderModule createShaderMod(WGPUDevice device, const char* shaderCode)
 {
 	WGPUShaderModule shaderMod;
 
 	// Shader Code Description
-	WGPUShaderModuleWGSLDescriptor shaderCodeDesc = createShaderCodeDesc(SHADER_CODE);
+	WGPUShaderModuleWGSLDescriptor shaderCodeDesc = createShaderCodeDesc(shaderCode);
 
 	// Shader Module Description
 	WGPUShaderModuleDescriptor shaderModDesc = createShaderModDesc(&shaderCodeDesc.chain);

@@ -54,7 +54,7 @@ WGPUAdapter requestAdapterSync(WGPUInstance instance, WGPURequestAdapterOptions 
         UserData& userData = *reinterpret_cast<UserData*>(pUserData);
         if (status == WGPURequestAdapterStatus_Success) {
             userData.adapter = adapter;
-			std::cout << "Got Adapter: 0x" << adapter << std::endl;
+			std::cout << "Got Adapter: " << adapter << std::endl;
         } else {
 			std::cerr << "Couldn't get a WebGPU Adapter: " << message << std::endl;
         }
@@ -102,7 +102,7 @@ WGPUDevice requestDeviceSync(WGPUAdapter adapter, WGPUDeviceDescriptor const* de
         UserData& userData = *reinterpret_cast<UserData*>(pUserData);
         if (status == WGPURequestDeviceStatus_Success) {
             userData.device = device;
-			std::cout << "Got Device: 0x" << device << std::endl;
+			std::cout << "Got Device: " << device << std::endl;
         } else {
             std::cout << "Could not get WebGPU device: " << message << std::endl;
         }

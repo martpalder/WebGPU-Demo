@@ -4,12 +4,24 @@
 
 #include <webgpu/webgpu.h>
 
+// Device
 WGPUDeviceDescriptor createDeviceDesc();
+
+// Encoder
 WGPUCommandEncoderDescriptor createEncoderDesc();
-WGPURenderPassDescriptor createRenderPassDesc(const WGPURenderPassColorAttachment& renderPassColorAttach);
 WGPUCommandBufferDescriptor createCmdBufferDesc();
+
+// Shader
 WGPUShaderModuleWGSLDescriptor createShaderCodeDesc(const char* shaderCode);
 WGPUShaderModuleDescriptor createShaderModDesc(const WGPUChainedStruct* shaderCodeChain);
-WGPURenderPipelineDescriptor createRenderPipelineDesc(const WGPUShaderModule& shaderMod, const WGPUFragmentState& fragmentState);
+
+// Bind Group
+WGPUBindGroupDescriptor createBindGroupDesc(const WGPUBindGroupLayout& bindGroupLayout,
+const WGPUBindGroupEntry& binding);
+
+// Render Pass
+WGPURenderPassDescriptor createRenderPassDesc(const WGPURenderPassColorAttachment& renderPassColorAttach);
+WGPURenderPipelineDescriptor createRenderPipelineDesc(const WGPUShaderModule& shaderMod,
+const WGPUFragmentState& fragmentState);
 
 #endif	// DESC_HPP_INCLUDED

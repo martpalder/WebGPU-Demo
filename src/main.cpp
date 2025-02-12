@@ -1,8 +1,12 @@
 #include "./app.hpp"
+#include <cstdio>
 
-int main (int, char**)
+#define W 800
+#define H 600
+
+int main(int, char**)
 {
-	App app;
+	App app(W, H, "WebGPU Demo");
 	app.Run();
     return 0;
 }

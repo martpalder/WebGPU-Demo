@@ -16,11 +16,14 @@ GPUEnv initGPUEnv(GLFWwindow* wnd)
 	// Create a WebGPU Instance
 	gpuEnv.inst = createInstance();
 	
+	#ifndef __EMSCRIPTEN__
 	// Get the Surface
 	gpuEnv.surf = glfwGetWGPUSurface(gpuEnv.inst, wnd);
+	#endif
 	
 	// Request the Adapter
 	WGPURequestAdapterOptions adapterOpts = {};
+	adapterOpts.compatibleSurface = gpuEnv.surf;
 	adapterOpts.nextInChain = nullptr;
 	WGPUAdapter adapter = requestAdapterSync(gpuEnv.inst, &adapterOpts);
 	// Release the Instance

@@ -3,25 +3,8 @@
 
 #include <cstdio>
 
-// Vertex buffer data
-// There are 2 floats per vertex, one for x and one for y.
-// But in the end this is just a bunch of floats to the eyes of the GPU,
-// the *layout* will tell how to interpret this.
-const static float vertexData[] = {
-    // x0, y0
-    -0.5f, -0.5f,
-
-    // x1, y1
-    +0.5f, -0.5f,
-
-    // x2, y2
-    +0.0f, +0.5f
-};
-
-// We will declare vertexCount as a member of the Application class
-uint32_t vertexCount = static_cast<uint32_t>(sizeof(vertexData) / sizeof(float));
-
-WGPUBuffer createBufferVert(const WGPUDevice& device, const WGPUQueue& queue)
+WGPUBuffer createBufferVert(const WGPUDevice& device, const WGPUQueue& queue,
+size_t dataSize, const float* vertexData)
 {
 	WGPUBuffer vertexBuffer;
 	
@@ -29,7 +12,7 @@ WGPUBuffer createBufferVert(const WGPUDevice& device, const WGPUQueue& queue)
 	WGPUBufferDescriptor bufferDesc{};
 	bufferDesc.nextInChain = nullptr;
 	bufferDesc.label = "VertexBuffer";
-	bufferDesc.size = sizeof(vertexData);
+	bufferDesc.size = dataSize;
 	bufferDesc.usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_Vertex; // Vertex usage here!
 	bufferDesc.mappedAtCreation = false;
 	
@@ -56,4 +39,41 @@ WGPUBuffer createBufferVert(const WGPUDevice& device, const WGPUQueue& queue)
 	wgpuDevicePopErrorScope(device, errorCallback, nullptr);
 
 	return vertexBuffer;
+}
+
+WGPUBuffer createBufferMat4x4(const WGPUDevice& device, const WGPUQueue& queue, mat4x4 mat)
+{
+	WGPUBuffer matrixBuffer;
+	
+	// Describe the Matrix Buffer
+	WGPUBufferDescriptor bufferDesc{};
+	bufferDesc.nextInChain = nullptr;
+	bufferDesc.label = "MatrixBuffer";
+	bufferDesc.size = sizeof(mat4x4);
+	bufferDesc.usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_Uniform; // Uniform usage here!
+	bufferDesc.mappedAtCreation = false;
+	
+	// Create a Uniform Buffer
+	wgpuDevicePushErrorScope(device, WGPUErrorFilter_Validation);
+	matrixBuffer = wgpuDeviceCreateBuffer(device, &bufferDesc);
+	wgpuDevicePopErrorScope(device, errorCallback, nullptr);
+	
+	// Check for Errors
+	if (matrixBuffer == nullptr)
+	{
+		perror("[ERROR]: Failed to create a Matrix Buffer");
+		
+		return nullptr;
+	}
+	else
+	{
+		puts("Created a Matrix Buffer");
+	}
+
+	// Upload the Matrix to the Buffer
+	wgpuDevicePushErrorScope(device, WGPUErrorFilter_Validation);
+	wgpuQueueWriteBuffer(queue, matrixBuffer, 0, mat, bufferDesc.size);
+	wgpuDevicePopErrorScope(device, errorCallback, nullptr);
+
+	return matrixBuffer;
 }

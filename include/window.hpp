@@ -4,7 +4,7 @@
 
 #include <GLFW/glfw3.h>
 
-GLFWwindow* createWindow();
+GLFWwindow* createWindow(int w, int h, const char* title);
 void destroyWindow(GLFWwindow* wnd);
 
 #endif	// WINDOW_HPP_INCLUDED

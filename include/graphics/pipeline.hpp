@@ -4,6 +4,7 @@
 
 #include <webgpu/webgpu.h>
 
-WGPURenderPipeline createRenderPipeline(WGPUDevice device, const WGPUShaderModule& shaderMod);
+WGPURenderPipeline createRenderPipeline(const WGPUDevice& device, const WGPUShaderModule& shaderMod,
+bool bCreateLayout);
 
 #endif  // PIPELINE_HPP_INCLUDED

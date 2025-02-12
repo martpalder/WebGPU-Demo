@@ -1,21 +1,27 @@
 cmake_minimum_required(VERSION 3.0...3.25)
 project(
-    LearnWebGPU # name of the project, which will also be the name of the visual studio solution if you use it
+    WebGPU-Demo # name of the project, which will also be the name of the visual studio solution if you use it
     VERSION 0.1.0 # any version number
-    LANGUAGES C CXX # programming languages used by the project
+    LANGUAGES CXX C # programming languages used by the project
 )
+
+# Set the Compiler Flags
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+#set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lc++abi")
 
 # Include wgpu-native directory, to define the 'wgpu-native' target
 add_executable(App
 	src/main.cpp
 	src/app.cpp
 	src/window.cpp
+	src/mesh.cpp
 	src/env/gpuenv.cpp
 	src/graphics/instance.cpp
 	src/graphics/request.cpp
 	src/graphics/inspect.cpp
 	src/graphics/texture.cpp
 	src/graphics/shader.cpp
+	src/graphics/bind.cpp
 	src/graphics/pipeline.cpp
 	src/graphics/buffer.cpp
 	src/structs/desc.cpp
@@ -67,6 +73,7 @@ target_include_directories(App PRIVATE
 	include/util
 	include/glfw3webgpu
 	external/include
+
 )
 
 target_link_directories(App PRIVATE

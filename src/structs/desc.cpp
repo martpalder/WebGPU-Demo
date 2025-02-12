@@ -84,11 +84,26 @@ WGPUShaderModuleDescriptor createShaderModDesc(const WGPUChainedStruct* shaderCo
 	return shaderModDesc;
 }
 
+WGPUBindGroupDescriptor createBindGroupDesc(const WGPUBindGroupLayout& bindGroupLayout,
+const WGPUBindGroupEntry& binding)
+{
+	WGPUBindGroupDescriptor bindGroupDesc = {};
+	
+	// Define the Bind Group
+	bindGroupDesc.nextInChain = nullptr;
+	bindGroupDesc.layout = bindGroupLayout;
+	// There must be as many bindings as declared in the layout!
+	bindGroupDesc.entryCount = 1;
+	bindGroupDesc.entries = &binding;
+	
+	return bindGroupDesc;
+}
+
 WGPURenderPipelineDescriptor createRenderPipelineDesc(const WGPUShaderModule& shaderMod, const WGPUFragmentState& fragmentState)
 {
 	WGPURenderPipelineDescriptor pipelineDesc{};
 	
-	// Define Pipeline Layout:
+	// Define the Pipeline Layout
 	pipelineDesc.nextInChain = nullptr;
     // Create a pipeline layout to define the input structure.
 	// We do not use any vertex buffer for this first simplistic example

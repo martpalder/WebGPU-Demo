@@ -5,6 +5,10 @@
 #include <webgpu/webgpu.h>
 
 WGPUVertexAttribute createAttribVert(int idx);
-WGPUVertexBufferLayout createBufferLayoutVert(const WGPUVertexAttribute* pPosAttrib);
+WGPUVertexBufferLayout createLayoutBufferVert(int numFloats, const WGPUVertexAttribute* pPosAttrib);
+WGPUBindGroupLayoutEntry createLayoutBinding();
+WGPUBindGroupLayout createLayoutBindGroup(const WGPUDevice& device,
+const WGPUBindGroupLayoutEntry& bindingLayout);
+WGPUPipelineLayout createLayoutPipeline(const WGPUDevice& device);
 
 #endif	// LAYOUT_HPP_INCLUDED

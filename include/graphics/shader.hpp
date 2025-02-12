@@ -7,6 +7,9 @@
 class Shader
 {
 private:
+	// Constants
+	constexpr static char SHADER_DIR[] = "./data/shaders/%s";
+	
     // Methods
     void Release();
 
@@ -25,6 +28,6 @@ public:
     void Load(WGPUDevice device, const char* fileName);
 };
 
-WGPUShaderModule createShaderMod(WGPUDevice device, const char* SHADER_CODE);
+WGPUShaderModule createShaderMod(WGPUDevice device, const char* shaderCode);
 
 #endif	// SHADER_HPP_INCLUDED

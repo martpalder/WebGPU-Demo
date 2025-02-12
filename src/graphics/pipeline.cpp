@@ -6,7 +6,8 @@
 
 #include <cstdio>
 
-WGPURenderPipeline createRenderPipeline(WGPUDevice device, const WGPUShaderModule& shaderMod)
+WGPURenderPipeline createRenderPipeline(const WGPUDevice& device, const WGPUShaderModule& shaderMod,
+bool bCreateLayout)
 {
     WGPURenderPipeline pipeline;
 
@@ -22,14 +23,22 @@ WGPURenderPipeline createRenderPipeline(WGPUDevice device, const WGPUShaderModul
     WGPURenderPipelineDescriptor pipelineDesc = createRenderPipelineDesc(shaderMod, fragmentState);
 	
 	// VERTEX FETCH
-	// Create Position Attribute
+	// Create Attributes
 	WGPUVertexAttribute posAttrib = createAttribVert(0);
 	// Create and set the Buffer Layout
-	WGPUVertexBufferLayout bufferLayout = createBufferLayoutVert(&posAttrib);
+	WGPUVertexBufferLayout bufferLayout = createLayoutBufferVert(3, &posAttrib);
 	pipelineDesc.vertex.bufferCount = 1;
 	pipelineDesc.vertex.buffers = &bufferLayout;
+	pipelineDesc.layout = nullptr;
+	
+	// PIPELINE LAYOUT
+	if (bCreateLayout)
+	{
+		// Assign the PipelineLayout to the RenderPipelineDescriptor's layout field
+		pipelineDesc.layout = createLayoutPipeline(device);
+	}
 
-	// Create Render Pipeline:
+	// Create the Render Pipeline:
     // Use the device to create the render pipeline.
 	wgpuDevicePushErrorScope(device, WGPUErrorFilter_Validation);
 	pipeline = wgpuDeviceCreateRenderPipeline(device, &pipelineDesc);
