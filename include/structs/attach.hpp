@@ -4,6 +4,6 @@
 
 #include <webgpu/webgpu.h>
 
-WGPURenderPassColorAttachment createRenderPassColorAttach();
+WGPURenderPassColorAttachment createRenderPassColorAttach(float r, float g, float b);
 
 #endif	// ATTACH_HPP_INCLUDED

@@ -28,6 +28,7 @@ add_executable(App
 	src/structs/config.cpp
 	src/structs/attach.cpp
 	src/structs/state.cpp
+	src/structs/attrib.cpp
 	src/structs/layout.cpp
 	src/error/callback.cpp
 	src/util/freader.cpp

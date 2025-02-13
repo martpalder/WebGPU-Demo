@@ -49,7 +49,7 @@ void App::Init(int w, int h, const char* title)
 	//this->CreateBindings();
 
 	// Load a Shader
-	m_shader.Load(m_gpuEnv.dev, "basic3d_uniform.wgsl");
+	m_shader.Load(m_gpuEnv.dev, "basic3d_color.wgsl");
 	// Create the Render Pipeline
 	this->CreatePipeline();
 	
@@ -122,7 +122,7 @@ void App::CreateAttachments()
 {
 	// ATTACHMENTS
 	// Render Pass Color Attachment
-	m_renderPassColorAttach = createRenderPassColorAttach();
+	m_renderPassColorAttach = createRenderPassColorAttach(0.1f, 0.1f, 0.1f);
 	puts("Created the Attachments");
 }
 

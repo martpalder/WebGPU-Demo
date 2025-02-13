@@ -2,11 +2,13 @@
 #ifndef MESH_HPP_INCLUDED
 #define MESH_HPP_INCLUDED
 
+#include "./vertex.hpp"
+
 #include <webgpu/webgpu.h>
 #include <linmath/linmath.h>
 
 // Calculate Vertex Size
-const static size_t VERTEX_SZ = 3 * sizeof(float);
+const static size_t VERTEX_SZ = sizeof(CUSTOM_VERTEX);
 
 class Mesh
 {

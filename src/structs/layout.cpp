@@ -4,36 +4,25 @@
 
 #include <cstdio>
 
-WGPUVertexAttribute createAttribVert(int idx)
-{
-	WGPUVertexAttribute attrib = {};
-	
-	// {{Describe the position attribute}}
-	// == For each attribute, describe its layout, i.e., how to interpret the raw data ==
-	// Means vec2f in the shader
-	attrib.format = WGPUVertexFormat_Float32x2;
-	// Index of the first element
-	attrib.offset = idx;
-	// Corresponds to @location(...)
-	attrib.shaderLocation = idx;
-	printf("Created a Vertex Attribute %d\n", idx);
-	
-	return attrib;
-}
-
-WGPUVertexBufferLayout createLayoutBufferVert(int numFloats, const WGPUVertexAttribute* pPosAttrib)
+WGPUVertexBufferLayout createLayoutBufferVert(size_t vertexSz, size_t attribCount,
+WGPUVertexAttribute* pAttribs)
 {
 	WGPUVertexBufferLayout bufferLayout = {};
 	
 	/// Describe the Buffer Layout
 	// {{Describe buffer stride and step mode}}
 	bufferLayout.stepMode = WGPUVertexStepMode_Vertex;
-	bufferLayout.arrayStride = numFloats * sizeof(float);
+	bufferLayout.arrayStride = vertexSz;
 	// {{Set the Attributes}}
-	if (pPosAttrib != nullptr)
+	if (attribCount != 0)
 	{
-		bufferLayout.attributeCount = 1;
-		bufferLayout.attributes = pPosAttrib;
+		bufferLayout.attributeCount = attribCount;
+		bufferLayout.attributes = pAttribs;
+	}
+	else
+	{
+		bufferLayout.attributeCount = 0;
+		bufferLayout.attributes = nullptr;
 	}
 	puts("Created a Vertex Buffer Layout");
 	
@@ -59,17 +48,17 @@ WGPUBindGroupLayoutEntry createLayoutBinding()
 	bindingLayout.buffer.hasDynamicOffset = false;
 	// Sampler
 	bindingLayout.sampler.nextInChain = nullptr;
-	bindingLayout.sampler.type = WGPUSamplerBindingType_Filtering;
+	bindingLayout.sampler.type = WGPUSamplerBindingType_Undefined;
 	// Texture
 	bindingLayout.texture.nextInChain = nullptr;
 	bindingLayout.texture.multisampled = false;
-	bindingLayout.texture.sampleType = WGPUTextureSampleType_Float;
-	bindingLayout.texture.viewDimension = WGPUTextureViewDimension_2D;
+	bindingLayout.texture.sampleType = WGPUTextureSampleType_Undefined;
+	bindingLayout.texture.viewDimension = WGPUTextureViewDimension_Undefined;
 	// Storage Texture
 	bindingLayout.storageTexture.nextInChain = nullptr;
-	bindingLayout.storageTexture.access = WGPUStorageTextureAccess_WriteOnly;
-	bindingLayout.storageTexture.format = WGPUTextureFormat_RGBA8Unorm;
-	bindingLayout.storageTexture.viewDimension = WGPUTextureViewDimension_2D;
+	bindingLayout.storageTexture.access = WGPUStorageTextureAccess_Undefined;
+	bindingLayout.storageTexture.format = WGPUTextureFormat_Undefined;
+	bindingLayout.storageTexture.viewDimension = WGPUTextureViewDimension_Undefined;
 	
 	puts("Created a Binding Layout");
 	

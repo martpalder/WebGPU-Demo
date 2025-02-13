@@ -1,6 +1,7 @@
 #include "./pipeline.hpp"
-#include "./desc.hpp"
 #include "./state.hpp"
+#include "./desc.hpp"
+#include "./attrib.hpp"
 #include "./layout.hpp"
 #include "./callback.hpp"
 #include "./myassert.hpp"
@@ -25,9 +26,14 @@ WGPUBindGroupLayout* pBindGroupLayout)
 	
 	// VERTEX FETCH
 	// Create Attributes
-	WGPUVertexAttribute posAttrib = createAttribVert(0);
+	WGPUVertexAttribute attribs[] = {
+		createAttribVertFloat(3, 0, 0, "position"),
+		createAttribVertFloat(3, 1, 3 * sizeof(float), "color"),
+	};
+	size_t vertexSz = 6 * sizeof(float);
+	
 	// Create and set the Buffer Layout
-	WGPUVertexBufferLayout bufferLayout = createLayoutBufferVert(3, &posAttrib);
+	WGPUVertexBufferLayout bufferLayout = createLayoutBufferVert(vertexSz, 2, &attribs[0]);
 	pipelineDesc.vertex.bufferCount = 1;
 	pipelineDesc.vertex.buffers = &bufferLayout;
 	
