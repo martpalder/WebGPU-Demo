@@ -1,7 +1,7 @@
 #include "./bind.hpp"
 #include "./desc.hpp"
-#include "./layout.hpp"
 #include "./callback.hpp"
+#include "./myassert.hpp"
 
 #include <cstdio>
 
@@ -19,26 +19,22 @@ WGPUBindGroupEntry createBinding(size_t bufferSz, const WGPUBuffer& buffer)
 	binding.offset = 0;
 	// And we specify again the size of the buffer.
 	binding.size = bufferSz;
+	puts("Created a Binding");
 	
 	return binding;
 }
 
 WGPUBindGroup createBindGroup(const WGPUDevice& device,
-size_t bufferSz, const WGPUBuffer& buffer)
+const WGPUBindGroupLayout& bindGroupLayout, WGPUBindGroupEntry* pBinding)
 {
 	WGPUBindGroup bindGroup = nullptr;
 	
-	// Create a Binding
-	WGPUBindGroupEntry binding = createBinding(bufferSz, buffer);
-
-	// Create Layouts
-	WGPUBindGroupLayoutEntry bindingLayout = createLayoutBinding();
-	WGPUBindGroupLayout bindGroupLayout = createLayoutBindGroup(device, bindingLayout);
+	// Create a Bind Group Descriptor
+	WGPUBindGroupDescriptor bindGroupDesc = createBindGroupDesc(bindGroupLayout, pBinding);
 	
 	// Create a Bind Group
-	WGPUBindGroupDescriptor bindGroupDesc = createBindGroupDesc(bindGroupLayout, binding);
 	wgpuDevicePushErrorScope(device, WGPUErrorFilter_Validation);
-	//bindGroup = wgpuDeviceCreateBindGroup(device, &bindGroupDesc);
+	bindGroup = wgpuDeviceCreateBindGroup(device, &bindGroupDesc);
 	wgpuDevicePopErrorScope(device, errorCallback, nullptr);
 	
 	// Check for Errors
@@ -50,6 +46,9 @@ size_t bufferSz, const WGPUBuffer& buffer)
 	{
 		puts("Created a Bind Group");
 	}
+	
+	// Assert
+	MY_ASSERT(bindGroup != nullptr);
 	
 	return bindGroup;
 }

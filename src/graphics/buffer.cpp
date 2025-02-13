@@ -1,5 +1,6 @@
 #include "./buffer.hpp"
 #include "./callback.hpp"
+#include "./myassert.hpp"
 
 #include <cstdio>
 
@@ -9,7 +10,7 @@ size_t dataSize, const float* vertexData)
 	WGPUBuffer vertexBuffer;
 	
 	// Describe Vertex Buffer
-	WGPUBufferDescriptor bufferDesc{};
+	WGPUBufferDescriptor bufferDesc = {};
 	bufferDesc.nextInChain = nullptr;
 	bufferDesc.label = "VertexBuffer";
 	bufferDesc.size = dataSize;
@@ -32,6 +33,9 @@ size_t dataSize, const float* vertexData)
 	{
 		puts("Created a Vertex Buffer");
 	}
+	
+	// Assert
+	MY_ASSERT(vertexBuffer != nullptr);
 
 	// Upload the Geometry Data to the Buffer
 	wgpuDevicePushErrorScope(device, WGPUErrorFilter_Validation);
@@ -41,15 +45,15 @@ size_t dataSize, const float* vertexData)
 	return vertexBuffer;
 }
 
-WGPUBuffer createBufferMat4x4(const WGPUDevice& device, const WGPUQueue& queue, mat4x4 mat)
+WGPUBuffer createBufferMat4x4(const WGPUDevice& device, const WGPUQueue& queue, const mat4x4& mat)
 {
 	WGPUBuffer matrixBuffer;
 	
 	// Describe the Matrix Buffer
-	WGPUBufferDescriptor bufferDesc{};
+	WGPUBufferDescriptor bufferDesc = {};
 	bufferDesc.nextInChain = nullptr;
 	bufferDesc.label = "MatrixBuffer";
-	bufferDesc.size = sizeof(mat4x4);
+	bufferDesc.size = sizeof(mat);
 	bufferDesc.usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_Uniform; // Uniform usage here!
 	bufferDesc.mappedAtCreation = false;
 	
@@ -69,6 +73,9 @@ WGPUBuffer createBufferMat4x4(const WGPUDevice& device, const WGPUQueue& queue, 
 	{
 		puts("Created a Matrix Buffer");
 	}
+	
+	// Assert
+	MY_ASSERT(matrixBuffer != nullptr);
 
 	// Upload the Matrix to the Buffer
 	wgpuDevicePushErrorScope(device, WGPUErrorFilter_Validation);

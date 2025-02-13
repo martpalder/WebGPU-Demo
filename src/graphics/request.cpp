@@ -1,9 +1,9 @@
 ﻿#include "./request.hpp"
+#include "./myassert.hpp"
 
 #include <webgpu/webgpu.h>
 #include <emscripten/emscripten.h>
 #include <iostream>
-#include <cassert>
 
 void onAdapterRequestEnded(
     WGPURequestAdapterStatus status, // a success status
@@ -50,7 +50,8 @@ WGPUAdapter requestAdapterSync(WGPUInstance instance, WGPURequestAdapterOptions 
     // provided as the last argument of wgpuInstanceRequestAdapter and received
     // by the callback as its last argument.
     auto onAdapterRequestEnded = [](WGPURequestAdapterStatus status, WGPUAdapter adapter,
-	char const* message, void* pUserData) {
+	char const* message, void* pUserData)
+	{
         UserData& userData = *reinterpret_cast<UserData*>(pUserData);
         if (status == WGPURequestAdapterStatus_Success) {
             userData.adapter = adapter;
@@ -77,7 +78,8 @@ WGPUAdapter requestAdapterSync(WGPUInstance instance, WGPURequestAdapterOptions 
     }
 	#endif // __EMSCRIPTEN__
 
-    //assert(userData.requestEnded);
+	// Assert
+    MY_ASSERT(userData.requestEnded);
 
     return userData.adapter;
 }
@@ -104,7 +106,7 @@ WGPUDevice requestDeviceSync(WGPUAdapter adapter, WGPUDeviceDescriptor const* de
             userData.device = device;
 			std::cout << "Got Device: " << device << std::endl;
         } else {
-            std::cout << "Could not get WebGPU device: " << message << std::endl;
+            std::cerr << "Could not get WebGPU device: " << message << std::endl;
         }
         userData.requestEnded = true;
     };
@@ -116,13 +118,14 @@ WGPUDevice requestDeviceSync(WGPUAdapter adapter, WGPUDeviceDescriptor const* de
         (void*)&userData
     );
 
-#ifdef __EMSCRIPTEN__
+	#ifdef __EMSCRIPTEN__
     while (!userData.requestEnded) {
         emscripten_sleep(100);
     }
-#endif // __EMSCRIPTEN__
+	#endif // __EMSCRIPTEN__
 
-    //assert(userData.requestEnded);
+	// Assert
+	MY_ASSERT(userData.requestEnded);
 
     return userData.device;
 }

@@ -1,17 +1,21 @@
 #include "./app.hpp"
 #include "./window.hpp"
+#include "./config.hpp"
 #include "./attach.hpp"
 #include "./desc.hpp"
-#include "./config.hpp"
+#include "./layout.hpp"
 #include "./bind.hpp"
 #include "./pipeline.hpp"
-#include "./texture.hpp"
+#include "./buffer.hpp"
+#include "./view.hpp"
 
 #include <cstdio>
 #include <emscripten/emscripten.h>
 
 App::App(int w, int h, const char* title)
 {
+	// Set Default Values
+	this->SetDefaults();
 	// INITIALIZATION
 	this->Init(w, h, title);
 }
@@ -23,32 +27,34 @@ App::~App()
 }
 
 void App::Init(int w, int h, const char* title)
-{
-	#ifndef __EMSCRIPTEN__
+{	
 	// Create the window
 	m_wnd = createWindow(w, h, title);
 	if (m_wnd == nullptr){ this->~App(); }
-	#endif
 	
 	// Initialize WebGPU
 	m_gpuEnv = initGPUEnv(m_wnd);
 	
+	#ifndef __EMSCRIPTEN__
 	// Configure the Surface
 	WGPUSurfaceConfiguration config = createSurfConfig(w, h, m_gpuEnv.dev);
 	wgpuSurfaceConfigure(m_gpuEnv.surf, &config);
+	#endif
 	
-	// Create Attachments, Descriptors and Bindings
+	// Create the Attachments and Descriptors
 	this->CreateAttachments();
 	this->CreateDescriptors();
+	
+	// Create the Bindings
 	//this->CreateBindings();
 
 	// Load a Shader
-	m_shader.Load(m_gpuEnv.dev, "basic3d.wgsl");
+	m_shader.Load(m_gpuEnv.dev, "basic3d_uniform.wgsl");
 	// Create the Render Pipeline
 	this->CreatePipeline();
 	
 	// Create a Projection Matrix
-	this->CreateProjection();
+	//this->CreateProjection();
 	
 	// Load a Mesh
 	m_mesh.Load(m_gpuEnv.dev, m_gpuEnv.queue);
@@ -57,9 +63,24 @@ void App::Init(int w, int h, const char* title)
 
 void App::Quit()
 {
-	// Release the Projection Buffer
-	wgpuBufferRelease(m_projBuffer);
-	m_projBuffer = nullptr;
+	if (m_projBuffer != nullptr)
+	{
+		// Release the Projection Buffer
+		wgpuBufferRelease(m_projBuffer);
+		m_projBuffer = nullptr;
+	}
+	
+	// Release the Bindings
+	if (m_bind.bindGroup != nullptr)
+	{
+		wgpuBindGroupRelease(m_bind.bindGroup);
+		m_bind.bindGroup = nullptr;
+	}
+	if (m_bind.bindGroupLayout != nullptr)
+	{
+		wgpuBindGroupLayoutRelease(m_bind.bindGroupLayout);
+		m_bind.bindGroupLayout = nullptr;
+	}
 	
 	// Quit WebGPU
 	quitGPUEnv(m_gpuEnv);
@@ -78,11 +99,22 @@ bool App::IsRunning()
 	#endif
 }
 
+void App::SetDefaults()
+{
+	// Set Default Values
+	m_bind.binding = {};
+	m_bind.bindingLayout = {};
+	m_bind.bindGroupLayout = nullptr;
+	m_bind.bindGroup = nullptr;
+	m_projBuffer = nullptr;
+}
+
 void App::SetBindGroup(const WGPURenderPassEncoder& renderPass)
 {
-	if (m_bindGroup != nullptr)
+	if (m_bind.bindGroup != nullptr)
 	{
-		wgpuRenderPassEncoderSetBindGroup(renderPass, 0, m_bindGroup, 0, nullptr);
+		wgpuRenderPassEncoderSetBindGroup(renderPass, 0, m_bind.bindGroup, 0, nullptr);
+		puts("Set the Bind Group");
 	}
 }
 
@@ -98,31 +130,38 @@ void App::CreateDescriptors()
 {
 	// DESCRIPTORS
 	// Command Encoder Descriptor
-	m_encoderDesc = createEncoderDesc();
+	m_descriptors.encoderDesc = createEncoderDesc();
 	// Render Pass Descriptor
-	m_renderPassDesc = createRenderPassDesc(m_renderPassColorAttach);
+	m_descriptors.renderPassDesc = createRenderPassDesc(m_renderPassColorAttach);
 	// Command Buffer Descriptor
-	m_cmdBufferDesc = createCmdBufferDesc();
+	m_descriptors.cmdBufferDesc = createCmdBufferDesc();
 	puts("Created the Descriptors");
 }
 
 void App::CreateBindings()
 {
-	m_bindGroup = createBindGroup(m_gpuEnv.dev, sizeof(mat4x4), m_projBuffer);
+	// Create the binding
+	m_bind.binding = createBinding(sizeof(m_proj), m_projBuffer);
+	// Create the Binding Layout
+	m_bind.bindingLayout = createLayoutBinding();
+	// Create the Bind Group Layout
+	m_bind.bindGroupLayout = createLayoutBindGroup(m_gpuEnv.dev, &m_bind.bindingLayout);
+	// Create the Bind Group
+	m_bind.bindGroup = createBindGroup(m_gpuEnv.dev, m_bind.bindGroupLayout, &m_bind.binding);
 }
 
 void App::CreatePipeline()
 {
-	m_gpuEnv.pipeline = createRenderPipeline(m_gpuEnv.dev, m_shader.GetShaderMod(), (m_bindGroup == nullptr));
+	// Create the Render Pipeline
+	WGPUShaderModule& shaderMod = m_shader.GetShaderMod();
+	m_gpuEnv.pipeline = createRenderPipeline(m_gpuEnv.dev, shaderMod, nullptr);
 }
 
 void App::CreateProjection()
 {
-	float fov = 60.0f;
-	float aspect = 4 / 3.0f;
-	float n = 0.1f;
-	float f = 100.0f;
-	mat4x4_perspective(m_proj, fov, aspect, n, f);
+	// Create the Projection Matrix
+	mat4x4_perspective(m_proj, 60.0f, 4 / 3.0f, 0.1f, 100.0f);
+	m_projBuffer = createBufferMat4x4(m_gpuEnv.dev, m_gpuEnv.queue, m_proj);
 }
 
 void App::EventLoop()
@@ -132,26 +171,18 @@ void App::EventLoop()
 	// mouse/key event, which we don't use so far)
 	glfwPollEvents();
 	#endif
-	
-	// Poll WebGPU Events
-	#if defined(WEBGPU_BACKEND_DAWN)
-	wgpuDeviceTick(m_gpuenv.dev);
-	#elif defined(WEBGPU_BACKEND_WGPU)
-	wgpuDevicePoll(m_gpuEnv.dev, false, nullptr);
-	#endif
 }
 
 void App::Cls()
 {
 	// Get the next Target Texture View
-	m_targetView = getNextTextureView(m_gpuEnv.surf);
+	getNextTargetView(m_gpuEnv.surf, &m_gpuEnv.targetView);
 	// Set the Target Texture View to Color Attachment
-	m_renderPassColorAttach.view = m_targetView;
+	m_renderPassColorAttach.view = m_gpuEnv.targetView;
 }
 
 void App::Flip()
 {
-	wgpuTextureViewRelease(m_targetView);
 	#ifndef __EMSCRIPTEN__
 	wgpuSurfacePresent(m_gpuEnv.surf);
 	#endif
@@ -160,7 +191,8 @@ void App::Flip()
 void App::RenderPass(const WGPUCommandEncoder& encoder)
 {
 	// {{Begin the Render Pass}}
-	WGPURenderPassEncoder renderPass = wgpuCommandEncoderBeginRenderPass(encoder, &m_renderPassDesc);
+	WGPURenderPassEncoder renderPass;
+	renderPass = wgpuCommandEncoderBeginRenderPass(encoder, &m_descriptors.renderPassDesc);
 	// {{Set the Render Pipeline}}
 	wgpuRenderPassEncoderSetPipeline(renderPass, m_gpuEnv.pipeline);
 	
@@ -178,13 +210,14 @@ void App::RenderPass(const WGPUCommandEncoder& encoder)
 void App::Draw()
 {
 	// {{Create a Command Encoder}}
-	WGPUCommandEncoder encoder = wgpuDeviceCreateCommandEncoder(m_gpuEnv.dev, &m_encoderDesc);
+	WGPUCommandEncoder encoder;
+	encoder = wgpuDeviceCreateCommandEncoder(m_gpuEnv.dev, &m_descriptors.encoderDesc);
 	
 	// {{Do a Render Pass}}
 	this->RenderPass(encoder);
 	
 	// {{Finish encoding the Command}}
-	WGPUCommandBuffer command = wgpuCommandEncoderFinish(encoder, &m_cmdBufferDesc);
+	WGPUCommandBuffer command = wgpuCommandEncoderFinish(encoder, &m_descriptors.cmdBufferDesc);
 	// {{Release the Command Encoder}}
 	wgpuCommandEncoderRelease(encoder);
 	

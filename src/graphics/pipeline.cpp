@@ -3,11 +3,12 @@
 #include "./state.hpp"
 #include "./layout.hpp"
 #include "./callback.hpp"
+#include "./myassert.hpp"
 
 #include <cstdio>
 
 WGPURenderPipeline createRenderPipeline(const WGPUDevice& device, const WGPUShaderModule& shaderMod,
-bool bCreateLayout)
+WGPUBindGroupLayout* pBindGroupLayout)
 {
     WGPURenderPipeline pipeline;
 
@@ -29,13 +30,14 @@ bool bCreateLayout)
 	WGPUVertexBufferLayout bufferLayout = createLayoutBufferVert(3, &posAttrib);
 	pipelineDesc.vertex.bufferCount = 1;
 	pipelineDesc.vertex.buffers = &bufferLayout;
-	pipelineDesc.layout = nullptr;
 	
-	// PIPELINE LAYOUT
-	if (bCreateLayout)
+	// If Bind Group Layout not NULL
+	if (pBindGroupLayout != nullptr)
 	{
+		// PIPELINE LAYOUT
 		// Assign the PipelineLayout to the RenderPipelineDescriptor's layout field
-		pipelineDesc.layout = createLayoutPipeline(device);
+		pipelineDesc.layout = createLayoutPipeline(device, pBindGroupLayout);
+		pipelineDesc.label = "UniformMatPipeline";
 	}
 
 	// Create the Render Pipeline:
@@ -43,7 +45,18 @@ bool bCreateLayout)
 	wgpuDevicePushErrorScope(device, WGPUErrorFilter_Validation);
 	pipeline = wgpuDeviceCreateRenderPipeline(device, &pipelineDesc);
 	wgpuDevicePopErrorScope(device, errorCallback, nullptr);
-	puts("Created the Render Pipeline");
+	
+	// Chek for Errors
+	if (pipeline == nullptr)
+	{
+		perror("[ERROR]: Failed to create the Render Pipeline");
+	}
+	{
+		puts("Created the Render Pipeline");
+	}
+	
+	// Assert
+	MY_ASSERT(pipeline != nullptr);
 
 	// Use Pipeline in Command Buffers:
     // Integrate the pipeline in command buffers to execute rendering commands.

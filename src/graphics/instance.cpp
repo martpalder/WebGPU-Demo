@@ -1,4 +1,5 @@
 #include "./instance.hpp"
+#include "./myassert.hpp"
 
 #include <iostream>
 #include <cstdio>
@@ -36,6 +37,9 @@ WGPUInstance createInstance()
 		// copied around without worrying about its size).
 		std::cout << "WGPU instance: " << instance << std::endl;
 	}
+	
+	// Assert
+	MY_ASSERT(instance != nullptr);
 	
 	return instance;
 }

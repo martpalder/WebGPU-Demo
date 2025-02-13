@@ -9,6 +9,12 @@
 #include <webgpu/webgpu.h>
 #include <cstdio>
 
+inline void assignNull(void* pObj, const char* name)
+{
+	pObj = nullptr;
+	printf("Released the %s\n", name);
+}
+
 GPUEnv initGPUEnv(GLFWwindow* wnd)
 {
 	GPUEnv gpuEnv;
@@ -21,10 +27,14 @@ GPUEnv initGPUEnv(GLFWwindow* wnd)
 	gpuEnv.surf = glfwGetWGPUSurface(gpuEnv.inst, wnd);
 	#endif
 	
-	// Request the Adapter
+	// Set the Adapter Options
 	WGPURequestAdapterOptions adapterOpts = {};
-	adapterOpts.compatibleSurface = gpuEnv.surf;
 	adapterOpts.nextInChain = nullptr;
+	adapterOpts.compatibleSurface = gpuEnv.surf;
+	adapterOpts.powerPreference = WGPUPowerPreference_LowPower;
+	adapterOpts.backendType = WGPUBackendType_Undefined;
+	
+	// Request the Adapter
 	WGPUAdapter adapter = requestAdapterSync(gpuEnv.inst, &adapterOpts);
 	// Release the Instance
 	wgpuInstanceRelease(gpuEnv.inst);
@@ -49,27 +59,31 @@ GPUEnv initGPUEnv(GLFWwindow* wnd)
 
 void quitGPUEnv(const GPUEnv& gpuEnv)
 {
+	// Release the Target View
+	wgpuTextureViewRelease(gpuEnv.targetView);
+	assignNull(gpuEnv.targetView, "Target View");
+	
 	// Release the Render Pipeline
 	wgpuRenderPipelineRelease(gpuEnv.pipeline);
-	puts("Released the Render Pipeline");
-
+	assignNull(gpuEnv.pipeline, "Render Pipeline");
+	
 	// Unconfigure the Surface
 	wgpuSurfaceUnconfigure(gpuEnv.surf);
 	puts("Unconfigured the Surface");
-
+	
 	// Release the Surface
 	wgpuSurfaceRelease(gpuEnv.surf);
-	puts("Released the Surface");
-
+	assignNull(gpuEnv.surf, "Surface");
+	
 	// Release the Queue
 	wgpuQueueRelease(gpuEnv.queue);
-	puts("Released the Queue");
-
+	assignNull(gpuEnv.queue, "Queue");
+	
 	// Release the Device
 	wgpuDeviceRelease(gpuEnv.dev);
-	puts("Released the Device");
-
+	assignNull(gpuEnv.dev, "Device");
+	
 	// Release the Instance
 	wgpuInstanceRelease(gpuEnv.inst);
-	puts("Released the Instance");
+	assignNull(gpuEnv.inst, "Instance");
 }

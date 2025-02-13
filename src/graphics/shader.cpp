@@ -1,7 +1,8 @@
 #include "./shader.hpp"
 #include "./desc.hpp"
-#include "./callback.hpp"
 #include "./freader.hpp"
+#include "./callback.hpp"
+#include "./myassert.hpp"
 
 #include <iostream>
 #include <cstring>
@@ -79,6 +80,9 @@ WGPUShaderModule createShaderMod(WGPUDevice device, const char* shaderCode)
 	{
 		std::cout << "Created a Shader Module" << std::endl;
 	}
+	
+	// Assert
+	MY_ASSERT(shaderMod != nullptr);
 
 	return shaderMod;
 }

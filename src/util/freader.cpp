@@ -4,7 +4,7 @@
 #include <cstdlib>
 #include <cstring>
 
-const char* readFileText(const char* PATH)
+char* readFileText(const char* PATH)
 {
 	FILE* fp = fopen(PATH, "r");
 	if (fp == nullptr)
@@ -19,20 +19,27 @@ const char* readFileText(const char* PATH)
 	// Check the File Size
 	fseek(fp, 0, SEEK_END);
 	long fSize = ftell(fp);
-	rewind(fp);
+	fseek(fp, 0, SEEK_SET);
 
 	// Allocate Memory
-	const char* text = (const char*)malloc(fSize);
-	if (text == nullptr){ perror("Malloc failed"); }
+	char* text = (char*)malloc(fSize);
+	if (text == nullptr)
+	{
+		perror("[ERROR]: Failed to allocate memory");
+	}
+	
 	// Copy the File Contents
-	fread((void*)text, 1, (size_t)fSize, fp);
+	long bytesRead = fread(text, 1, fSize, fp);
+	
+	// Add a Null Terminator
+	text[bytesRead] = '\0';
 	
 	// Close the File
 	fclose(fp);
 	fp = nullptr;
 
 	// Print
-	//printf("File size: %ld\n", fSize);
+	//printf("File size: %ld\n", bytesRead);
 	
 	return text;
 }

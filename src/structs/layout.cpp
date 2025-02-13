@@ -1,5 +1,6 @@
 #include "./layout.hpp"
 #include "./callback.hpp"
+#include "./myassert.hpp"
 
 #include <cstdio>
 
@@ -15,6 +16,7 @@ WGPUVertexAttribute createAttribVert(int idx)
 	attrib.offset = idx;
 	// Corresponds to @location(...)
 	attrib.shaderLocation = idx;
+	printf("Created a Vertex Attribute %d\n", idx);
 	
 	return attrib;
 }
@@ -27,12 +29,13 @@ WGPUVertexBufferLayout createLayoutBufferVert(int numFloats, const WGPUVertexAtt
 	// {{Describe buffer stride and step mode}}
 	bufferLayout.stepMode = WGPUVertexStepMode_Vertex;
 	bufferLayout.arrayStride = numFloats * sizeof(float);
-	// {{Set Attributes}}
+	// {{Set the Attributes}}
 	if (pPosAttrib != nullptr)
 	{
 		bufferLayout.attributeCount = 1;
 		bufferLayout.attributes = pPosAttrib;
 	}
+	puts("Created a Vertex Buffer Layout");
 	
 	return bufferLayout;
 }
@@ -40,26 +43,7 @@ WGPUVertexBufferLayout createLayoutBufferVert(int numFloats, const WGPUVertexAtt
 WGPUBindGroupLayoutEntry createLayoutBinding()
 {
 	// Define Binding Layout
-	WGPUBindGroupLayoutEntry bindingLayout{};
-	
-	// Set Default Values
-	// Buffer
-	bindingLayout.buffer.nextInChain = nullptr;
-	bindingLayout.buffer.type = WGPUBufferBindingType_Undefined;
-	bindingLayout.buffer.hasDynamicOffset = false;
-	// Sampler
-	bindingLayout.sampler.nextInChain = nullptr;
-	bindingLayout.sampler.type = WGPUSamplerBindingType_Undefined;
-	// Storage Texture
-	bindingLayout.storageTexture.nextInChain = nullptr;
-	bindingLayout.storageTexture.access = WGPUStorageTextureAccess_Undefined;
-	bindingLayout.storageTexture.format = WGPUTextureFormat_Undefined;
-	bindingLayout.storageTexture.viewDimension = WGPUTextureViewDimension_Undefined;
-	// Texture
-	bindingLayout.texture.nextInChain = nullptr;
-	bindingLayout.texture.multisampled = false;
-	bindingLayout.texture.sampleType = WGPUTextureSampleType_Undefined;
-	bindingLayout.texture.viewDimension = WGPUTextureViewDimension_Undefined;
+	WGPUBindGroupLayoutEntry bindingLayout = {};
 	
 	// The binding index as used in the @binding attribute in the shader
 	bindingLayout.binding = 0;
@@ -68,19 +52,45 @@ WGPUBindGroupLayoutEntry createLayoutBinding()
 	bindingLayout.buffer.type = WGPUBufferBindingType_Uniform;
 	bindingLayout.buffer.minBindingSize = 4 * sizeof(float);
 	
+	// Set Default Values
+	// Buffer
+	bindingLayout.buffer.nextInChain = nullptr;
+	bindingLayout.buffer.type = WGPUBufferBindingType_Uniform;
+	bindingLayout.buffer.hasDynamicOffset = false;
+	// Sampler
+	bindingLayout.sampler.nextInChain = nullptr;
+	bindingLayout.sampler.type = WGPUSamplerBindingType_Filtering;
+	// Texture
+	bindingLayout.texture.nextInChain = nullptr;
+	bindingLayout.texture.multisampled = false;
+	bindingLayout.texture.sampleType = WGPUTextureSampleType_Float;
+	bindingLayout.texture.viewDimension = WGPUTextureViewDimension_2D;
+	// Storage Texture
+	bindingLayout.storageTexture.nextInChain = nullptr;
+	bindingLayout.storageTexture.access = WGPUStorageTextureAccess_WriteOnly;
+	bindingLayout.storageTexture.format = WGPUTextureFormat_RGBA8Unorm;
+	bindingLayout.storageTexture.viewDimension = WGPUTextureViewDimension_2D;
+	
+	puts("Created a Binding Layout");
+	
 	return bindingLayout;
 }
 
 WGPUBindGroupLayout createLayoutBindGroup(const WGPUDevice& device,
-const WGPUBindGroupLayoutEntry& bindingLayout)
+WGPUBindGroupLayoutEntry* pBindingLayout)
 {
-	WGPUBindGroupLayout bindGroupLayout;
+	WGPUBindGroupLayout bindGroupLayout = nullptr;
 	
 	// Describe the bind group layout
 	WGPUBindGroupLayoutDescriptor bindGroupLayoutDesc{};
 	bindGroupLayoutDesc.nextInChain = nullptr;
-	bindGroupLayoutDesc.entryCount = 1;
-	bindGroupLayoutDesc.entries = &bindingLayout;
+	bindGroupLayoutDesc.label = "BindGroupLayout";
+	// Set the Entries
+	if (pBindingLayout != nullptr)
+	{
+		bindGroupLayoutDesc.entryCount = 1;
+		bindGroupLayoutDesc.entries = pBindingLayout;
+	}
 	
 	// Create the bind group layout
 	wgpuDevicePushErrorScope(device, WGPUErrorFilter_Validation);
@@ -97,42 +107,21 @@ const WGPUBindGroupLayoutEntry& bindingLayout)
 		puts("Created a Bind Group Layout");
 	}
 	
+	// Assert
+	MY_ASSERT(bindGroupLayout != nullptr);
+	
 	return bindGroupLayout;
 }
 
-WGPUPipelineLayout createLayoutPipeline(const WGPUDevice& device)
+WGPUPipelineLayout createLayoutPipeline(const WGPUDevice& device, WGPUBindGroupLayout* pBindGroupLayout)
 {
-	WGPUPipelineLayout pipelineLayout;
-	
-	// {{Define bindingLayout}}
-	WGPUBindGroupLayoutEntry bindingLayout = createLayoutBinding();
-	
-	WGPUBindGroupLayoutDescriptor bindGroupLayoutDesc{};
-	bindGroupLayoutDesc.nextInChain = nullptr;
-	bindGroupLayoutDesc.entryCount = 1;
-	bindGroupLayoutDesc.entries = &bindingLayout;
-	WGPUBindGroupLayout bindGroupLayout;
-	
-	// Create the Bind Group Layout
-	wgpuDevicePushErrorScope(device, WGPUErrorFilter_Validation);
-	bindGroupLayout = wgpuDeviceCreateBindGroupLayout(device, &bindGroupLayoutDesc);
-	wgpuDevicePopErrorScope(device, errorCallback, nullptr);
-	
-	// Check for Errors
-	if (pipelineLayout == nullptr)
-	{
-		perror("[ERROR]: Failed to create a Bind Group Layout");
-	}
-	else
-	{
-		puts("Created a Bind Group Layout");
-	}
+	WGPUPipelineLayout pipelineLayout = nullptr;
 
 	// Describe the Pipeline Layout
 	WGPUPipelineLayoutDescriptor layoutDesc{};
 	layoutDesc.nextInChain = nullptr;
 	layoutDesc.bindGroupLayoutCount = 1;
-	layoutDesc.bindGroupLayouts = &bindGroupLayout;
+	layoutDesc.bindGroupLayouts = pBindGroupLayout;
 	
 	// Create the Pipeline Layout
 	wgpuDevicePushErrorScope(device, WGPUErrorFilter_Validation);
@@ -148,6 +137,9 @@ WGPUPipelineLayout createLayoutPipeline(const WGPUDevice& device)
 	{
 		puts("Created a Pipeline Layout");
 	}
+	
+	// Assert
+	MY_ASSERT(pipelineLayout != nullptr);
 	
 	return pipelineLayout;
 }

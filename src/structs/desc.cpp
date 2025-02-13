@@ -10,7 +10,7 @@ WGPUDeviceDescriptor createDeviceDesc()
 	deviceDesc.requiredFeatureCount = 0; // we do not require any specific feature
 	deviceDesc.requiredLimits = nullptr; // we do not require any specific limit
 	deviceDesc.defaultQueue.nextInChain = nullptr;
-	deviceDesc.defaultQueue.label = "The default queue";
+	deviceDesc.defaultQueue.label = "Queue";
 	// {{Set device lost callback}}
 	deviceDesc.deviceLostCallback = deviceLostCallback;
 	// {{Set uncaptured error callback}}
@@ -27,7 +27,7 @@ WGPUCommandEncoderDescriptor createEncoderDesc()
 	WGPUCommandEncoderDescriptor encoderDesc = {};
 	
 	encoderDesc.nextInChain = nullptr;
-	encoderDesc.label = "My command encoder";
+	encoderDesc.label = "Command Encoder";
 	
 	return encoderDesc;
 }
@@ -50,7 +50,7 @@ WGPUCommandBufferDescriptor createCmdBufferDesc()
 	WGPUCommandBufferDescriptor cmdBufferDesc = {};
 	
 	cmdBufferDesc.nextInChain = nullptr;
-	cmdBufferDesc.label = "Command buffer";
+	cmdBufferDesc.label = "Command Buffer";
 	
 	return cmdBufferDesc;
 }
@@ -85,26 +85,29 @@ WGPUShaderModuleDescriptor createShaderModDesc(const WGPUChainedStruct* shaderCo
 }
 
 WGPUBindGroupDescriptor createBindGroupDesc(const WGPUBindGroupLayout& bindGroupLayout,
-const WGPUBindGroupEntry& binding)
+WGPUBindGroupEntry* pBinding)
 {
 	WGPUBindGroupDescriptor bindGroupDesc = {};
 	
 	// Define the Bind Group
 	bindGroupDesc.nextInChain = nullptr;
+	bindGroupDesc.label = "BindGroup";
 	bindGroupDesc.layout = bindGroupLayout;
 	// There must be as many bindings as declared in the layout!
 	bindGroupDesc.entryCount = 1;
-	bindGroupDesc.entries = &binding;
+	bindGroupDesc.entries = pBinding;
 	
 	return bindGroupDesc;
 }
 
-WGPURenderPipelineDescriptor createRenderPipelineDesc(const WGPUShaderModule& shaderMod, const WGPUFragmentState& fragmentState)
+WGPURenderPipelineDescriptor createRenderPipelineDesc(const WGPUShaderModule& shaderMod,
+const WGPUFragmentState& fragmentState)
 {
 	WGPURenderPipelineDescriptor pipelineDesc{};
 	
 	// Define the Pipeline Layout
 	pipelineDesc.nextInChain = nullptr;
+	pipelineDesc.label = "RenderPipeline";
     // Create a pipeline layout to define the input structure.
 	// We do not use any vertex buffer for this first simplistic example
 	pipelineDesc.vertex.bufferCount = 0;

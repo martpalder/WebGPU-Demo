@@ -19,11 +19,11 @@ add_executable(App
 	src/graphics/instance.cpp
 	src/graphics/request.cpp
 	src/graphics/inspect.cpp
-	src/graphics/texture.cpp
 	src/graphics/shader.cpp
 	src/graphics/bind.cpp
 	src/graphics/pipeline.cpp
 	src/graphics/buffer.cpp
+	src/graphics/view.cpp
 	src/structs/desc.cpp
 	src/structs/config.cpp
 	src/structs/attach.cpp
@@ -65,24 +65,27 @@ if (EMSCRIPTEN)
 endif()
 
 target_include_directories(App PRIVATE
+	${MINGW}/include
 	include
 	include/env
 	include/graphics
 	include/structs
-	include/error
 	include/util
+	include/error
 	include/glfw3webgpu
 	external/include
-
 )
 
 target_link_directories(App PRIVATE
+	${MINGW}/lib
 	external/lib
 )
 
 # Add the 'webgpu' target as a dependency of our App
 target_link_libraries(App PRIVATE
+	gcc
 	stdc++
+	m
 	glfw3
 	wgpu_native
 )

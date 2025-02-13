@@ -5,9 +5,16 @@
 #include "./env/gpuenv.hpp"
 #include "./shader.hpp"
 #include "./mesh.hpp"
+#include "./bind.hpp"
 
 #include <GLFW/glfw3.h>
 #include <linmath/linmath.h>
+
+typedef struct {
+	WGPUCommandEncoderDescriptor encoderDesc;
+	WGPURenderPassDescriptor renderPassDesc;
+	WGPUCommandBufferDescriptor cmdBufferDesc;
+} Descriptors;
 
 class App
 {
@@ -15,18 +22,15 @@ private:
 	// Main Members
 	GPUEnv m_gpuEnv;
 	GLFWwindow* m_wnd;
+	
 	// Descriptors
-	WGPUCommandEncoderDescriptor m_encoderDesc;
-	WGPURenderPassDescriptor m_renderPassDesc;
-	WGPUCommandBufferDescriptor m_cmdBufferDesc;
+	Descriptors m_descriptors;
 	// Attachments
 	WGPURenderPassColorAttachment m_renderPassColorAttach;
-	// Target View
-	WGPUTextureView m_targetView;
-	// Binding Group
-	WGPUBindGroupLayout m_bindGroupLayout;
-	WGPUBindGroup m_bindGroup;
-	// Matrices
+	// Bindings
+	Bind m_bind;
+	
+	// Projection Matrix and Buffer
 	mat4x4 m_proj;
 	WGPUBuffer m_projBuffer;
 	
@@ -40,6 +44,7 @@ private:
 	bool IsRunning();
 	
 	// Setters
+	void SetDefaults();
 	void SetBindGroup(const WGPURenderPassEncoder& renderPass);
 	
 	// Init/Quit Methods

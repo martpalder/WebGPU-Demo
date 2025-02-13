@@ -17,7 +17,7 @@ WGPUShaderModuleDescriptor createShaderModDesc(const WGPUChainedStruct* shaderCo
 
 // Bind Group
 WGPUBindGroupDescriptor createBindGroupDesc(const WGPUBindGroupLayout& bindGroupLayout,
-const WGPUBindGroupEntry& binding);
+WGPUBindGroupEntry* pBinding);
 
 // Render Pass
 WGPURenderPassDescriptor createRenderPassDesc(const WGPURenderPassColorAttachment& renderPassColorAttach);
