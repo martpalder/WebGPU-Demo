@@ -1,3 +1,6 @@
+// The memory location of the uniform is given by a pair of a *bind group* and a *binding*
+@group(0) @binding(0) var<uniform> uProj: mat4x4f;
+
 @vertex
 fn vs_main(@location(0) pos: vec3f) -> @builtin(position) vec4f
 {

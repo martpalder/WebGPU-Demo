@@ -1,3 +1,4 @@
 @echo off
-cmake --build build-mingw64
+cmake . -B "build-mingw64"
+cmake --build "build-mingw64"
 pause

@@ -1,25 +1,28 @@
 #include "./mesh.hpp"
 #include "./buffer.hpp"
+#include "./color.hpp"
 
 #include <cstdio>
 
 // Vertex buffer data
-// There are 2 floats per vertex, one for x and one for y.
+// There are 3 floats per vertex,
+// one for x and one for y and one for z.
 // But in the end this is just a bunch of floats to the eyes of the GPU,
 // the *layout* will tell how to interpret this.
-const static CUSTOM_VERTEX vertexData[] = {
-    // x0, y0, z0
-    { -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f },
-    // x1, y1, z1
-    { +0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f },
-    // x2, y2, z2
-    { +0.5f, +0.5f, 0.0f, 1.0f, 0.0f, 0.0f },
-	// x3, y3, z3
-    { -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f },
-	// x4, y4, z4
-    { +0.5f, +0.5f, 0.0f, 0.0f, 0.0f, 1.0f },
-	// x5, y5, z5
-    { -0.5f, +0.5f, 0.0f, 0.0f, 0.0f, 1.0f },
+const static CUSTOM_VERTEX vertexData[] =
+{
+    // x0, y0, z0, color
+    { -0.5f, -0.5f, 0.0f, RED },
+    // x1, y1, z1, color
+    { +0.5f, -0.5f, 0.0f, GREEN },
+    // x2, y2, z2, color
+    { +0.5f, +0.5f, 0.0f, BLUE },
+	// x3, y3, z3, color
+    { -0.5f, -0.5f, 0.0f, RED },
+	// x4, y4, z4, color
+    { +0.5f, +0.5f, 0.0f, BLUE },
+	// x5, y5, z5, color
+    { -0.5f, +0.5f, 0.0f, GREEN },
 };
 
 Mesh::Mesh()
@@ -61,13 +64,14 @@ void Mesh::Load(const WGPUDevice& device, const WGPUQueue& queue)
 	printf("Number of vertices: %u\n", m_vertexCount);
 }
 
+void Mesh::Update(const WGPURenderPassEncoder& renderPass)
+{
+	// Set the Vertex Buffer
+	wgpuRenderPassEncoderSetVertexBuffer(renderPass, 0, m_vertexBuffer, 0, m_bufferSz);
+}
+
 void Mesh::Draw(const WGPURenderPassEncoder& renderPass)
 {
-	if (m_vertexBuffer != nullptr)
-	{
-		// Set the Vertex Buffer
-		wgpuRenderPassEncoderSetVertexBuffer(renderPass, 0, m_vertexBuffer, 0, m_bufferSz);
-		// Draw 1 Instance of a X-Vertices Shape
-		wgpuRenderPassEncoderDraw(renderPass, m_vertexCount, 1, 0, 0);
-	}
+	// Draw 1 Instance of a X-Vertices Shape
+	wgpuRenderPassEncoderDraw(renderPass, m_vertexCount, 1, 0, 0);
 }

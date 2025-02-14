@@ -62,7 +62,32 @@ if (EMSCRIPTEN)
 	set(CMAKE_EXECUTABLE_SUFFIX ".wasm")
 	# Enable the use of emscripten_sleep()
 	add_library(glfw INTERFACE)
-	target_link_options(App PRIVATE -sASYNCIFY -sUSE_GLFW=3)
+	target_link_options(App PRIVATE "-sASYNCIFY" "-sUSE_GLFW=3")
+
+	# Add the 'emscripten' includes
+	target_include_directories(App PRIVATE
+		external/emscripten/include
+	)
+	# Add the 'emscripten' libs
+	target_link_directories(App PRIVATE
+		external/emscripten/lib
+	)
+else()
+	target_include_directories(App PRIVATE
+		external/glfw/include
+		external/wgpu-native/include
+		external/glfw3webgpu
+	)
+	target_link_directories(App PRIVATE
+		external/glfw/lib-mingw-w64
+		external/wgpu-native/lib
+		external/glfw3webgpu
+	)
+
+	# Add the 'glfw3' and 'webgpu' target as a dependency of our App
+	target_link_libraries(App PRIVATE
+		glfw3 wgpu_native
+	)
 endif()
 
 target_include_directories(App PRIVATE
@@ -73,8 +98,7 @@ target_include_directories(App PRIVATE
 	include/structs
 	include/util
 	include/error
-	include/glfw3webgpu
-	external/include
+	external/linmath
 )
 
 target_link_directories(App PRIVATE
@@ -82,14 +106,13 @@ target_link_directories(App PRIVATE
 	external/lib
 )
 
-# Add the 'webgpu' target as a dependency of our App
+# Add the glibc targets as dependences of our App
 target_link_libraries(App PRIVATE
-	gcc
-	stdc++
-	m
-	glfw3
-	wgpu_native
+	gcc stdc++ m
 )
+
+# Add Rust Debug Macro
+target_compile_definitions(App PRIVATE RUST_BACKTRACE=full)
 
 # The application's binary must find wgpu.dll or libwgpu.so at runtime,
 # so we automatically copy it (it's called WGPU_RUNTIME_LIB in general)

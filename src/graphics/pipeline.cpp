@@ -17,12 +17,11 @@ WGPUBindGroupLayout* pBindGroupLayout)
     // Configure vertex input, rasterization, and color blending states.
 	WGPUBlendState blendState = createBlendState();
 	WGPUColorTargetState colorTarget = createColorTargetState(blendState);
-	
-	// Create and set the Fragment State
 	WGPUFragmentState fragmentState = createFragmentState(shaderMod, colorTarget);
 	
 	// Create a Render Pipeline Descriptor
-    WGPURenderPipelineDescriptor pipelineDesc = createRenderPipelineDesc(shaderMod, fragmentState);
+    WGPURenderPipelineDescriptor pipelineDesc = {};
+    pipelineDesc = createRenderPipelineDesc(shaderMod, fragmentState);
 	
 	// VERTEX FETCH
 	// Create Attributes
@@ -30,21 +29,18 @@ WGPUBindGroupLayout* pBindGroupLayout)
 		createAttribVertFloat(3, 0, 0, "position"),
 		createAttribVertFloat(3, 1, 3 * sizeof(float), "color"),
 	};
-	size_t vertexSz = 6 * sizeof(float);
+	size_t vertexSz = 6 * sizeof(float);	// 6 Floats
 	
 	// Create and set the Buffer Layout
-	WGPUVertexBufferLayout bufferLayout = createLayoutBufferVert(vertexSz, 2, &attribs[0]);
+	WGPUVertexBufferLayout bufferLayout = {};
+	bufferLayout = createLayoutBufferVert(vertexSz, 2, &attribs[0]);
 	pipelineDesc.vertex.bufferCount = 1;
 	pipelineDesc.vertex.buffers = &bufferLayout;
 	
-	// If Bind Group Layout not NULL
-	if (pBindGroupLayout != nullptr)
-	{
-		// PIPELINE LAYOUT
-		// Assign the PipelineLayout to the RenderPipelineDescriptor's layout field
-		pipelineDesc.layout = createLayoutPipeline(device, pBindGroupLayout);
-		pipelineDesc.label = "UniformMatPipeline";
-	}
+	// PIPELINE LAYOUT
+	// Assign the PipelineLayout to the RenderPipelineDescriptor's layout field
+	pipelineDesc.layout = createLayoutPipeline(device, pBindGroupLayout);
+	puts("Assigned the PipelineLayout to the RenderPipelineDescriptor");
 
 	// Create the Render Pipeline:
     // Use the device to create the render pipeline.

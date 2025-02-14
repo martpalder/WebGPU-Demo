@@ -1,16 +1,17 @@
 #include "./app.hpp"
 #include "./window.hpp"
-#include "./config.hpp"
 #include "./attach.hpp"
 #include "./desc.hpp"
 #include "./layout.hpp"
-#include "./bind.hpp"
 #include "./pipeline.hpp"
 #include "./buffer.hpp"
 #include "./view.hpp"
+#include "./myassert.hpp"
 
 #include <cstdio>
+#ifdef __EMSCRIPTEN__
 #include <emscripten/emscripten.h>
+#endif
 
 App::App(int w, int h, const char* title)
 {
@@ -35,26 +36,17 @@ void App::Init(int w, int h, const char* title)
 	// Initialize WebGPU
 	m_gpuEnv = initGPUEnv(m_wnd);
 	
-	#ifndef __EMSCRIPTEN__
-	// Configure the Surface
-	WGPUSurfaceConfiguration config = createSurfConfig(w, h, m_gpuEnv.dev);
-	wgpuSurfaceConfigure(m_gpuEnv.surf, &config);
-	#endif
-	
 	// Create the Attachments and Descriptors
 	this->CreateAttachments();
 	this->CreateDescriptors();
 	
 	// Create the Bindings
-	//this->CreateBindings();
+	this->CreateBindings();
 
 	// Load a Shader
 	m_shader.Load(m_gpuEnv.dev, "basic3d_color.wgsl");
 	// Create the Render Pipeline
 	this->CreatePipeline();
-	
-	// Create a Projection Matrix
-	//this->CreateProjection();
 	
 	// Load a Mesh
 	m_mesh.Load(m_gpuEnv.dev, m_gpuEnv.queue);
@@ -102,10 +94,14 @@ bool App::IsRunning()
 void App::SetDefaults()
 {
 	// Set Default Values
+	// Window
+	m_wnd = nullptr;
+	// Bindings
 	m_bind.binding = {};
 	m_bind.bindingLayout = {};
 	m_bind.bindGroupLayout = nullptr;
 	m_bind.bindGroup = nullptr;
+	// Projection
 	m_projBuffer = nullptr;
 }
 
@@ -140,14 +136,12 @@ void App::CreateDescriptors()
 
 void App::CreateBindings()
 {
-	// Create the binding
-	m_bind.binding = createBinding(sizeof(m_proj), m_projBuffer);
-	// Create the Binding Layout
-	m_bind.bindingLayout = createLayoutBinding();
-	// Create the Bind Group Layout
-	m_bind.bindGroupLayout = createLayoutBindGroup(m_gpuEnv.dev, &m_bind.bindingLayout);
-	// Create the Bind Group
-	m_bind.bindGroup = createBindGroup(m_gpuEnv.dev, m_bind.bindGroupLayout, &m_bind.binding);
+	// Create the Projection Matrix
+	mat4x4_perspective(m_proj, 60.0f, 4 / 3.0f, 0.1f, 100.0f);
+	m_projBuffer = createBufferMatrix(m_gpuEnv.dev, m_gpuEnv.queue, m_proj);
+	
+	// Bind the Projection Buffer
+	m_bind = bindBuffer(m_gpuEnv.dev, 0, m_projBuffer);
 }
 
 void App::CreatePipeline()
@@ -155,13 +149,6 @@ void App::CreatePipeline()
 	// Create the Render Pipeline
 	WGPUShaderModule& shaderMod = m_shader.GetShaderMod();
 	m_gpuEnv.pipeline = createRenderPipeline(m_gpuEnv.dev, shaderMod, nullptr);
-}
-
-void App::CreateProjection()
-{
-	// Create the Projection Matrix
-	mat4x4_perspective(m_proj, 60.0f, 4 / 3.0f, 0.1f, 100.0f);
-	m_projBuffer = createBufferMat4x4(m_gpuEnv.dev, m_gpuEnv.queue, m_proj);
 }
 
 void App::EventLoop()
@@ -196,8 +183,11 @@ void App::RenderPass(const WGPUCommandEncoder& encoder)
 	// {{Set the Render Pipeline}}
 	wgpuRenderPassEncoderSetPipeline(renderPass, m_gpuEnv.pipeline);
 	
+	// {{Update}}
+	m_mesh.Update(renderPass);
+	
 	// {{Set the binding group here!}}
-	//this->SetBindGroup(renderPass);
+	this->SetBindGroup(renderPass);
 	
 	// {{Draw}}
 	m_mesh.Draw(renderPass);

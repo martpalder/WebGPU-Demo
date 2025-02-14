@@ -8,7 +8,7 @@
 #include "./bind.hpp"
 
 #include <GLFW/glfw3.h>
-#include <linmath/linmath.h>
+#include <linmath.h>
 
 typedef struct {
 	WGPUCommandEncoderDescriptor encoderDesc;
@@ -56,7 +56,6 @@ private:
 	void CreateDescriptors();
 	void CreateBindings();
 	void CreatePipeline();
-	void CreateProjection();
 	
 	// Main Methods
 	void EventLoop();

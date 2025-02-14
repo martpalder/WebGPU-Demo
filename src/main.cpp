@@ -1,4 +1,5 @@
 #include "./app.hpp"
+
 #include <cstdio>
 
 #define W 800
@@ -8,5 +9,6 @@ int main(int, char**)
 {
 	App app(W, H, "WebGPU Demo");
 	app.Run();
+	
     return 0;
 }

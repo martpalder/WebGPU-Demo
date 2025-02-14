@@ -102,15 +102,24 @@ WGPUBindGroupLayoutEntry* pBindingLayout)
 	return bindGroupLayout;
 }
 
-WGPUPipelineLayout createLayoutPipeline(const WGPUDevice& device, WGPUBindGroupLayout* pBindGroupLayout)
+WGPUPipelineLayout createLayoutPipeline(const WGPUDevice& device,
+WGPUBindGroupLayout* pBindGroupLayout)
 {
 	WGPUPipelineLayout pipelineLayout = nullptr;
 
 	// Describe the Pipeline Layout
 	WGPUPipelineLayoutDescriptor layoutDesc{};
 	layoutDesc.nextInChain = nullptr;
-	layoutDesc.bindGroupLayoutCount = 1;
-	layoutDesc.bindGroupLayouts = pBindGroupLayout;
+	layoutDesc.bindGroupLayoutCount = 0;
+	layoutDesc.bindGroupLayouts = nullptr;
+	
+	if (pBindGroupLayout != nullptr)
+	{
+		// Set the Bind Group Layout
+		layoutDesc.bindGroupLayoutCount = 1;
+		layoutDesc.bindGroupLayouts = pBindGroupLayout;
+		puts("Set the Bind Group Layout");
+	}
 	
 	// Create the Pipeline Layout
 	wgpuDevicePushErrorScope(device, WGPUErrorFilter_Validation);

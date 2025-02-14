@@ -1,24 +1,30 @@
 #include "./bind.hpp"
 #include "./desc.hpp"
+#include "./layout.hpp"
 #include "./callback.hpp"
 #include "./myassert.hpp"
 
 #include <cstdio>
 
-WGPUBindGroupEntry createBinding(size_t bufferSz, const WGPUBuffer& buffer)
+WGPUBindGroupEntry createBinding(int idx, const WGPUBuffer& buffer)
 {
 	// Create a binding
-	WGPUBindGroupEntry binding{};
+	WGPUBindGroupEntry binding = {};
+	
 	binding.nextInChain = nullptr;
 	// The index of the binding (the entries in bindGroupDesc can be in any order)
-	binding.binding = 0;
+	binding.binding = idx;
 	// The buffer it is actually bound to
 	binding.buffer = buffer;
 	// We can specify an offset within the buffer, so that a single buffer can hold
 	// multiple uniform blocks.
 	binding.offset = 0;
 	// And we specify again the size of the buffer.
-	binding.size = bufferSz;
+	binding.size = wgpuBufferGetSize(buffer);
+	
+	// Other Stuff
+	binding.sampler = nullptr;
+	binding.textureView = nullptr;
 	puts("Created a Binding");
 	
 	return binding;
@@ -51,4 +57,22 @@ const WGPUBindGroupLayout& bindGroupLayout, WGPUBindGroupEntry* pBinding)
 	MY_ASSERT(bindGroup != nullptr);
 	
 	return bindGroup;
+}
+
+Bind bindBuffer(const WGPUDevice& device, int idx, const WGPUBuffer& buffer)
+{
+	Bind bind;
+	
+	// Create the binding
+	bind.binding = createBinding(idx, buffer);
+	// Create the Binding Layout
+	bind.bindingLayout = createLayoutBinding();
+	// Create the Bind Group Layout
+	bind.bindGroupLayout = createLayoutBindGroup(device, &bind.bindingLayout);
+	MY_ASSERT(bind.bindGroupLayout);
+	// Create the Bind Group
+	bind.bindGroup = createBindGroup(device, bind.bindGroupLayout, &bind.binding);
+	MY_ASSERT(bind.bindGroup);
+	
+	return bind;
 }

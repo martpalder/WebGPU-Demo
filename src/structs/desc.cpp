@@ -108,8 +108,9 @@ const WGPUFragmentState& fragmentState)
 	// Define the Pipeline Layout
 	pipelineDesc.nextInChain = nullptr;
 	pipelineDesc.label = "RenderPipeline";
+	pipelineDesc.layout = nullptr;
+	
     // Create a pipeline layout to define the input structure.
-	// We do not use any vertex buffer for this first simplistic example
 	pipelineDesc.vertex.bufferCount = 0;
 	pipelineDesc.vertex.buffers = nullptr;
 	
@@ -148,7 +149,6 @@ const WGPUFragmentState& fragmentState)
 	pipelineDesc.multisample.mask = ~0u;
 	// Default value as well (irrelevant for count = 1 anyways)
 	pipelineDesc.multisample.alphaToCoverageEnabled = false;
-	pipelineDesc.layout = nullptr;
 	
 	return pipelineDesc;
 }

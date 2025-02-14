@@ -5,7 +5,7 @@
 #include "./vertex.hpp"
 
 #include <webgpu/webgpu.h>
-#include <linmath/linmath.h>
+#include <linmath.h>
 
 // Calculate Vertex Size
 const static size_t VERTEX_SZ = sizeof(CUSTOM_VERTEX);
@@ -30,6 +30,7 @@ public:
 	
 	// Methods
 	void Load(const WGPUDevice& device, const WGPUQueue& queue);
+	void Update(const WGPURenderPassEncoder& renderPass);
 	void Draw(const WGPURenderPassEncoder& renderPass);
 };
 

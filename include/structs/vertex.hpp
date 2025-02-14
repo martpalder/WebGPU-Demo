@@ -2,7 +2,7 @@
 #ifndef VERTEX_HPP_INCLUDED
 #define VERTEX_HPP_INCLUDED
 
-#include <linmath/linmath.h>
+#include <linmath.h>
 
 typedef struct {
     vec2 pos;

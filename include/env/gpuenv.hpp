@@ -4,6 +4,7 @@
 
 #include <GLFW/glfw3.h>
 #include <webgpu/webgpu.h>
+#include <cstdio>
 
 typedef struct {
 	WGPUInstance inst;
@@ -14,7 +15,15 @@ typedef struct {
 	WGPUTextureView targetView;
 } GPUEnv;
 
+WGPURequestAdapterOptions createAdapterOpts(const WGPUSurface& surf);
+
 GPUEnv initGPUEnv(GLFWwindow* wnd);
 void quitGPUEnv(const GPUEnv& gpuEnv);
+
+inline void assignNull(void* pObj, const char* name)
+{
+	pObj = nullptr;
+	printf("Released the %s\n", name);
+}
 
 #endif	// GPUENV_HPP_INCLUDED

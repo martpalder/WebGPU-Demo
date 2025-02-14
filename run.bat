@@ -1,5 +1,4 @@
 @echo off
 set RUST_BACKTRACE=full
-cd build-mingw64
-.\App
+"build-mingw64\App.exe"
 pause

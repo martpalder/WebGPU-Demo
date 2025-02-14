@@ -14,8 +14,10 @@ typedef struct {
 	WGPUBindGroup bindGroup;
 } Bind;
 
-WGPUBindGroupEntry createBinding(size_t bufferSz, const WGPUBuffer& buffer);
-WGPUBindGroup createBindGroup(const WGPUDevice& device,
-const WGPUBindGroupLayout& bindGroupLayout, WGPUBindGroupEntry* pBinding);
+WGPUBindGroupEntry createBinding(int idx, const WGPUBuffer& buffer);
+WGPUBindGroup createBindGroup(const WGPUDevice& device, const WGPUBindGroupLayout& bindGroupLayout,
+WGPUBindGroupEntry* pBinding);
+
+Bind bindBuffer(const WGPUDevice& device, int idx, const WGPUBuffer& buffer);
 
 #endif	// BIND_HPP_INCLUDED

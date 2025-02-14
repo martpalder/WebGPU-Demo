@@ -45,7 +45,8 @@ size_t dataSize, const float* vertexData)
 	return vertexBuffer;
 }
 
-WGPUBuffer createBufferMat4x4(const WGPUDevice& device, const WGPUQueue& queue, const mat4x4& mat)
+WGPUBuffer createBufferMatrix(const WGPUDevice& device, const WGPUQueue& queue,
+const mat4x4& matrix)
 {
 	WGPUBuffer matrixBuffer;
 	
@@ -53,7 +54,7 @@ WGPUBuffer createBufferMat4x4(const WGPUDevice& device, const WGPUQueue& queue, 
 	WGPUBufferDescriptor bufferDesc = {};
 	bufferDesc.nextInChain = nullptr;
 	bufferDesc.label = "MatrixBuffer";
-	bufferDesc.size = sizeof(mat);
+	bufferDesc.size = sizeof(matrix);
 	bufferDesc.usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_Uniform; // Uniform usage here!
 	bufferDesc.mappedAtCreation = false;
 	
@@ -79,7 +80,7 @@ WGPUBuffer createBufferMat4x4(const WGPUDevice& device, const WGPUQueue& queue, 
 
 	// Upload the Matrix to the Buffer
 	wgpuDevicePushErrorScope(device, WGPUErrorFilter_Validation);
-	wgpuQueueWriteBuffer(queue, matrixBuffer, 0, mat, bufferDesc.size);
+	wgpuQueueWriteBuffer(queue, matrixBuffer, 0, matrix, bufferDesc.size);
 	wgpuDevicePopErrorScope(device, errorCallback, nullptr);
 
 	return matrixBuffer;

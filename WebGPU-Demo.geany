@@ -1,0 +1,61 @@
+[editor]
+line_wrapping=false
+line_break_column=72
+auto_continue_multiline=true
+
+[file_prefs]
+final_new_line=true
+ensure_convert_new_lines=false
+strip_trailing_spaces=false
+replace_tabs=false
+
+[indentation]
+indent_width=4
+indent_type=1
+indent_hard_tab_width=8
+detect_indent=false
+detect_indent_width=false
+indent_mode=2
+
+[project]
+name=WebGPU-Demo
+base_path=E:\\Users\\Martin\\WebGPU-Demo
+description=
+file_patterns=
+
+[long line marker]
+long_line_behaviour=1
+long_line_column=72
+
+[files]
+current_page=0
+FILE_NAME_0=4360;C++;0;EUTF-8;1;1;0;E%3A%5CUsers%5CMartin%5CWebGPU-Demo%5Csrc%5Capp.cpp;0;4
+FILE_NAME_1=1131;C++;0;EUTF-8;1;1;0;E%3A%5CUsers%5CMartin%5CWebGPU-Demo%5Cinclude%5Capp.hpp;0;4
+FILE_NAME_2=1868;C++;0;EUTF-8;1;1;0;E%3A%5CUsers%5CMartin%5CWebGPU-Demo%5Csrc%5Cgraphics%5Cpipeline.cpp;0;4
+FILE_NAME_3=3554;C++;0;EUTF-8;1;1;0;E%3A%5CUsers%5CMartin%5CWebGPU-Demo%5Csrc%5Cstructs%5Clayout.cpp;0;4
+FILE_NAME_4=559;C++;0;EUTF-8;1;1;0;E%3A%5CUsers%5CMartin%5CWebGPU-Demo%5Cinclude%5Cgraphics%5Cbind.hpp;0;4
+FILE_NAME_5=97;None;0;EUTF-8;1;1;0;E%3A%5CUsers%5CMartin%5CWebGPU-Demo%5Cdata%5Cshaders%5Cbasic3d_color.wgsl;0;4
+
+[build-menu]
+NF_03_LB=
+NF_03_CM=
+NF_03_WD=%p
+EX_00_LB=_Execute
+EX_00_CM="./build-mingw64/App.exe"
+EX_00_WD=%p
+NF_00_LB=_Make
+NF_00_CM=make
+NF_00_WD=%p
+NF_01_LB=Make Custom _Target...
+NF_01_CM=make 
+NF_01_WD=%p
+NF_02_LB=Make _Object
+NF_02_CM=make %e.o
+NF_02_WD=%p
+C++FT_00_LB=_Compile
+C++FT_00_CM=cmake --build "build-mingw64"
+C++FT_00_WD=%p
+C++FT_01_LB=_Build
+C++FT_01_CM=cmake --build "build-mingw64"
+C++FT_01_WD=%p
+filetypes=C++;
