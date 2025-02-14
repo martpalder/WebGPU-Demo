@@ -6,7 +6,7 @@
 #include "./pipeline.hpp"
 #include "./buffer.hpp"
 #include "./view.hpp"
-#include "./myassert.hpp"
+#include "./callback.hpp"
 
 #include <cstdio>
 #ifdef __EMSCRIPTEN__
@@ -31,7 +31,6 @@ void App::Init(int w, int h, const char* title)
 {	
 	// Create the window
 	m_wnd = createWindow(w, h, title);
-	if (m_wnd == nullptr){ this->~App(); }
 	
 	// Initialize WebGPU
 	m_gpuEnv = initGPUEnv(m_wnd);
@@ -39,41 +38,22 @@ void App::Init(int w, int h, const char* title)
 	// Create the Attachments and Descriptors
 	this->CreateAttachments();
 	this->CreateDescriptors();
-	
-	// Create the Bindings
-	this->CreateBindings();
 
 	// Load a Shader
 	m_shader.Load(m_gpuEnv.dev, "basic3d_color.wgsl");
+	// Load a Mesh
+	m_player.CreateBindings(m_gpuEnv);
+	m_player.LoadMesh(m_gpuEnv);
+	
+	// Create the Bindings
+	//m_mesh.CreateBindings(m_gpuEnv.dev, m_gpuEnv.queue);
 	// Create the Render Pipeline
 	this->CreatePipeline();
-	
-	// Load a Mesh
-	m_mesh.Load(m_gpuEnv.dev, m_gpuEnv.queue);
 	puts("Initialized the App");
 }
 
 void App::Quit()
-{
-	if (m_projBuffer != nullptr)
-	{
-		// Release the Projection Buffer
-		wgpuBufferRelease(m_projBuffer);
-		m_projBuffer = nullptr;
-	}
-	
-	// Release the Bindings
-	if (m_bind.bindGroup != nullptr)
-	{
-		wgpuBindGroupRelease(m_bind.bindGroup);
-		m_bind.bindGroup = nullptr;
-	}
-	if (m_bind.bindGroupLayout != nullptr)
-	{
-		wgpuBindGroupLayoutRelease(m_bind.bindGroupLayout);
-		m_bind.bindGroupLayout = nullptr;
-	}
-	
+{	
 	// Quit WebGPU
 	quitGPUEnv(m_gpuEnv);
 	// Destroy the Window
@@ -96,22 +76,6 @@ void App::SetDefaults()
 	// Set Default Values
 	// Window
 	m_wnd = nullptr;
-	// Bindings
-	m_bind.binding = {};
-	m_bind.bindingLayout = {};
-	m_bind.bindGroupLayout = nullptr;
-	m_bind.bindGroup = nullptr;
-	// Projection
-	m_projBuffer = nullptr;
-}
-
-void App::SetBindGroup(const WGPURenderPassEncoder& renderPass)
-{
-	if (m_bind.bindGroup != nullptr)
-	{
-		wgpuRenderPassEncoderSetBindGroup(renderPass, 0, m_bind.bindGroup, 0, nullptr);
-		puts("Set the Bind Group");
-	}
 }
 
 void App::CreateAttachments()
@@ -134,21 +98,14 @@ void App::CreateDescriptors()
 	puts("Created the Descriptors");
 }
 
-void App::CreateBindings()
-{
-	// Create the Projection Matrix
-	mat4x4_perspective(m_proj, 60.0f, 4 / 3.0f, 0.1f, 100.0f);
-	m_projBuffer = createBufferMatrix(m_gpuEnv.dev, m_gpuEnv.queue, m_proj);
-	
-	// Bind the Projection Buffer
-	m_bind = bindBuffer(m_gpuEnv.dev, 0, m_projBuffer);
-}
-
 void App::CreatePipeline()
 {
 	// Create the Render Pipeline
-	WGPUShaderModule& shaderMod = m_shader.GetShaderMod();
-	m_gpuEnv.pipeline = createRenderPipeline(m_gpuEnv.dev, shaderMod, nullptr);
+	m_gpuEnv.pipeline = createRenderPipeline(
+		m_gpuEnv.dev,
+		m_shader.GetShaderMod(),
+		m_player.GetBindGroupLayout()
+	);
 }
 
 void App::EventLoop()
@@ -164,7 +121,7 @@ void App::Cls()
 {
 	// Get the next Target Texture View
 	getNextTargetView(m_gpuEnv.surf, &m_gpuEnv.targetView);
-	// Set the Target Texture View to Color Attachment
+	// Assign the Target Texture View to Color Attachment
 	m_renderPassColorAttach.view = m_gpuEnv.targetView;
 }
 
@@ -184,13 +141,10 @@ void App::RenderPass(const WGPUCommandEncoder& encoder)
 	wgpuRenderPassEncoderSetPipeline(renderPass, m_gpuEnv.pipeline);
 	
 	// {{Update}}
-	m_mesh.Update(renderPass);
-	
-	// {{Set the binding group here!}}
-	this->SetBindGroup(renderPass);
+	m_player.Update(m_gpuEnv.queue, renderPass);
 	
 	// {{Draw}}
-	m_mesh.Draw(renderPass);
+	m_player.Draw(renderPass);
 
 	// {{End and release the Render Pass}}
 	wgpuRenderPassEncoderEnd(renderPass);

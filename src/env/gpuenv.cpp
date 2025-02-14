@@ -31,12 +31,8 @@ GPUEnv initGPUEnv(GLFWwindow* wnd)
 	
 	// Create a WebGPU Instance
 	gpuEnv.inst = createInstance();
-	
-	gpuEnv.surf = nullptr;
-	#ifndef __EMSCRIPTEN__
 	// Get the Surface from GLFW
 	gpuEnv.surf = glfwGetWGPUSurface(gpuEnv.inst, wnd);
-	#endif
 	
 	// Create the Adapter Options
 	WGPURequestAdapterOptions adapterOpts;
@@ -59,20 +55,27 @@ GPUEnv initGPUEnv(GLFWwindow* wnd)
 	// Inspect the Device
 	inspectDevice(gpuEnv.dev);
 	
-	#ifndef __EMSCRIPTEN__
 	// Get the Window Size
 	int w, h;
 	glfwGetWindowSize(wnd, &w, &h);
-	gpuEnv.surf = glfwGetWGPUSurface(gpuEnv.inst, wnd);
-	// Configure the Surface
+	
+	// Create a Surface Configuration
 	WGPUSurfaceConfiguration config = createSurfConfig(w, h, gpuEnv.dev);
+	
+	// Configure the Surface
+	wgpuDevicePushErrorScope(gpuEnv.dev, WGPUErrorFilter_Validation);
 	wgpuSurfaceConfigure(gpuEnv.surf, &config);
-	#endif
+	wgpuDevicePopErrorScope(gpuEnv.dev, errorCallback, nullptr);
 	
 	// Get the Queue
+	wgpuDevicePushErrorScope(gpuEnv.dev, WGPUErrorFilter_Validation);
 	gpuEnv.queue = wgpuDeviceGetQueue(gpuEnv.dev);
+	wgpuDevicePopErrorScope(gpuEnv.dev, errorCallback, nullptr);
+	
 	// Set the Queue Callbacks
+	wgpuDevicePushErrorScope(gpuEnv.dev, WGPUErrorFilter_Validation);
 	wgpuQueueOnSubmittedWorkDone(gpuEnv.queue, onQueueWorkDone, nullptr /* pUserData */);
+	wgpuDevicePopErrorScope(gpuEnv.dev, errorCallback, nullptr);
 	
 	return gpuEnv;
 }

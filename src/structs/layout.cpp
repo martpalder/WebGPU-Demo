@@ -29,7 +29,7 @@ WGPUVertexAttribute* pAttribs)
 	return bufferLayout;
 }
 
-WGPUBindGroupLayoutEntry createLayoutBinding()
+WGPUBindGroupLayoutEntry createLayoutBinding(size_t minBindingSize)
 {
 	// Define Binding Layout
 	WGPUBindGroupLayoutEntry bindingLayout = {};
@@ -39,7 +39,7 @@ WGPUBindGroupLayoutEntry createLayoutBinding()
 	// The stage that needs to access this resource
 	bindingLayout.visibility = WGPUShaderStage_Vertex;
 	bindingLayout.buffer.type = WGPUBufferBindingType_Uniform;
-	bindingLayout.buffer.minBindingSize = 4 * sizeof(float);
+	bindingLayout.buffer.minBindingSize = minBindingSize;
 	
 	// Set Default Values
 	// Buffer

@@ -29,12 +29,10 @@ long_line_column=72
 
 [files]
 current_page=0
-FILE_NAME_0=4360;C++;0;EUTF-8;1;1;0;E%3A%5CUsers%5CMartin%5CWebGPU-Demo%5Csrc%5Capp.cpp;0;4
-FILE_NAME_1=1131;C++;0;EUTF-8;1;1;0;E%3A%5CUsers%5CMartin%5CWebGPU-Demo%5Cinclude%5Capp.hpp;0;4
-FILE_NAME_2=1868;C++;0;EUTF-8;1;1;0;E%3A%5CUsers%5CMartin%5CWebGPU-Demo%5Csrc%5Cgraphics%5Cpipeline.cpp;0;4
-FILE_NAME_3=3554;C++;0;EUTF-8;1;1;0;E%3A%5CUsers%5CMartin%5CWebGPU-Demo%5Csrc%5Cstructs%5Clayout.cpp;0;4
-FILE_NAME_4=559;C++;0;EUTF-8;1;1;0;E%3A%5CUsers%5CMartin%5CWebGPU-Demo%5Cinclude%5Cgraphics%5Cbind.hpp;0;4
-FILE_NAME_5=97;None;0;EUTF-8;1;1;0;E%3A%5CUsers%5CMartin%5CWebGPU-Demo%5Cdata%5Cshaders%5Cbasic3d_color.wgsl;0;4
+FILE_NAME_0=3200;C++;0;EUTF-8;1;1;0;E%3A%5CUsers%5CMartin%5CWebGPU-Demo%5Csrc%5Capp.cpp;0;4
+FILE_NAME_1=2295;C++;0;EUTF-8;1;1;0;E%3A%5CUsers%5CMartin%5CWebGPU-Demo%5Csrc%5Cactor.cpp;0;4
+FILE_NAME_2=796;C++;0;EUTF-8;1;1;0;E%3A%5CUsers%5CMartin%5CWebGPU-Demo%5Cinclude%5Cactor.hpp;0;4
+FILE_NAME_3=1998;C++;0;EUTF-8;1;1;0;E%3A%5CUsers%5CMartin%5CWebGPU-Demo%5Csrc%5Cgraphics%5Cmesh.cpp;0;4
 
 [build-menu]
 NF_03_LB=

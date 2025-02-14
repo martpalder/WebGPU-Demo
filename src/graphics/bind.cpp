@@ -4,6 +4,7 @@
 #include "./callback.hpp"
 #include "./myassert.hpp"
 
+#include <linmath.h>
 #include <cstdio>
 
 WGPUBindGroupEntry createBinding(int idx, const WGPUBuffer& buffer)
@@ -66,7 +67,7 @@ Bind bindBuffer(const WGPUDevice& device, int idx, const WGPUBuffer& buffer)
 	// Create the binding
 	bind.binding = createBinding(idx, buffer);
 	// Create the Binding Layout
-	bind.bindingLayout = createLayoutBinding();
+	bind.bindingLayout = createLayoutBinding(sizeof(mat4x4));
 	// Create the Bind Group Layout
 	bind.bindGroupLayout = createLayoutBindGroup(device, &bind.bindingLayout);
 	MY_ASSERT(bind.bindGroupLayout);

@@ -4,8 +4,7 @@
 
 #include "./env/gpuenv.hpp"
 #include "./shader.hpp"
-#include "./mesh.hpp"
-#include "./bind.hpp"
+#include "./actor.hpp"
 
 #include <GLFW/glfw3.h>
 #include <linmath.h>
@@ -27,25 +26,18 @@ private:
 	Descriptors m_descriptors;
 	// Attachments
 	WGPURenderPassColorAttachment m_renderPassColorAttach;
-	// Bindings
-	Bind m_bind;
-	
-	// Projection Matrix and Buffer
-	mat4x4 m_proj;
-	WGPUBuffer m_projBuffer;
 	
 	// RESOURCES
 	// Shaders
 	Shader m_shader;
-	// Meshes
-	Mesh m_mesh;
+	// Actors
+	Actor m_player;
 	
 	// Getters
 	bool IsRunning();
 	
 	// Setters
 	void SetDefaults();
-	void SetBindGroup(const WGPURenderPassEncoder& renderPass);
 	
 	// Init/Quit Methods
 	void Init(int w, int h, const char* title);
@@ -54,7 +46,6 @@ private:
 	// Creation Methods
 	void CreateAttachments();
 	void CreateDescriptors();
-	void CreateBindings();
 	void CreatePipeline();
 	
 	// Main Methods

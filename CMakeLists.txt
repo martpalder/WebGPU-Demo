@@ -14,12 +14,13 @@ add_executable(App
 	src/main.cpp
 	src/app.cpp
 	src/window.cpp
-	src/mesh.cpp
+	src/actor.cpp
 	src/env/gpuenv.cpp
 	src/graphics/instance.cpp
 	src/graphics/request.cpp
 	src/graphics/inspect.cpp
 	src/graphics/shader.cpp
+	src/graphics/mesh.cpp
 	src/graphics/bind.cpp
 	src/graphics/pipeline.cpp
 	src/graphics/buffer.cpp

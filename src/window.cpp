@@ -1,6 +1,7 @@
 #include "./window.hpp"
 
 #include <cstdio>
+#include <cstdlib>
 
 GLFWwindow* createWindow(int w, int h, const char* title)
 {
@@ -11,6 +12,7 @@ GLFWwindow* createWindow(int w, int h, const char* title)
 	{
 		// Initialization failed
 		perror("[ERROR]: Failed to initialize GLFW");
+		exit(-1);
 		
 		return nullptr;
 	}
@@ -25,6 +27,7 @@ GLFWwindow* createWindow(int w, int h, const char* title)
 	{
 		// Window Creation failed
 		perror("[ERROR]: Failed to create a Window");
+		exit(-1);
 	}
 	
 	return wnd;
