@@ -9,8 +9,8 @@
 #include <webgpu/webgpu.h>
 #include <linmath.h>
 
-// Calculate Vertex Size
-const static size_t VERTEX_SZ = sizeof(CUSTOM_VERTEX);
+#define CUSTOM_INDEX uint16_t
+#define INDEX_SZ sizeof(CUSTOM_INDEX)
 
 class Mesh
 {
@@ -18,12 +18,16 @@ private:
 	// Members
 	// Counts
 	uint32_t m_vertexCount;
-	uint64_t m_bufferSz;
+	uint32_t m_indexCount;
+	// Buffer Sizes
+	uint64_t m_vertexBufferSz;
+	uint64_t m_indexBufferSz;
 	// Buffers
 	WGPUBuffer m_vertexBuffer;
-	
-	// Vertex Data
-	const CUSTOM_VERTEX* m_pVertexData;
+	WGPUBuffer m_indexBuffer;
+	// Datas
+	const void* m_pVertexData;
+	const void* m_pIndexData;
 	
 	// Methods
 	void Release();
@@ -35,14 +39,18 @@ public:
 	
 	// Getters
 	uint32_t GetVertexCount();
+	uint32_t GetIndexCount();
+	WGPUBool IsIndexed();
 	
 	// Setters
 	void SetDefaults();
-	void SetVertexBuffer(const WGPURenderPassEncoder& renderPass);
-	void AssignVertexData(const GPUEnv& gpuEnv, uint32_t vertexCount,
-	const CUSTOM_VERTEX* pVertexData);
+	void SetBuffers(const WGPURenderPassEncoder& renderPass);
+	void AssignVertices(const GPUEnv& gpuEnv, uint32_t vertexCount,
+	const void* pVertexData);
+	void AssignIndices(const GPUEnv& gpuEnv, uint32_t indexCount,
+	const void* pIndexData);
 };
 
-Mesh loadMesh(const GPUEnv& gpuEnv);
+Mesh* loadMesh(const GPUEnv& gpuEnv);
 
 #endif	// MESH_HPP_INCLUDED

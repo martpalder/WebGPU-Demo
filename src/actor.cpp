@@ -3,24 +3,24 @@
 
 Actor::Actor()
 {
+	// Set the Defaults
+	this->SetDefaults();
+	
 	// Set the Projection Matrix
 	mat4x4_perspective(m_proj, 90.0f, 4 / 3.0f, 0.1f, 100.0f);
-	// Set the Model Matrix
-	mat4x4_translate(m_model, 1.0f, 0.0f, -1.0f);
-	
-	// Combine the Matrices
-	mat4x4_mul(m_mp, m_proj, m_model);	// Check ordering
+	// Set the Translation Matrix
+	mat4x4_translate(m_t, m_pos[0], m_pos[1], m_pos[2]);
 }
 
 Actor::~Actor()
 {
-	// Release
+	// Release the Actor
 	this->Release();
 }
 
-WGPUBindGroupLayout* Actor::GetBindGroupLayout()
+WGPUBuffer& Actor::GetTransformBuffer()
 {
-	return &m_bind.bindGroupLayout;
+	return m_mpBuffer;
 }
 
 void Actor::SetDefaults()
@@ -31,14 +31,12 @@ void Actor::SetDefaults()
 	m_pos[2] = -1.0f;
 	
 	// Initialize Matrices
+	mat4x4_identity(m_t);
+	mat4x4_identity(m_r);
 	mat4x4_identity(m_model);
 	mat4x4_identity(m_mp);
 	
-	// Bindings
-	m_bind.binding = {};
-	m_bind.bindingLayout = {};
-	m_bind.bindGroupLayout = nullptr;
-	m_bind.bindGroup = nullptr;
+	m_pMesh = nullptr;
 }
 
 void Actor::SetPos(float x, float y, float z)
@@ -48,29 +46,20 @@ void Actor::SetPos(float x, float y, float z)
 	m_pos[1] = y;
 	m_pos[2] = z;
 	
-	// Set the Model Matrix
-	mat4x4_translate(m_model, m_pos[0], m_pos[1], m_pos[2]);
-	// Combine the Matrices
-	mat4x4_mul(m_mp, m_proj, m_model);	// Check ordering
+	// Set the Translation Matrix
+	mat4x4_translate(m_t, m_pos[0], m_pos[1], m_pos[2]);
 }
 
 void Actor::Release()
 {
-	// Release the Bindings
-	if (m_bind.bindGroup != nullptr)
+	if (m_pMesh != nullptr)
 	{
-		wgpuBindGroupRelease(m_bind.bindGroup);
-		m_bind.bindGroup = nullptr;
-		puts("Released the Bind Group");
+		// Release the Mesh
+		delete m_pMesh;
+		m_pMesh = nullptr;
+		puts("Released the Mesh");
 	}
-	if (m_bind.bindGroupLayout != nullptr)
-	{
-		wgpuBindGroupLayoutRelease(m_bind.bindGroupLayout);
-		m_bind.bindGroupLayout = nullptr;
-		puts("Released the Bind Group Layout");
-	}
-	
-	// Release the Buffers
+
 	if (m_mpBuffer != nullptr)
 	{
 		// Release the Transform Buffer
@@ -80,35 +69,23 @@ void Actor::Release()
 	}
 }
 
-void Actor::CreateBindings(const GPUEnv& gpuEnv)
+void Actor::CreateTransform(const GPUEnv& gpuEnv)
 {
-	// Create and bind the Transform Buffer
+	// Create the Transform Buffer
 	m_mpBuffer = createBufferMatrix(gpuEnv, m_mp);
-	m_bind = bindBuffer(gpuEnv.dev, 0, m_mpBuffer);
 }
 
 void Actor::Update(const WGPUQueue& queue, const WGPURenderPassEncoder& renderPass)
 {
-	//this->Translate(0.0f, 0.0f, -0.01f);
+	// Combine the Matrices
+	mat4x4_rotate(m_r, m_r, 0.0f, 0.0f, 1.0f, 0.01f);
+	mat4x4_mul(m_model, m_t, m_r);
+	mat4x4_mul(m_mp, m_proj, m_model);	// Check ordering
 	
-	// Set the Vertex Buffer
-	m_mesh.SetVertexBuffer(renderPass);
+	// Set the Mesh Buffers
+	m_pMesh->SetBuffers(renderPass);
 	// Update the Uniform Buffer
 	wgpuQueueWriteBuffer(queue, m_mpBuffer, 0, m_mp, sizeof(m_mp));
-	
-	// {{Set the binding group here!}}
-	if (m_bind.bindGroup != nullptr)
-	{
-		// Set the Bind Group
-		wgpuRenderPassEncoderSetBindGroup(renderPass, 0, m_bind.bindGroup, 0, nullptr);
-	}
-}
-
-void Actor::Draw(const WGPURenderPassEncoder& renderPass)
-{
-	// Draw 1 Instance of a X-Vertices Shape
-	uint32_t vertexCount = m_mesh.GetVertexCount();
-	wgpuRenderPassEncoderDraw(renderPass, vertexCount, 1, 0, 0);
 }
 
 void Actor::Translate(float x, float y, float z)
@@ -118,13 +95,34 @@ void Actor::Translate(float x, float y, float z)
 	m_pos[1] += y;
 	m_pos[2] += z;
 	
-	// Set the Model Matrix
-	mat4x4_translate(m_model, m_pos[0], m_pos[1], m_pos[2]);
-	// Combine the Matrices
-	mat4x4_mul(m_mp, m_proj, m_model);	// Check ordering
+	// Set the Translation Matrix
+	mat4x4_translate(m_t, m_pos[0], m_pos[1], m_pos[2]);
+}
+
+void Actor::RotateZ(float z)
+{
+	mat4x4_rotate(m_r, m_r, 0.0f, 0.0f, 1.0f, z);
+}
+
+void Actor::Draw(const WGPURenderPassEncoder& renderPass)
+{
+	// If Indexed
+	if (m_pMesh->IsIndexed())
+	{
+		// Draw 1 Instance of a X-Indices Shape
+		uint32_t indexCount = m_pMesh->GetIndexCount();
+		wgpuRenderPassEncoderDraw(renderPass, indexCount, 1, 0, 0);
+	}
+	else
+	{
+		// Draw 1 Instance of a X-Vertices Shape
+		uint32_t vertexCount = m_pMesh->GetVertexCount();
+		wgpuRenderPassEncoderDraw(renderPass, vertexCount, 1, 0, 0);
+	}
 }
 
 void Actor::LoadMesh(const GPUEnv& gpuEnv)
 {
-	m_mesh = loadMesh(gpuEnv);
+	// Load a Mesh
+	m_pMesh = loadMesh(gpuEnv);
 }

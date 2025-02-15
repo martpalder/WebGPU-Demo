@@ -9,16 +9,15 @@ class Actor
 private:
 	// Members
 	vec3 m_pos;
-	Mesh m_mesh;
 	
+	// Components
 	// Matrices
+	mat4x4 m_t, m_r;
 	mat4x4 m_model, m_proj, m_mp;
-	
 	// Buffers
 	WGPUBuffer m_mpBuffer;
-	
-	// Bindings
-	Bind m_bind;
+	// Mesh
+	Mesh* m_pMesh;
 	
 	// Methods
 	void Release();
@@ -28,18 +27,18 @@ public:
 	~Actor();
 	
 	// Getters
-	WGPUBindGroupLayout* GetBindGroupLayout();
+	WGPUBuffer& GetTransformBuffer();
 	
 	// Setters
 	void SetDefaults();
 	void SetPos(float x, float y, float z);
-	void SetBindGroup(const WGPURenderPassEncoder& renderPass);
 	
 	// Methods
-	void CreateBindings(const GPUEnv& gpuEnv);
+	void CreateTransform(const GPUEnv& gpuEnv);
 	void Update(const WGPUQueue& queue, const WGPURenderPassEncoder& renderPass);
-	void Draw(const WGPURenderPassEncoder& renderPass);
 	void Translate(float x, float y, float z);
+	void RotateZ(float z);
+	void Draw(const WGPURenderPassEncoder& renderPass);
 	void LoadMesh(const GPUEnv& gpuEnv);
 };
 

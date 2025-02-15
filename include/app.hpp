@@ -3,17 +3,12 @@
 #define APP_HPP_INCLUDED
 
 #include "./env/gpuenv.hpp"
+#include "./desc.hpp"
 #include "./shader.hpp"
 #include "./actor.hpp"
 
 #include <GLFW/glfw3.h>
 #include <linmath.h>
-
-typedef struct {
-	WGPUCommandEncoderDescriptor encoderDesc;
-	WGPURenderPassDescriptor renderPassDesc;
-	WGPUCommandBufferDescriptor cmdBufferDesc;
-} Descriptors;
 
 class App
 {
@@ -25,7 +20,9 @@ private:
 	// Descriptors
 	Descriptors m_descriptors;
 	// Attachments
-	WGPURenderPassColorAttachment m_renderPassColorAttach;
+	WGPURenderPassColorAttachment m_colorAttach;
+	// Bindings
+	Bind m_bind;
 	
 	// RESOURCES
 	// Shaders
@@ -34,7 +31,7 @@ private:
 	Actor m_player;
 	
 	// Getters
-	bool IsRunning();
+	WGPUBool IsRunning();
 	
 	// Setters
 	void SetDefaults();
@@ -45,15 +42,17 @@ private:
 	
 	// Creation Methods
 	void CreateAttachments();
-	void CreateDescriptors();
 	void CreatePipeline();
 	
 	// Main Methods
-	void EventLoop();
 	void Cls();
 	void Flip();
+	void EventLoop();
 	void RenderPass(const WGPUCommandEncoder& encoder);
+	void Update();
 	void Draw();
+	
+	// Main Loops
 	void MainLoopGLFW();
 	void MainLoopEM();
 

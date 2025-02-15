@@ -1,7 +1,6 @@
 #include "./app.hpp"
 #include "./window.hpp"
 #include "./attach.hpp"
-#include "./desc.hpp"
 #include "./layout.hpp"
 #include "./pipeline.hpp"
 #include "./buffer.hpp"
@@ -37,23 +36,37 @@ void App::Init(int w, int h, const char* title)
 	
 	// Create the Attachments and Descriptors
 	this->CreateAttachments();
-	this->CreateDescriptors();
+	m_descriptors = createDescriptors(m_colorAttach);
+	
+	// Create Player Transform
+	m_player.CreateTransform(m_gpuEnv);
 
 	// Load a Shader
 	m_shader.Load(m_gpuEnv.dev, "basic3d_color.wgsl");
 	// Load a Mesh
-	m_player.CreateBindings(m_gpuEnv);
 	m_player.LoadMesh(m_gpuEnv);
 	
-	// Create the Bindings
-	//m_mesh.CreateBindings(m_gpuEnv.dev, m_gpuEnv.queue);
 	// Create the Render Pipeline
 	this->CreatePipeline();
 	puts("Initialized the App");
 }
 
 void App::Quit()
-{	
+{
+	// Release the Bindings
+	if (m_bind.bindGroup != nullptr)
+	{
+		wgpuBindGroupRelease(m_bind.bindGroup);
+		m_bind.bindGroup = nullptr;
+		puts("Released the Bind Group");
+	}
+	if (m_bind.bindGroupLayout != nullptr)
+	{
+		wgpuBindGroupLayoutRelease(m_bind.bindGroupLayout);
+		m_bind.bindGroupLayout = nullptr;
+		puts("Released the Bind Group Layout");
+	}
+	
 	// Quit WebGPU
 	quitGPUEnv(m_gpuEnv);
 	// Destroy the Window
@@ -62,7 +75,7 @@ void App::Quit()
 	puts("Quit the App");
 }
 
-bool App::IsRunning()
+WGPUBool App::IsRunning()
 {
 	#ifndef __EMSCRIPTEN__
 	return (glfwWindowShouldClose(m_wnd) == false);
@@ -76,36 +89,47 @@ void App::SetDefaults()
 	// Set Default Values
 	// Window
 	m_wnd = nullptr;
+	// Bindings
+	m_bind.binding = {};
+	m_bind.bindingLayout = {};
+	m_bind.bindGroupLayout = nullptr;
+	m_bind.bindGroup = nullptr;
 }
 
 void App::CreateAttachments()
 {
 	// ATTACHMENTS
 	// Render Pass Color Attachment
-	m_renderPassColorAttach = createRenderPassColorAttach(0.1f, 0.1f, 0.1f);
+	m_colorAttach = createRenderPassColorAttach(0.1f, 0.1f, 0.1f);
 	puts("Created the Attachments");
-}
-
-void App::CreateDescriptors()
-{
-	// DESCRIPTORS
-	// Command Encoder Descriptor
-	m_descriptors.encoderDesc = createEncoderDesc();
-	// Render Pass Descriptor
-	m_descriptors.renderPassDesc = createRenderPassDesc(m_renderPassColorAttach);
-	// Command Buffer Descriptor
-	m_descriptors.cmdBufferDesc = createCmdBufferDesc();
-	puts("Created the Descriptors");
 }
 
 void App::CreatePipeline()
 {
+	// Bind the Transform Buffer
+	m_bind = bindBuffer(m_gpuEnv.dev, 0, m_player.GetTransformBuffer());
+	
 	// Create the Render Pipeline
 	m_gpuEnv.pipeline = createRenderPipeline(
 		m_gpuEnv.dev,
 		m_shader.GetShaderMod(),
-		m_player.GetBindGroupLayout()
+		&m_bind.bindGroupLayout
 	);
+}
+
+void App::Cls()
+{
+	// Get the next Target Texture View
+	getNextTargetView(m_gpuEnv.surf, &m_gpuEnv.targetView);
+	// Assign the Target Texture View to Color Attachment
+	m_colorAttach.view = m_gpuEnv.targetView;
+}
+
+void App::Flip()
+{
+	#ifndef __EMSCRIPTEN__
+	wgpuSurfacePresent(m_gpuEnv.surf);
+	#endif
 }
 
 void App::EventLoop()
@@ -114,21 +138,6 @@ void App::EventLoop()
 	// Check whether the user clicked on the close button (and any other
 	// mouse/key event, which we don't use so far)
 	glfwPollEvents();
-	#endif
-}
-
-void App::Cls()
-{
-	// Get the next Target Texture View
-	getNextTargetView(m_gpuEnv.surf, &m_gpuEnv.targetView);
-	// Assign the Target Texture View to Color Attachment
-	m_renderPassColorAttach.view = m_gpuEnv.targetView;
-}
-
-void App::Flip()
-{
-	#ifndef __EMSCRIPTEN__
-	wgpuSurfacePresent(m_gpuEnv.surf);
 	#endif
 }
 
@@ -143,6 +152,13 @@ void App::RenderPass(const WGPUCommandEncoder& encoder)
 	// {{Update}}
 	m_player.Update(m_gpuEnv.queue, renderPass);
 	
+	// {{Set the binding group here!}}
+	if (m_bind.bindGroup != nullptr)
+	{
+		// Set the Bind Group
+		wgpuRenderPassEncoderSetBindGroup(renderPass, 0, m_bind.bindGroup, 0, nullptr);
+	}
+	
 	// {{Draw}}
 	m_player.Draw(renderPass);
 
@@ -151,8 +167,16 @@ void App::RenderPass(const WGPUCommandEncoder& encoder)
 	wgpuRenderPassEncoderRelease(renderPass);
 }
 
+void App::Update()
+{
+	m_player.RotateZ(0.01f);
+}
+
 void App::Draw()
 {
+	// Clear the Screen
+	this->Cls();
+	
 	// {{Create a Command Encoder}}
 	WGPUCommandEncoder encoder;
 	encoder = wgpuDeviceCreateCommandEncoder(m_gpuEnv.dev, &m_descriptors.encoderDesc);
@@ -170,6 +194,9 @@ void App::Draw()
 	wgpuQueueSubmit(m_gpuEnv.queue, 1, &command);
 	wgpuCommandBufferRelease(command);
 	//puts("Command submitted.");
+	
+	// Flip the Display Buffer
+	this->Flip();
 }
 
 void App::MainLoopGLFW()
@@ -178,14 +205,11 @@ void App::MainLoopGLFW()
 	while (this->IsRunning())
 	{
 		// Run the Event Loop
-		this->EventLoop();
-		
-		// Clear
-		this->Cls();
+		this->EventLoop();	
+		// Update
+		this->Update();
 		// Draw
 		this->Draw();
-		// Flip
-		this->Flip();
 	}
 }
 
@@ -194,16 +218,14 @@ void App::MainLoopEM()
 	// Equivalent of the Main Loop when using Emscripten:
 	auto callback = [](void *arg)
 	{
+		// Get the App
 		App* pApp = reinterpret_cast<App*>(arg);
 		// Run the Event Loop
-		pApp->EventLoop();
-		
-		// Clear
-		pApp->Cls();
+		pApp->EventLoop();	
+		// Update
+		pApp->Update();
 		// Draw
 		pApp->Draw();
-		// Flip
-		pApp->Flip();
 	};
 	
 	// Set the Main Loop

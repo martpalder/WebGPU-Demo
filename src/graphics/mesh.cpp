@@ -12,18 +12,19 @@
 // the *layout* will tell how to interpret this.
 const static CUSTOM_VERTEX vertexData[] =
 {
-    // x0, y0, z0, color
+	// Front
     { -0.5f, -0.5f, 0.0f, RED },
-    // x1, y1, z1, color
     { +0.5f, -0.5f, 0.0f, GREEN },
-    // x2, y2, z2, color
     { +0.5f, +0.5f, 0.0f, BLUE },
-	// x3, y3, z3, color
     { -0.5f, -0.5f, 0.0f, RED },
-	// x4, y4, z4, color
     { +0.5f, +0.5f, 0.0f, BLUE },
-	// x5, y5, z5, color
     { -0.5f, +0.5f, 0.0f, GREEN },
+};
+
+const static CUSTOM_INDEX indexData[] =
+{
+	0, 1, 2,
+	0, 2, 3,
 };
 
 Mesh::Mesh()
@@ -34,7 +35,7 @@ Mesh::Mesh()
 
 Mesh::~Mesh()
 {
-	// Release
+	// Release the Mesh
 	this->Release();
 }
 
@@ -43,23 +44,56 @@ uint32_t Mesh::GetVertexCount()
 	return m_vertexCount;
 }
 
+uint32_t Mesh::GetIndexCount()
+{
+	return m_indexCount;
+}
+
+WGPUBool Mesh::IsIndexed()
+{
+	return (m_indexBuffer != nullptr);
+}
+
 void Mesh::SetDefaults()
 {
 	// Set Default Values
 	m_vertexCount = 0;
-	m_bufferSz = 0;
+	m_indexCount = 0;
+	
+	m_vertexBufferSz = 0;
+	m_indexBufferSz = 0;
+	
 	m_pVertexData = nullptr;
 	m_vertexBuffer = nullptr;
+	
+	m_pIndexData = nullptr;
+	m_indexBuffer = nullptr;
 }
 
-void Mesh::SetVertexBuffer(const WGPURenderPassEncoder& renderPass)
+void Mesh::SetBuffers(const WGPURenderPassEncoder& renderPass)
 {
 	// Set the Vertex Buffer
-	wgpuRenderPassEncoderSetVertexBuffer(renderPass, 0, m_vertexBuffer, 0, m_bufferSz);
+	wgpuRenderPassEncoderSetVertexBuffer(
+		renderPass, 0,
+		m_vertexBuffer,
+		0, m_vertexBufferSz
+	);
+	
+	// If Indexed
+	if (this->IsIndexed())
+	{
+		// Set the Index Buffer
+		wgpuRenderPassEncoderSetIndexBuffer(
+			renderPass,
+			m_indexBuffer,
+			WGPUIndexFormat_Uint16,
+			0, m_indexBufferSz
+		);
+	}
 }
 
-void Mesh::AssignVertexData(const GPUEnv& gpuEnv, uint32_t vertexCount,
-const CUSTOM_VERTEX* pVertexData)
+void Mesh::AssignVertices(const GPUEnv& gpuEnv, uint32_t vertexCount,
+const void* pVertexData)
 {
 	// Set the Vertex Count and Vertex Data
 	m_vertexCount = vertexCount;
@@ -67,30 +101,56 @@ const CUSTOM_VERTEX* pVertexData)
 	
 	// Create a Vertex Buffer
 	m_vertexBuffer = createBufferVert(gpuEnv, vertexCount * sizeof(CUSTOM_VERTEX), m_pVertexData);
-	m_bufferSz = wgpuBufferGetSize(m_vertexBuffer);
+	m_vertexBufferSz = wgpuBufferGetSize(m_vertexBuffer);
 	puts("Assigned Vertex Data");
-	printf("Number of vertices: %u\n", m_vertexCount);
+	printf("Number of vertices: %u\n", vertexCount);
+}
+
+void Mesh::AssignIndices(const GPUEnv& gpuEnv, uint32_t indexCount,
+const void* pIndexData)
+{
+	// Set the Index Count and Index Data
+	m_indexCount = indexCount;
+	m_pIndexData = pIndexData;
+	
+	// Create an Index Buffer
+	m_indexBuffer = createBufferIdx(gpuEnv, indexCount * sizeof(CUSTOM_INDEX), m_pIndexData);
+	m_indexBufferSz = wgpuBufferGetSize(m_indexBuffer);
+	puts("Assigned Index Data");
+	printf("Number of indices: %u\n", indexCount);
 }
 
 void Mesh::Release()
 {
+	if (m_indexBuffer != nullptr)
+	{
+		// Release the Index Buffer
+		wgpuBufferRelease(m_indexBuffer);
+		m_indexBuffer = nullptr;
+		m_pIndexData = nullptr;
+		puts("Released the Index Buffer");
+	}
 	if (m_vertexBuffer != nullptr)
 	{
 		// Release the Vertex Buffer
-		/*wgpuBufferRelease(m_vertexBuffer);
-		m_pVertexData = nullptr;
+		wgpuBufferRelease(m_vertexBuffer);
 		m_vertexBuffer = nullptr;
-		puts("Released the Vertex Buffer");*/
+		m_pVertexData = nullptr;
+		puts("Released the Vertex Buffer");
 	}
 }
 
-Mesh loadMesh(const GPUEnv& gpuEnv)
+Mesh* loadMesh(const GPUEnv& gpuEnv)
 {
-	Mesh mesh;
+	Mesh* pMesh = new Mesh();
 	
-	// Assign the Vertex Data
-	uint32_t vertexCount = static_cast<uint32_t>(sizeof(vertexData) / VERTEX_SZ);
-	mesh.AssignVertexData(gpuEnv, vertexCount, &vertexData[0]);
+	// Assign the Vertices
+	uint32_t vertexCount = (uint32_t)(sizeof(vertexData) / VERTEX_SZ);
+	pMesh->AssignVertices(gpuEnv, 6, &vertexData[0]);
 	
-	return mesh;
+	// Assign the Indices
+	//uint32_t indexCount = (uint32_t)(sizeof(indexData) / INDEX_SZ);
+	//pMesh->AssignIndices(gpuEnv, indexCount, &indexData[0]);
+	
+	return pMesh;
 }

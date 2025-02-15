@@ -5,7 +5,7 @@
 #include <cstdio>
 
 WGPUBuffer createBufferVert(const GPUEnv& gpuEnv,
-size_t dataSize, const CUSTOM_VERTEX* vertexData)
+size_t dataSize, const void* pVertexData)
 {
 	WGPUBuffer vertexBuffer;
 	
@@ -39,10 +39,51 @@ size_t dataSize, const CUSTOM_VERTEX* vertexData)
 
 	// Upload the Geometry Data to the Buffer
 	wgpuDevicePushErrorScope(gpuEnv.dev, WGPUErrorFilter_Validation);
-	wgpuQueueWriteBuffer(gpuEnv.queue, vertexBuffer, 0, vertexData, bufferDesc.size);
+	wgpuQueueWriteBuffer(gpuEnv.queue, vertexBuffer, 0, pVertexData, bufferDesc.size);
 	wgpuDevicePopErrorScope(gpuEnv.dev, errorCallback, nullptr);
 
 	return vertexBuffer;
+}
+
+WGPUBuffer createBufferIdx(const GPUEnv& gpuEnv,
+size_t dataSize, const void* pIndexData)
+{
+	WGPUBuffer indexBuffer;
+	
+	// Describe the Index Buffer
+	WGPUBufferDescriptor bufferDesc = {};
+	bufferDesc.nextInChain = nullptr;
+	bufferDesc.label = "IndexBuffer";
+	bufferDesc.size = dataSize;
+	bufferDesc.usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_Index ; // Index usage here!
+	bufferDesc.mappedAtCreation = false;
+	
+	// Create a Vertex Buffer
+	wgpuDevicePushErrorScope(gpuEnv.dev, WGPUErrorFilter_Validation);
+	indexBuffer = wgpuDeviceCreateBuffer(gpuEnv.dev, &bufferDesc);
+	wgpuDevicePopErrorScope(gpuEnv.dev, errorCallback, nullptr);
+	
+	// Check for Errors
+	if (indexBuffer == nullptr)
+	{
+		perror("[ERROR]: Failed to create an Index Buffer");
+		
+		return nullptr;
+	}
+	else
+	{
+		puts("Created an Index Buffer");
+	}
+	
+	// Assert
+	MY_ASSERT(indexBuffer != nullptr);
+
+	// Upload the Geometry Data to the Buffer
+	wgpuDevicePushErrorScope(gpuEnv.dev, WGPUErrorFilter_Validation);
+	wgpuQueueWriteBuffer(gpuEnv.queue, indexBuffer, 0, pIndexData, bufferDesc.size);
+	wgpuDevicePopErrorScope(gpuEnv.dev, errorCallback, nullptr);
+
+	return indexBuffer;
 }
 
 WGPUBuffer createBufferMatrix(const GPUEnv& gpuEnv, const mat4x4& matrix)

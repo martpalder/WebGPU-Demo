@@ -1,6 +1,8 @@
 #include "./desc.hpp"
 #include "./callback.hpp"
 
+#include <cstdio>
+
 WGPUDeviceDescriptor createDeviceDesc()
 {
 	WGPUDeviceDescriptor deviceDesc = {};
@@ -151,4 +153,20 @@ const WGPUFragmentState& fragmentState)
 	pipelineDesc.multisample.alphaToCoverageEnabled = false;
 	
 	return pipelineDesc;
+}
+
+Descriptors createDescriptors(const WGPURenderPassColorAttachment& colorAttach)
+{
+	Descriptors descriptors;
+	
+	// DESCRIPTORS
+	// Command Encoder Descriptor
+	descriptors.encoderDesc = createEncoderDesc();
+	// Render Pass Descriptor
+	descriptors.renderPassDesc = createRenderPassDesc(colorAttach);
+	// Command Buffer Descriptor
+	descriptors.cmdBufferDesc = createCmdBufferDesc();
+	puts("Created the Descriptors");
+	
+	return descriptors;
 }
