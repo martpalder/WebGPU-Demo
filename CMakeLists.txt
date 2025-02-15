@@ -14,6 +14,7 @@ add_executable(App
 	src/main.cpp
 	src/app.cpp
 	src/window.cpp
+	src/input.cpp
 	src/actor.cpp
 	src/env/gpuenv.cpp
 	src/graphics/instance.cpp

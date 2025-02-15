@@ -33,6 +33,8 @@ void App::Init(int w, int h, const char* title)
 	
 	// Initialize WebGPU
 	m_gpuEnv = initGPUEnv(m_wnd);
+	// Initialize Input
+	m_input.Init(m_wnd);
 	
 	// Create the Attachments and Descriptors
 	this->CreateAttachments();
@@ -150,7 +152,7 @@ void App::RenderPass(const WGPUCommandEncoder& encoder)
 	wgpuRenderPassEncoderSetPipeline(renderPass, m_gpuEnv.pipeline);
 	
 	// {{Update}}
-	m_player.Update(m_gpuEnv.queue, renderPass);
+	m_player.Update(m_gpuEnv.queue);
 	
 	// {{Set the binding group here!}}
 	if (m_bind.bindGroup != nullptr)
@@ -169,7 +171,17 @@ void App::RenderPass(const WGPUCommandEncoder& encoder)
 
 void App::Update()
 {
+	// Get Move Input
+	float h = m_input.GetAxis(0);
+	float v = m_input.GetAxis(1);
+	
 	// Transform Actors
+	if (h != 0.0f || v != 0.0f)
+	{
+		float speed = 0.1f;
+		m_player.Translate(h, 0.0f, v);
+	}
+	
 	m_player.RotateY(0.01f);
 	m_player.RotateZ(0.01f);
 }
@@ -219,7 +231,7 @@ void App::MainLoopEM()
 {
 	#ifdef __EMSCRIPTEN__
 	// Equivalent of the Main Loop when using Emscripten:
-	auto callback = [](void *arg)
+	auto callback = [](void* arg)
 	{
 		// Get the App
 		App* pApp = reinterpret_cast<App*>(arg);

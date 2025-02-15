@@ -9,6 +9,7 @@ class Actor
 private:
 	// Members
 	vec3 m_pos;
+	float m_speed;
 	
 	// Components
 	// Matrices
@@ -34,8 +35,9 @@ public:
 	void SetPos(float x, float y, float z);
 	
 	// Main Methods
+	void InitMatrices();
 	void CreateTransform(const GPUEnv& gpuEnv);
-	void Update(const WGPUQueue& queue, const WGPURenderPassEncoder& renderPass);
+	void Update(const WGPUQueue& queue);
 	void Draw(const WGPURenderPassEncoder& renderPass);
 	
 	// Transformations

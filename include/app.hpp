@@ -3,6 +3,7 @@
 #define APP_HPP_INCLUDED
 
 #include "./env/gpuenv.hpp"
+#include "./input.hpp"
 #include "./desc.hpp"
 #include "./shader.hpp"
 #include "./actor.hpp"
@@ -15,6 +16,7 @@ class App
 private:
 	// Main Members
 	GPUEnv m_gpuEnv;
+	Input m_input;
 	GLFWwindow* m_wnd;
 	
 	// Descriptors
