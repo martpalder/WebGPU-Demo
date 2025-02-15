@@ -84,11 +84,11 @@ void quitGPUEnv(const GPUEnv& gpuEnv)
 {
 	// Release the Target View
 	wgpuTextureViewRelease(gpuEnv.targetView);
-	assignNull(gpuEnv.targetView, "Target View");
+	printRelease("Target View");
 	
 	// Release the Render Pipeline
 	wgpuRenderPipelineRelease(gpuEnv.pipeline);
-	assignNull(gpuEnv.pipeline, "Render Pipeline");
+	printRelease("Render Pipeline");
 	
 	// Unconfigure the Surface
 	wgpuSurfaceUnconfigure(gpuEnv.surf);
@@ -96,17 +96,17 @@ void quitGPUEnv(const GPUEnv& gpuEnv)
 	
 	// Release the Surface
 	wgpuSurfaceRelease(gpuEnv.surf);
-	assignNull(gpuEnv.surf, "Surface");
+	printRelease("Surface");
 	
 	// Release the Queue
 	wgpuQueueRelease(gpuEnv.queue);
-	assignNull(gpuEnv.queue, "Queue");
+	printRelease("Queue");
 	
 	// Release the Device
 	wgpuDeviceRelease(gpuEnv.dev);
-	assignNull(gpuEnv.dev, "Device");
+	printRelease("Device");
 	
 	// Release the Instance
 	wgpuInstanceRelease(gpuEnv.inst);
-	assignNull(gpuEnv.inst, "Instance");
+	printRelease("Instance");
 }

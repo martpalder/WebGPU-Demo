@@ -2,6 +2,8 @@
 #ifndef DESC_HPP_INCLUDED
 #define DESC_HPP_INCLUDED
 
+#include "./state.hpp"
+
 #include <webgpu/webgpu.h>
 
 typedef struct {
@@ -27,8 +29,10 @@ WGPUBindGroupEntry* pBinding);
 
 // Render Pass
 WGPURenderPassDescriptor createRenderPassDesc(const WGPURenderPassColorAttachment& renderPassColorAttach);
+
+// Render Pipeline
 WGPURenderPipelineDescriptor createRenderPipelineDesc(const WGPUShaderModule& shaderMod,
-const WGPUFragmentState& fragmentState);
+const States& states);
 
 // Descriptors
 Descriptors createDescriptors(const WGPURenderPassColorAttachment& colorAttach);

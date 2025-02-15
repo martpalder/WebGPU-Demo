@@ -20,7 +20,7 @@ indent_mode=2
 [project]
 name=WebGPU-Demo
 base_path=E:\\Users\\Martin\\WebGPU-Demo
-description=
+description=A WebGPU Demo Application written in C++
 file_patterns=
 
 [long line marker]
@@ -28,15 +28,17 @@ long_line_behaviour=1
 long_line_column=72
 
 [files]
-current_page=0
-FILE_NAME_0=4684;C++;0;EUTF-8;1;1;0;E%3A%5CUsers%5CMartin%5CWebGPU-Demo%5Csrc%5Capp.cpp;0;4
+current_page=1
+FILE_NAME_0=3807;C++;0;EUTF-8;1;1;0;E%3A%5CUsers%5CMartin%5CWebGPU-Demo%5Csrc%5Capp.cpp;0;4
+FILE_NAME_1=547;C++;0;EUTF-8;1;1;0;E%3A%5CUsers%5CMartin%5CWebGPU-Demo%5Csrc%5Cactor.cpp;0;4
+FILE_NAME_2=775;C++;0;EUTF-8;1;1;0;E%3A%5CUsers%5CMartin%5CWebGPU-Demo%5Cinclude%5Cactor.hpp;0;4
 
 [build-menu]
 NF_03_LB=
 NF_03_CM=
 NF_03_WD=%p
 EX_00_LB=_Execute
-EX_00_CM="./build-mingw64/App.exe"
+EX_00_CM="./build-ninja/App.exe"
 EX_00_WD=%p
 NF_00_LB=_Make
 NF_00_CM=make
@@ -48,9 +50,9 @@ NF_02_LB=Make _Object
 NF_02_CM=make %e.o
 NF_02_WD=%p
 C++FT_00_LB=_Compile
-C++FT_00_CM=cmake --build "build-mingw64"
+C++FT_00_CM=cmake --build "build-ninja"
 C++FT_00_WD=%p
 C++FT_01_LB=_Build
-C++FT_01_CM=cmake --build "build-mingw64"
+C++FT_01_CM=cmake --build "build-ninja"
 C++FT_01_WD=%p
 filetypes=C++;

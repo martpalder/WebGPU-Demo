@@ -13,18 +13,57 @@
 const static CUSTOM_VERTEX vertexData[] =
 {
 	// Front
-    { -0.5f, -0.5f, 0.0f, RED },
-    { +0.5f, -0.5f, 0.0f, GREEN },
-    { +0.5f, +0.5f, 0.0f, BLUE },
-    { -0.5f, -0.5f, 0.0f, RED },
-    { +0.5f, +0.5f, 0.0f, BLUE },
-    { -0.5f, +0.5f, 0.0f, GREEN },
+    { -0.5f, -0.5f, +0.5f, RED },
+    { +0.5f, -0.5f, +0.5f, GREEN },
+    { +0.5f, +0.5f, +0.5f, BLUE },
+    { -0.5f, +0.5f, +0.5f, GREEN },
+    // Left
+    { -0.5f, -0.5f, -0.5f, RED },
+    { -0.5f, -0.5f, +0.5f, GREEN },
+    { -0.5f, +0.5f, +0.5f, BLUE },
+    { -0.5f, +0.5f, -0.5f, GREEN },
+    // Back
+    { +0.5f, -0.5f, -0.5f, RED },
+    { -0.5f, -0.5f, -0.5f, GREEN },
+    { -0.5f, +0.5f, -0.5f, BLUE },
+    { +0.5f, +0.5f, -0.5f, GREEN },
+    // Right
+    { +0.5f, -0.5f, +0.5f, RED },
+    { +0.5f, -0.5f, -0.5f, GREEN },
+    { +0.5f, +0.5f, -0.5f, BLUE },
+    { +0.5f, +0.5f, +0.5f, GREEN },
+    // Top
+    { -0.5f, 0.5f, +0.5f, RED },
+    { +0.5f, 0.5f, +0.5f, GREEN },
+    { +0.5f, 0.5f, -0.5f, BLUE },
+    { -0.5f, 0.5f, -0.5f, GREEN },
+    // Down
+    { -0.5f, -0.5f, -0.5f, RED },
+    { +0.5f, -0.5f, -0.5f, GREEN },
+    { +0.5f, -0.5f, +0.5f, BLUE },
+    { -0.5f, -0.5f, +0.5f, GREEN },
 };
 
 const static CUSTOM_INDEX indexData[] =
 {
+	// Front
 	0, 1, 2,
 	0, 2, 3,
+	// Left
+	4, 5, 6,
+	4, 6, 7,
+	// Back
+	8, 9, 10,
+	8, 10, 11,
+	// Right
+	12, 13, 14,
+	12, 14, 15,
+	// Top
+	16, 17, 18,
+	16, 18, 19,
+	// Down
+	20, 21, 22,
+	20, 22, 23
 };
 
 Mesh::Mesh()
@@ -56,16 +95,14 @@ WGPUBool Mesh::IsIndexed()
 
 void Mesh::SetDefaults()
 {
-	// Set Default Values
+	// Numbers
 	m_vertexCount = 0;
 	m_indexCount = 0;
-	
 	m_vertexBufferSz = 0;
 	m_indexBufferSz = 0;
-	
+	// Pointers
 	m_pVertexData = nullptr;
 	m_vertexBuffer = nullptr;
-	
 	m_pIndexData = nullptr;
 	m_indexBuffer = nullptr;
 }
@@ -99,8 +136,11 @@ const void* pVertexData)
 	m_vertexCount = vertexCount;
 	m_pVertexData = pVertexData;
 	
+	// Caluclate Data Size
+	size_t dataSize = vertexCount * sizeof(CUSTOM_VERTEX);
+	
 	// Create a Vertex Buffer
-	m_vertexBuffer = createBufferVert(gpuEnv, vertexCount * sizeof(CUSTOM_VERTEX), m_pVertexData);
+	m_vertexBuffer = createBufferVert(gpuEnv, dataSize, m_pVertexData);
 	m_vertexBufferSz = wgpuBufferGetSize(m_vertexBuffer);
 	puts("Assigned Vertex Data");
 	printf("Number of vertices: %u\n", vertexCount);
@@ -113,8 +153,11 @@ const void* pIndexData)
 	m_indexCount = indexCount;
 	m_pIndexData = pIndexData;
 	
+	// Caluclate Data Size
+	size_t dataSize = indexCount * sizeof(CUSTOM_INDEX);
+	
 	// Create an Index Buffer
-	m_indexBuffer = createBufferIdx(gpuEnv, indexCount * sizeof(CUSTOM_INDEX), m_pIndexData);
+	m_indexBuffer = createBufferIdx(gpuEnv, dataSize, m_pIndexData);
 	m_indexBufferSz = wgpuBufferGetSize(m_indexBuffer);
 	puts("Assigned Index Data");
 	printf("Number of indices: %u\n", indexCount);
@@ -140,17 +183,32 @@ void Mesh::Release()
 	}
 }
 
+void Mesh::Draw(const WGPURenderPassEncoder& renderPass)
+{
+	// If Indexed
+	if (this->IsIndexed())
+	{
+		// Draw 1 Instance of a X-Indices Shape
+		wgpuRenderPassEncoderDrawIndexed(renderPass, m_indexCount, 1, 0, 0, 0);
+	}
+	else
+	{
+		// Draw 1 Instance of a X-Vertices Shape
+		wgpuRenderPassEncoderDraw(renderPass, m_vertexCount, 1, 0, 0);
+	}
+}
+
 Mesh* loadMesh(const GPUEnv& gpuEnv)
 {
 	Mesh* pMesh = new Mesh();
 	
 	// Assign the Vertices
 	uint32_t vertexCount = (uint32_t)(sizeof(vertexData) / VERTEX_SZ);
-	pMesh->AssignVertices(gpuEnv, 6, &vertexData[0]);
+	pMesh->AssignVertices(gpuEnv, vertexCount, &vertexData[0]);
 	
 	// Assign the Indices
-	//uint32_t indexCount = (uint32_t)(sizeof(indexData) / INDEX_SZ);
-	//pMesh->AssignIndices(gpuEnv, indexCount, &indexData[0]);
+	uint32_t indexCount = (uint32_t)(sizeof(indexData) / INDEX_SZ);
+	pMesh->AssignIndices(gpuEnv, indexCount, &indexData[0]);
 	
 	return pMesh;
 }

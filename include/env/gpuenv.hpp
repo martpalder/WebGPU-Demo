@@ -20,9 +20,8 @@ WGPURequestAdapterOptions createAdapterOpts(const WGPUSurface& surf);
 GPUEnv initGPUEnv(GLFWwindow* wnd);
 void quitGPUEnv(const GPUEnv& gpuEnv);
 
-inline void assignNull(void* pObj, const char* name)
+inline void printRelease(const char* name)
 {
-	pObj = nullptr;
 	printf("Released the %s\n", name);
 }
 

@@ -28,6 +28,27 @@ WGPUColorTargetState createColorTargetState(const WGPUBlendState& blendState)
 	return colorTarget;
 }
 
+WGPUVertexState createVertexState(const WGPUShaderModule& shaderMod)
+{
+	WGPUVertexState vertexState = {};
+	
+	// Create a pipeline layout to define the input structure.
+	vertexState.bufferCount = 0;
+	vertexState.buffers = nullptr;
+	
+	// Set Up Shader Stages:
+    // Specify the vertex and fragment shader stages.
+	// NB: We define the 'shaderModule' in the second part of this chapter.
+	// Here we tell that the programmable vertex shader stage is described
+	// by the function called 'vs_main' in that module.
+	vertexState.module = shaderMod;
+	vertexState.entryPoint = "vs_main";
+	vertexState.constantCount = 0;
+	vertexState.constants = nullptr;
+	
+	return vertexState;
+}
+
 WGPUFragmentState createFragmentState(const WGPUShaderModule& shaderMod,
 const WGPUColorTargetState& colorTarget)
 {

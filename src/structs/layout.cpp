@@ -9,21 +9,13 @@ WGPUVertexAttribute* pAttribs)
 {
 	WGPUVertexBufferLayout bufferLayout = {};
 	
-	/// Describe the Buffer Layout
+	// Describe the Buffer Layout
 	// {{Describe buffer stride and step mode}}
 	bufferLayout.stepMode = WGPUVertexStepMode_Vertex;
 	bufferLayout.arrayStride = vertexSz;
 	// {{Set the Attributes}}
-	if (attribCount != 0)
-	{
-		bufferLayout.attributeCount = attribCount;
-		bufferLayout.attributes = pAttribs;
-	}
-	else
-	{
-		bufferLayout.attributeCount = 0;
-		bufferLayout.attributes = nullptr;
-	}
+	bufferLayout.attributeCount = attribCount;
+	bufferLayout.attributes = pAttribs;
 	puts("Created a Vertex Buffer Layout");
 	
 	return bufferLayout;

@@ -58,7 +58,7 @@ size_t dataSize, const void* pIndexData)
 	bufferDesc.usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_Index ; // Index usage here!
 	bufferDesc.mappedAtCreation = false;
 	
-	// Create a Vertex Buffer
+	// Create the Index Buffer
 	wgpuDevicePushErrorScope(gpuEnv.dev, WGPUErrorFilter_Validation);
 	indexBuffer = wgpuDeviceCreateBuffer(gpuEnv.dev, &bufferDesc);
 	wgpuDevicePopErrorScope(gpuEnv.dev, errorCallback, nullptr);

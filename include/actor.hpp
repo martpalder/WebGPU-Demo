@@ -33,12 +33,18 @@ public:
 	void SetDefaults();
 	void SetPos(float x, float y, float z);
 	
-	// Methods
+	// Main Methods
 	void CreateTransform(const GPUEnv& gpuEnv);
 	void Update(const WGPUQueue& queue, const WGPURenderPassEncoder& renderPass);
-	void Translate(float x, float y, float z);
-	void RotateZ(float z);
 	void Draw(const WGPURenderPassEncoder& renderPass);
+	
+	// Transformations
+	void Translate(float x, float y, float z);
+	void RotateX(float x);
+	void RotateY(float y);
+	void RotateZ(float z);
+	
+	// Load
 	void LoadMesh(const GPUEnv& gpuEnv);
 };
 

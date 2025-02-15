@@ -38,7 +38,7 @@ void App::Init(int w, int h, const char* title)
 	this->CreateAttachments();
 	m_descriptors = createDescriptors(m_colorAttach);
 	
-	// Create Player Transform
+	// Create the Player Transform
 	m_player.CreateTransform(m_gpuEnv);
 
 	// Load a Shader
@@ -169,6 +169,8 @@ void App::RenderPass(const WGPUCommandEncoder& encoder)
 
 void App::Update()
 {
+	// Transform Actors
+	m_player.RotateY(0.01f);
 	m_player.RotateZ(0.01f);
 }
 
@@ -215,6 +217,7 @@ void App::MainLoopGLFW()
 
 void App::MainLoopEM()
 {
+	#ifdef __EMSCRIPTEN__
 	// Equivalent of the Main Loop when using Emscripten:
 	auto callback = [](void *arg)
 	{
@@ -229,7 +232,8 @@ void App::MainLoopEM()
 	};
 	
 	// Set the Main Loop
-	//emscripten_set_main_loop_arg(callback, this, 0, true);
+	emscripten_set_main_loop_arg(callback, this, 0, true);
+	#endif
 }
 
 void App::Run()

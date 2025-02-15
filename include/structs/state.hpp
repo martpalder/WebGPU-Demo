@@ -4,8 +4,16 @@
 
 #include <webgpu/webgpu.h>
 
+typedef struct {
+	WGPUVertexState vertex;
+	WGPUFragmentState fragment;
+} States;
+
 WGPUBlendState createBlendState();
 WGPUColorTargetState createColorTargetState(const WGPUBlendState& blendState);
-WGPUFragmentState createFragmentState(const WGPUShaderModule& shaderMod, const WGPUColorTargetState& colorTarget);
+
+WGPUVertexState createVertexState(const WGPUShaderModule& shaderMod);
+WGPUFragmentState createFragmentState(const WGPUShaderModule& shaderMod,
+const WGPUColorTargetState& colorTarget);
 
 #endif	// STATE_HPP_INCLUDED

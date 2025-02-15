@@ -103,7 +103,7 @@ WGPUBindGroupEntry* pBinding)
 }
 
 WGPURenderPipelineDescriptor createRenderPipelineDesc(const WGPUShaderModule& shaderMod,
-const WGPUFragmentState& fragmentState)
+const States& states)
 {
 	WGPURenderPipelineDescriptor pipelineDesc{};
 	
@@ -112,20 +112,9 @@ const WGPUFragmentState& fragmentState)
 	pipelineDesc.label = "RenderPipeline";
 	pipelineDesc.layout = nullptr;
 	
-    // Create a pipeline layout to define the input structure.
-	pipelineDesc.vertex.bufferCount = 0;
-	pipelineDesc.vertex.buffers = nullptr;
-	
-	// Set Up Shader Stages:
-    // Specify the vertex and fragment shader stages.
-	// NB: We define the 'shaderModule' in the second part of this chapter.
-	// Here we tell that the programmable vertex shader stage is described
-	// by the function called 'vs_main' in that module.
-	pipelineDesc.vertex.module = shaderMod;
-	pipelineDesc.vertex.entryPoint = "vs_main";
-	pipelineDesc.vertex.constantCount = 0;
-	pipelineDesc.vertex.constants = nullptr;
-	
+	// Set the Vertex State
+	pipelineDesc.vertex = states.vertex;
+		
 	// Each sequence of 3 vertices is considered as a triangle
 	pipelineDesc.primitive.topology = WGPUPrimitiveTopology_TriangleList;
 	// We'll see later how to specify the order in which vertices should be
@@ -138,10 +127,10 @@ const WGPUFragmentState& fragmentState)
 	// But the face orientation does not matter much because we do not
 	// cull (i.e. "hide") the faces pointing away from us (which is often
 	// used for optimization).
-	pipelineDesc.primitive.cullMode = WGPUCullMode_None;
+	pipelineDesc.primitive.cullMode = WGPUCullMode_Back;	// Back-face culling
 	
 	// Set the Fragment State
-	pipelineDesc.fragment = &fragmentState;
+	pipelineDesc.fragment = &states.fragment;
 	// We do not use stencil/depth testing for now
 	pipelineDesc.depthStencil = nullptr;
 	

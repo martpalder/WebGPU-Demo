@@ -31,6 +31,7 @@ private:
 	
 	// Methods
 	void Release();
+	WGPUBool IsIndexed();
 
 public:
 	// Constructor/Destructor
@@ -40,7 +41,6 @@ public:
 	// Getters
 	uint32_t GetVertexCount();
 	uint32_t GetIndexCount();
-	WGPUBool IsIndexed();
 	
 	// Setters
 	void SetDefaults();
@@ -49,6 +49,9 @@ public:
 	const void* pVertexData);
 	void AssignIndices(const GPUEnv& gpuEnv, uint32_t indexCount,
 	const void* pIndexData);
+	
+	// Methods
+	void Draw(const WGPURenderPassEncoder& renderPass);
 };
 
 Mesh* loadMesh(const GPUEnv& gpuEnv);

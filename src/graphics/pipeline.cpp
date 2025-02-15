@@ -1,8 +1,8 @@
 #include "./pipeline.hpp"
-#include "./state.hpp"
 #include "./desc.hpp"
 #include "./attrib.hpp"
 #include "./layout.hpp"
+#include "./state.hpp"
 #include "./callback.hpp"
 #include "./myassert.hpp"
 
@@ -12,23 +12,27 @@ WGPURenderPipeline createRenderPipeline(const WGPUDevice& device, const WGPUShad
 WGPUBindGroupLayout* pBindGroupLayout)
 {
     WGPURenderPipeline pipeline;
-
-	// Configure Pipeline States:
-    // Configure vertex input, rasterization, and color blending states.
+    
+    // Configure Pipeline States:
+    States states;
+    // Create Blend State and Color Target State
 	WGPUBlendState blendState = createBlendState();
 	WGPUColorTargetState colorTarget = createColorTargetState(blendState);
-	WGPUFragmentState fragmentState = createFragmentState(shaderMod, colorTarget);
-	
+	// Create Vertex and Fragment State
+	states.vertex = createVertexState(shaderMod);
+	states.fragment = createFragmentState(shaderMod, colorTarget);
+    
 	// Create a Render Pipeline Descriptor
     WGPURenderPipelineDescriptor pipelineDesc = {};
-    pipelineDesc = createRenderPipelineDesc(shaderMod, fragmentState);
+    pipelineDesc = createRenderPipelineDesc(shaderMod, states);
 	
 	// VERTEX FETCH
-	// Create Attributes
+	// Create Vertex Attributes
 	WGPUVertexAttribute attribs[] = {
 		createAttribVertFloat(3, 0, 0, "position"),
 		createAttribVertFloat(3, 1, 3 * sizeof(float), "color"),
 	};
+	// Set Vertex Size
 	size_t vertexSz = 6 * sizeof(float);	// 6 Floats
 	
 	// Create and set the Buffer Layout
