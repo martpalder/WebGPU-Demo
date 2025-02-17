@@ -1,20 +1,12 @@
 #include "./actor.hpp"
 #include "./buffer.hpp"
-#include "./obj_loader.hpp"
 
 #include <cstring>
 
 Actor::Actor()
 {
-	// Set the Defaults
-	this->SetDefaults();
-	this->InitMatrices();
-	
-	// Set the Projection Matrix
-	float fov = 90.0f;
-	mat4x4_perspective(m_proj, fov, 4 / 3.0f, 0.1f, 100.0f);
-	// Set the Translation Matrix
-	mat4x4_translate(m_t, m_pos[0], m_pos[1], m_pos[2]);
+	// Initialize
+	this->Init();
 }
 
 Actor::~Actor()
@@ -28,7 +20,7 @@ WGPUBuffer& Actor::GetTBuffer()
 	return m_mpBuffer;
 }
 
-void Actor::SetDefaults()
+void Actor::Init()
 {
 	// Set Default Values
 	m_pos[0] = 0.0f;
@@ -37,6 +29,13 @@ void Actor::SetDefaults()
 	m_speed = 0.2f;
 	m_bindGroup = nullptr;
 	m_pMesh = nullptr;
+	
+	// Initialize Matrices
+	mat4x4_identity(m_t);
+	mat4x4_identity(m_r);
+	mat4x4_identity(m_model);
+	mat4x4_identity(m_proj);
+	mat4x4_identity(m_mp);
 }
 
 void Actor::SetPos(float x, float y, float z)
@@ -50,23 +49,28 @@ void Actor::SetPos(float x, float y, float z)
 	mat4x4_translate(m_t, m_pos[0], m_pos[1], m_pos[2]);
 }
 
-void Actor::InitMatrices()
+void Actor::SetMesh(Mesh* pMesh)
 {
-	// Initialize Matrices
-	mat4x4_identity(m_t);
-	mat4x4_identity(m_r);
-	mat4x4_identity(m_model);
-	mat4x4_identity(m_mp);
+	m_pMesh = pMesh;
 }
 
-void Actor::CreateBindGroup(const WGPUDevice& device,
+void Actor::CreateBindGroup(const GPUEnv& gpuEnv,
 const WGPUBindGroupLayout& bindGroupLayout)
 {
+	// Set the Projection Matrix
+	float fov = 90.0f;
+	mat4x4_perspective(m_proj, fov, 4 / 3.0f, 0.1f, 100.0f);
+	// Set the Translation Matrix
+	mat4x4_translate(m_t, m_pos[0], m_pos[1], m_pos[2]);
+	
+	// Create the Transform Buffer
+	m_mpBuffer = createBufferMatrix(gpuEnv, m_mp);
+	
 	// Bind the Transform Buffer
 	WGPUBindGroupEntry bindings[] = {
 		createBinding(0, m_mpBuffer),
 	};
-	m_bindGroup = createBindGroup(device, bindGroupLayout, 1, &bindings[0]);
+	m_bindGroup = createBindGroup(gpuEnv.dev, bindGroupLayout, 1, &bindings[0]);
 }
 
 void Actor::Release()
@@ -96,17 +100,12 @@ void Actor::Release()
 	}
 }
 
-void Actor::CreateTransform(const GPUEnv& gpuEnv)
-{
-	// Create the Transform Buffer
-	m_mpBuffer = createBufferMatrix(gpuEnv, m_mp);
-}
-
 void Actor::Update(const WGPUQueue& queue)
 {
-	// Combine the Matrices
+	// Combine the Transformation Matrices
 	mat4x4_mul(m_model, m_t, m_r);
-	mat4x4_mul(m_mp, m_proj, m_model);	// Check ordering
+	// Combine Model, View and Projection
+	mat4x4_mul(m_mp, m_proj, m_model);	// Check correct ordering
 	
 	// Update the Uniform Buffer
 	wgpuQueueWriteBuffer(queue, m_mpBuffer, 0, m_mp, sizeof(m_mp));
@@ -142,34 +141,15 @@ void Actor::Translate(float x, float y, float z)
 
 void Actor::RotateX(float x)
 {
-	mat4x4_rotate(m_r, m_r, 1.0f, 0.0f, 0.0f, x);
+	mat4x4_rotate_X(m_r, m_r, x);
 }
 
 void Actor::RotateY(float y)
 {
-	mat4x4_rotate(m_r, m_r, 0.0f, 1.0f, 0.0f, y);
+	mat4x4_rotate_Y(m_r, m_r, y);
 }
 
 void Actor::RotateZ(float z)
 {
-	mat4x4_rotate(m_r, m_r, 0.0f, 0.0f, 1.0f, z);
-}
-
-void Actor::LoadMesh(const GPUEnv& gpuEnv, const char* fileName)
-{
-	this->CreateTransform(gpuEnv);
-	
-	// Set the Filepath
-	char path[32];
-	sprintf(path, "./data/models/%s", fileName);
-	
-	// Get the File Extension
-	const char* fileExt = strrchr(fileName, '.') + 1;
-	
-	// Check the File Extension
-	if (strcmp(fileExt, "obj") == 0)
-	{
-		// Load an OBJ
-		m_pMesh = loadOBJ(gpuEnv, path);
-	}
+	mat4x4_rotate_Z(m_r, m_r, z);
 }

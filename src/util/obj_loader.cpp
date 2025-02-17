@@ -97,6 +97,6 @@ Mesh* loadOBJ(const GPUEnv& gpuEnv, const char* path)
 	
 	// Free the Text
 	free(text);
-	
+		
 	return pMesh;
 }

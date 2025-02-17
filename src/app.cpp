@@ -44,15 +44,15 @@ void App::Init(int w, int h, const char* title)
 	// Load a Shader
 	m_shader.Load(m_gpuEnv.dev, "basic3d_color.wgsl");
 	// Load Meshes
-	m_terrain.LoadMesh(m_gpuEnv, "plane.obj");
-	m_player.LoadMesh(m_gpuEnv, "cube.obj");
+	Mesh* pMesh = m_meshMgr.Load(m_gpuEnv, "cube.obj");
+	
+	// Add the Player
+	m_pPlayer = m_world.AddActor(0.0f, 0.0f, 0.0f, "Player");
+	m_pPlayer->SetMesh(pMesh);
 	
 	// Create the Render Pipeline
 	this->CreatePipeline();
 	puts("Initialized the App");
-	
-	// Set Terrain
-	m_terrain.Translate(0.0f, -2.0f, 0.0f);
 }
 
 void App::Quit()
@@ -108,8 +108,7 @@ void App::CreatePipeline()
 	m_bindGroupLayout = createLayoutBindGroup(m_gpuEnv.dev, &m_bindingLayout);
 	
 	// Create the Bind Groups
-	m_terrain.CreateBindGroup(m_gpuEnv.dev, m_bindGroupLayout);
-	m_player.CreateBindGroup(m_gpuEnv.dev, m_bindGroupLayout);
+	m_world.CreateBindGroups(m_gpuEnv, m_bindGroupLayout);
 	
 	// Create the Render Pipeline
 	m_gpuEnv.pipeline = createRenderPipeline(
@@ -152,8 +151,7 @@ void App::RenderPass(const WGPUCommandEncoder& encoder)
 	wgpuRenderPassEncoderSetPipeline(renderPass, m_gpuEnv.pipeline);
 	
 	// {{Draw}}
-	m_terrain.Draw(renderPass);
-	m_player.Draw(renderPass);
+	m_world.Draw(renderPass);
 	
 	// {{End and release the Render Pass}}
 	wgpuRenderPassEncoderEnd(renderPass);
@@ -163,8 +161,7 @@ void App::RenderPass(const WGPUCommandEncoder& encoder)
 void App::Update()
 {
 	// {{Update}}
-	m_player.Update(m_gpuEnv.queue);
-	m_terrain.Update(m_gpuEnv.queue);
+	m_world.Update(m_gpuEnv.queue);
 	
 	// Get Move Input
 	float h = m_input.GetAxis(0);
@@ -174,9 +171,8 @@ void App::Update()
 	if (h != 0.0f || v != 0.0f)
 	{
 		// Move tbe Player
-		m_player.Translate(h, 0.0f, -v);
+		m_pPlayer->Translate(h, 0.0f, -v);
 	}
-	//m_terrain.RotateX(0.1f);
 }
 
 void App::Draw()

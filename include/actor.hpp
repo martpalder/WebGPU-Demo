@@ -34,13 +34,13 @@ public:
 	WGPUBuffer& GetTBuffer();
 	
 	// Setters
-	void SetDefaults();
 	void SetPos(float x, float y, float z);
+	void SetMesh(Mesh* pMesh);
 	
 	// Main Methods
-	void InitMatrices();
+	void Init();
 	void CreateTransform(const GPUEnv& gpuEnv);
-	void CreateBindGroup(const WGPUDevice& device, const WGPUBindGroupLayout& bindGroupLayout);
+	void CreateBindGroup(const GPUEnv& gpuEnv, const WGPUBindGroupLayout& bindGroupLayout);
 	void Update(const WGPUQueue& queue);
 	void Draw(const WGPURenderPassEncoder& renderPass);
 	

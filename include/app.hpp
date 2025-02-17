@@ -7,7 +7,8 @@
 #include "./desc.hpp"
 #include "./attach.hpp"
 #include "./shader.hpp"
-#include "./actor.hpp"
+#include "./mesh_manager.hpp"
+#include "./world.hpp"
 
 #include <GLFW/glfw3.h>
 #include <linmath.h>
@@ -31,8 +32,13 @@ private:
 	// RESOURCES
 	// Shaders
 	Shader m_shader;
+	// Mesh Manager
+	MeshManager m_meshMgr;
+	
+	// World
+	World m_world;
 	// Actors
-	Actor m_player, m_terrain;
+	Actor* m_pPlayer;
 	
 	// Getters
 	WGPUBool IsRunning();

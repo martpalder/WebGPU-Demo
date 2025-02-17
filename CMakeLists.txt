@@ -11,12 +11,15 @@ project(
 
 # Include wgpu-native directory, to define the 'wgpu-native' target
 add_executable(App
+	# Main
 	src/main.cpp
 	src/app.cpp
 	src/window.cpp
 	src/input.cpp
+	src/world.cpp
 	src/actor.cpp
-	src/env/gpuenv.cpp
+	src/camera.cpp
+	# Graphics
 	src/graphics/instance.cpp
 	src/graphics/request.cpp
 	src/graphics/inspect.cpp
@@ -27,15 +30,22 @@ add_executable(App
 	src/graphics/pipeline.cpp
 	src/graphics/buffer.cpp
 	src/graphics/view.cpp
+	# Structs
 	src/structs/desc.cpp
 	src/structs/config.cpp
 	src/structs/attach.cpp
 	src/structs/state.cpp
 	src/structs/attrib.cpp
 	src/structs/layout.cpp
+	# Env
+	src/env/gpuenv.cpp
+	# Managers
+	src/managers/mesh_manager.cpp
+	# Error and Util
 	src/error/callback.cpp
 	src/util/freader.cpp
 	src/util/obj_loader.cpp
+	# glfw3webgpu
 	src/glfw3webgpu/glfw3webgpu.c
 )
 
@@ -100,6 +110,7 @@ target_include_directories(App PRIVATE
 	include/env
 	include/graphics
 	include/structs
+	include/managers
 	include/util
 	include/error
 	external/linmath
