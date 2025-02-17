@@ -1,70 +1,8 @@
 #include "./mesh.hpp"
 #include "./vertex.hpp"
 #include "./buffer.hpp"
-#include "./color.hpp"
 
 #include <cstdio>
-
-// Vertex buffer data
-// There are 3 floats per vertex,
-// one for x and one for y and one for z.
-// But in the end this is just a bunch of floats to the eyes of the GPU,
-// the *layout* will tell how to interpret this.
-const static CUSTOM_VERTEX vertexData[] =
-{
-	// Front
-    { -0.5f, -0.5f, +0.5f, RED },
-    { +0.5f, -0.5f, +0.5f, GREEN },
-    { +0.5f, +0.5f, +0.5f, BLUE },
-    { -0.5f, +0.5f, +0.5f, GREEN },
-    // Left
-    { -0.5f, -0.5f, -0.5f, RED },
-    { -0.5f, -0.5f, +0.5f, GREEN },
-    { -0.5f, +0.5f, +0.5f, BLUE },
-    { -0.5f, +0.5f, -0.5f, GREEN },
-    // Back
-    { +0.5f, -0.5f, -0.5f, RED },
-    { -0.5f, -0.5f, -0.5f, GREEN },
-    { -0.5f, +0.5f, -0.5f, BLUE },
-    { +0.5f, +0.5f, -0.5f, GREEN },
-    // Right
-    { +0.5f, -0.5f, +0.5f, RED },
-    { +0.5f, -0.5f, -0.5f, GREEN },
-    { +0.5f, +0.5f, -0.5f, BLUE },
-    { +0.5f, +0.5f, +0.5f, GREEN },
-    // Top
-    { -0.5f, 0.5f, +0.5f, RED },
-    { +0.5f, 0.5f, +0.5f, GREEN },
-    { +0.5f, 0.5f, -0.5f, BLUE },
-    { -0.5f, 0.5f, -0.5f, GREEN },
-    // Down
-    { -0.5f, -0.5f, -0.5f, RED },
-    { +0.5f, -0.5f, -0.5f, GREEN },
-    { +0.5f, -0.5f, +0.5f, BLUE },
-    { -0.5f, -0.5f, +0.5f, GREEN },
-};
-
-const static CUSTOM_INDEX indexData[] =
-{
-	// Front
-	0, 1, 2,
-	0, 2, 3,
-	// Left
-	4, 5, 6,
-	4, 6, 7,
-	// Back
-	8, 9, 10,
-	8, 10, 11,
-	// Right
-	12, 13, 14,
-	12, 14, 15,
-	// Top
-	16, 17, 18,
-	16, 18, 19,
-	// Down
-	20, 21, 22,
-	20, 22, 23
-};
 
 Mesh::Mesh()
 {
@@ -185,6 +123,9 @@ void Mesh::Release()
 
 void Mesh::Draw(const WGPURenderPassEncoder& renderPass)
 {
+	// Set the Buffers
+	this->SetBuffers(renderPass);
+	
 	// If Indexed
 	if (this->IsIndexed())
 	{
@@ -196,19 +137,4 @@ void Mesh::Draw(const WGPURenderPassEncoder& renderPass)
 		// Draw 1 Instance of a X-Vertices Shape
 		wgpuRenderPassEncoderDraw(renderPass, m_vertexCount, 1, 0, 0);
 	}
-}
-
-Mesh* loadMesh(const GPUEnv& gpuEnv)
-{
-	Mesh* pMesh = new Mesh();
-	
-	// Assign the Vertices
-	uint32_t vertexCount = (uint32_t)(sizeof(vertexData) / VERTEX_SZ);
-	pMesh->AssignVertices(gpuEnv, vertexCount, &vertexData[0]);
-	
-	// Assign the Indices
-	uint32_t indexCount = (uint32_t)(sizeof(indexData) / INDEX_SZ);
-	pMesh->AssignIndices(gpuEnv, indexCount, &indexData[0]);
-	
-	return pMesh;
 }

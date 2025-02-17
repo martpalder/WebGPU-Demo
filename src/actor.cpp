@@ -1,5 +1,8 @@
 #include "./actor.hpp"
 #include "./buffer.hpp"
+#include "./obj_loader.hpp"
+
+#include <cstring>
 
 Actor::Actor()
 {
@@ -8,7 +11,8 @@ Actor::Actor()
 	this->InitMatrices();
 	
 	// Set the Projection Matrix
-	mat4x4_perspective(m_proj, 90.0f, 4 / 3.0f, 0.2f, 100.0f);
+	float fov = 90.0f;
+	mat4x4_perspective(m_proj, fov, 4 / 3.0f, 0.1f, 100.0f);
 	// Set the Translation Matrix
 	mat4x4_translate(m_t, m_pos[0], m_pos[1], m_pos[2]);
 }
@@ -19,7 +23,7 @@ Actor::~Actor()
 	this->Release();
 }
 
-WGPUBuffer& Actor::GetTransformBuffer()
+WGPUBuffer& Actor::GetTBuffer()
 {
 	return m_mpBuffer;
 }
@@ -31,6 +35,7 @@ void Actor::SetDefaults()
 	m_pos[1] = 0.0f;
 	m_pos[2] = -1.5f;
 	m_speed = 0.2f;
+	m_bindGroup = nullptr;
 	m_pMesh = nullptr;
 }
 
@@ -54,8 +59,26 @@ void Actor::InitMatrices()
 	mat4x4_identity(m_mp);
 }
 
+void Actor::CreateBindGroup(const WGPUDevice& device,
+const WGPUBindGroupLayout& bindGroupLayout)
+{
+	// Bind the Transform Buffer
+	WGPUBindGroupEntry bindings[] = {
+		createBinding(0, m_mpBuffer),
+	};
+	m_bindGroup = createBindGroup(device, bindGroupLayout, 1, &bindings[0]);
+}
+
 void Actor::Release()
 {
+	if (m_bindGroup != nullptr)
+	{
+		// Release the Bind Group
+		wgpuBindGroupRelease(m_bindGroup);
+		m_bindGroup = nullptr;
+		puts("Released the Bind Group");
+	}
+	
 	if (m_pMesh != nullptr)
 	{
 		// Release the Mesh
@@ -91,10 +114,17 @@ void Actor::Update(const WGPUQueue& queue)
 
 void Actor::Draw(const WGPURenderPassEncoder& renderPass)
 {
+	// {{Set the binding groups here!}}
+	if (m_bindGroup != nullptr)
+	{
+		// Set the Bind Group
+		wgpuRenderPassEncoderSetBindGroup(renderPass, 0, m_bindGroup, 0, nullptr);
+	}
+	
+	// If has Mesh
 	if (m_pMesh != nullptr)
 	{
-		// Set Buffers and Draw
-		m_pMesh->SetBuffers(renderPass);
+		// Draw the Mesh
 		m_pMesh->Draw(renderPass);
 	}
 }
@@ -125,8 +155,21 @@ void Actor::RotateZ(float z)
 	mat4x4_rotate(m_r, m_r, 0.0f, 0.0f, 1.0f, z);
 }
 
-void Actor::LoadMesh(const GPUEnv& gpuEnv)
+void Actor::LoadMesh(const GPUEnv& gpuEnv, const char* fileName)
 {
-	// Load a Mesh
-	m_pMesh = loadMesh(gpuEnv);
+	this->CreateTransform(gpuEnv);
+	
+	// Set the Filepath
+	char path[32];
+	sprintf(path, "./data/models/%s", fileName);
+	
+	// Get the File Extension
+	const char* fileExt = strrchr(fileName, '.') + 1;
+	
+	// Check the File Extension
+	if (strcmp(fileExt, "obj") == 0)
+	{
+		// Load an OBJ
+		m_pMesh = loadOBJ(gpuEnv, path);
+	}
 }

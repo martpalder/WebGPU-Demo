@@ -68,3 +68,56 @@ const WGPUColorTargetState& colorTarget)
 	
 	return fragmentState;
 }
+
+WGPUDepthStencilState createDepthStencilState()
+{
+	WGPUDepthStencilState depthStencilState = {};
+	
+	WGPUStencilFaceState stencilFrontState = {};
+	WGPUStencilFaceState stencilBackState = {};
+	
+	// Define the Stencil Front State
+	stencilFrontState.compare = WGPUCompareFunction_Less;
+	stencilFrontState.failOp = WGPUStencilOperation_Zero;
+	stencilFrontState.depthFailOp = WGPUStencilOperation_Zero;
+	stencilFrontState.passOp = WGPUStencilOperation_Zero;
+	// Define the Stencil Back State
+	stencilBackState.compare = WGPUCompareFunction_Less;
+	stencilBackState.failOp = WGPUStencilOperation_Zero;
+	stencilBackState.depthFailOp = WGPUStencilOperation_Zero;
+	stencilBackState.passOp = WGPUStencilOperation_Zero;
+	
+	// Define the Depth Stencil State
+	// Depth
+	depthStencilState.nextInChain = nullptr;
+	depthStencilState.format = WGPUTextureFormat_Depth24Plus;
+	depthStencilState.depthWriteEnabled = true;
+	depthStencilState.depthCompare = WGPUCompareFunction_Less;
+	// Stencil
+	depthStencilState.stencilFront = stencilFrontState;
+	depthStencilState.stencilBack = stencilBackState;
+	depthStencilState.stencilReadMask = 0;
+	depthStencilState.stencilWriteMask = 0;
+	// Depth Bias
+	depthStencilState.depthBias = 0;
+	depthStencilState.depthBiasSlopeScale = 0.0f;
+	depthStencilState.depthBiasClamp = 0.0f;
+	
+	return depthStencilState;
+}
+
+States createStates(const WGPUShaderModule& shaderMod)
+{
+	States states = {};
+	
+    // Create Blend State and Color Target State
+	states.blend = createBlendState();
+	states.colorTarget = createColorTargetState(states.blend);
+	// Create Vertex and Fragment State
+	states.vertex = createVertexState(shaderMod);
+	states.fragment = createFragmentState(shaderMod, states.colorTarget);
+	// Create the Depth Stencil State
+	states.depthStencil = createDepthStencilState();
+	
+	return states;
+}

@@ -4,6 +4,7 @@
 #include "./layout.hpp"
 #include "./pipeline.hpp"
 #include "./buffer.hpp"
+#include "./texture.hpp"
 #include "./view.hpp"
 #include "./callback.hpp"
 
@@ -38,34 +39,28 @@ void App::Init(int w, int h, const char* title)
 	
 	// Create the Attachments and Descriptors
 	this->CreateAttachments();
-	m_descriptors = createDescriptors(m_colorAttach);
-	
-	// Create the Player Transform
-	m_player.CreateTransform(m_gpuEnv);
+	m_descriptors = createDescriptors(m_attachments, true);
 
 	// Load a Shader
 	m_shader.Load(m_gpuEnv.dev, "basic3d_color.wgsl");
-	// Load a Mesh
-	m_player.LoadMesh(m_gpuEnv);
+	// Load Meshes
+	m_terrain.LoadMesh(m_gpuEnv, "plane.obj");
+	m_player.LoadMesh(m_gpuEnv, "cube.obj");
 	
 	// Create the Render Pipeline
 	this->CreatePipeline();
 	puts("Initialized the App");
+	
+	// Set Terrain
+	m_terrain.Translate(0.0f, -2.0f, 0.0f);
 }
 
 void App::Quit()
 {
-	// Release the Bindings
-	if (m_bind.bindGroup != nullptr)
+	if (m_bindGroupLayout != nullptr)
 	{
-		wgpuBindGroupRelease(m_bind.bindGroup);
-		m_bind.bindGroup = nullptr;
-		puts("Released the Bind Group");
-	}
-	if (m_bind.bindGroupLayout != nullptr)
-	{
-		wgpuBindGroupLayoutRelease(m_bind.bindGroupLayout);
-		m_bind.bindGroupLayout = nullptr;
+		wgpuBindGroupLayoutRelease(m_bindGroupLayout);
+		m_bindGroupLayout = nullptr;
 		puts("Released the Bind Group Layout");
 	}
 	
@@ -91,31 +86,36 @@ void App::SetDefaults()
 	// Set Default Values
 	// Window
 	m_wnd = nullptr;
-	// Bindings
-	m_bind.binding = {};
-	m_bind.bindingLayout = {};
-	m_bind.bindGroupLayout = nullptr;
-	m_bind.bindGroup = nullptr;
 }
 
 void App::CreateAttachments()
 {
+	// Create a Depth Texture
+	WGPUTexture depthTexture = createDepthTexture(m_gpuEnv.dev, 800, 600);
+	
 	// ATTACHMENTS
 	// Render Pass Color Attachment
-	m_colorAttach = createRenderPassColorAttach(0.1f, 0.1f, 0.1f);
+	m_attachments.colorAttach = createColorAttach(0.1f, 0.1f, 0.1f);
+	m_attachments.depthStencilAttach = createDepthStencilAttach(m_gpuEnv.dev, depthTexture);
+	// TODO: Depth Stencil Attachment
 	puts("Created the Attachments");
 }
 
 void App::CreatePipeline()
 {
-	// Bind the Transform Buffer
-	m_bind = bindBuffer(m_gpuEnv.dev, 0, m_player.GetTransformBuffer());
+	// Create Bind Group Layout
+	m_bindingLayout = createLayoutBinding(sizeof(mat4x4));
+	m_bindGroupLayout = createLayoutBindGroup(m_gpuEnv.dev, &m_bindingLayout);
+	
+	// Create the Bind Groups
+	m_terrain.CreateBindGroup(m_gpuEnv.dev, m_bindGroupLayout);
+	m_player.CreateBindGroup(m_gpuEnv.dev, m_bindGroupLayout);
 	
 	// Create the Render Pipeline
 	m_gpuEnv.pipeline = createRenderPipeline(
 		m_gpuEnv.dev,
 		m_shader.GetShaderMod(),
-		&m_bind.bindGroupLayout
+		&m_bindGroupLayout
 	);
 }
 
@@ -124,7 +124,7 @@ void App::Cls()
 	// Get the next Target Texture View
 	getNextTargetView(m_gpuEnv.surf, &m_gpuEnv.targetView);
 	// Assign the Target Texture View to Color Attachment
-	m_colorAttach.view = m_gpuEnv.targetView;
+	m_attachments.colorAttach.view = m_gpuEnv.targetView;
 }
 
 void App::Flip()
@@ -151,19 +151,10 @@ void App::RenderPass(const WGPUCommandEncoder& encoder)
 	// {{Set the Render Pipeline}}
 	wgpuRenderPassEncoderSetPipeline(renderPass, m_gpuEnv.pipeline);
 	
-	// {{Update}}
-	m_player.Update(m_gpuEnv.queue);
-	
-	// {{Set the binding group here!}}
-	if (m_bind.bindGroup != nullptr)
-	{
-		// Set the Bind Group
-		wgpuRenderPassEncoderSetBindGroup(renderPass, 0, m_bind.bindGroup, 0, nullptr);
-	}
-	
 	// {{Draw}}
+	m_terrain.Draw(renderPass);
 	m_player.Draw(renderPass);
-
+	
 	// {{End and release the Render Pass}}
 	wgpuRenderPassEncoderEnd(renderPass);
 	wgpuRenderPassEncoderRelease(renderPass);
@@ -171,19 +162,21 @@ void App::RenderPass(const WGPUCommandEncoder& encoder)
 
 void App::Update()
 {
+	// {{Update}}
+	m_player.Update(m_gpuEnv.queue);
+	m_terrain.Update(m_gpuEnv.queue);
+	
 	// Get Move Input
 	float h = m_input.GetAxis(0);
 	float v = m_input.GetAxis(1);
 	
-	// Transform Actors
+	// If there's Move Input
 	if (h != 0.0f || v != 0.0f)
 	{
-		float speed = 0.1f;
-		m_player.Translate(h, 0.0f, v);
+		// Move tbe Player
+		m_player.Translate(h, 0.0f, -v);
 	}
-	
-	m_player.RotateY(0.01f);
-	m_player.RotateZ(0.01f);
+	//m_terrain.RotateX(0.1f);
 }
 
 void App::Draw()

@@ -5,6 +5,7 @@
 #include "./env/gpuenv.hpp"
 #include "./input.hpp"
 #include "./desc.hpp"
+#include "./attach.hpp"
 #include "./shader.hpp"
 #include "./actor.hpp"
 
@@ -20,17 +21,18 @@ private:
 	GLFWwindow* m_wnd;
 	
 	// Descriptors
-	Descriptors m_descriptors;
+	Descriptors m_descriptors = {};
 	// Attachments
-	WGPURenderPassColorAttachment m_colorAttach;
-	// Bindings
-	Bind m_bind;
+	Attachments m_attachments = {};
+	// Layouts
+	WGPUBindGroupLayoutEntry m_bindingLayout;
+	WGPUBindGroupLayout m_bindGroupLayout;
 	
 	// RESOURCES
 	// Shaders
 	Shader m_shader;
 	// Actors
-	Actor m_player;
+	Actor m_player, m_terrain;
 	
 	// Getters
 	WGPUBool IsRunning();

@@ -24,8 +24,20 @@ float Input::GetAxis(uint8_t axis)
 {
 	switch (axis)
 	{
-		case 0: return g_keys[GLFW_KEY_D] - g_keys[GLFW_KEY_A];
-		case 1: return g_keys[GLFW_KEY_S] - g_keys[GLFW_KEY_W];
+		case 0:
+		{
+			bool bRight = g_keys[GLFW_KEY_RIGHT] || g_keys[GLFW_KEY_D];
+			bool bLeft = g_keys[GLFW_KEY_LEFT] || g_keys[GLFW_KEY_A];
+			
+			return (bRight - bLeft);
+		}
+		case 1:
+		{
+			bool bUp = g_keys[GLFW_KEY_UP] || g_keys[GLFW_KEY_W];
+			bool bDown = g_keys[GLFW_KEY_DOWN] || g_keys[GLFW_KEY_S];
+			
+			return (bUp - bDown);
+		}
 	}
 	
 	return 0.0f;

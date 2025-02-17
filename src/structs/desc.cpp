@@ -8,7 +8,7 @@ WGPUDeviceDescriptor createDeviceDesc()
 	WGPUDeviceDescriptor deviceDesc = {};
 	
 	deviceDesc.nextInChain = nullptr;
-	deviceDesc.label = "My Device"; // anything works here, that's your call
+	deviceDesc.label = "MyDevice"; // anything works here, that's your call
 	deviceDesc.requiredFeatureCount = 0; // we do not require any specific feature
 	deviceDesc.requiredLimits = nullptr; // we do not require any specific limit
 	deviceDesc.defaultQueue.nextInChain = nullptr;
@@ -20,6 +20,7 @@ WGPUDeviceDescriptor createDeviceDesc()
 	callbackInfo.nextInChain = nullptr;
 	callbackInfo.callback = onDeviceError;
 	deviceDesc.uncapturedErrorCallbackInfo = callbackInfo;
+	puts("Created a Device Descriptor");
 	
 	return deviceDesc;
 }
@@ -34,15 +35,21 @@ WGPUCommandEncoderDescriptor createEncoderDesc()
 	return encoderDesc;
 }
 
-WGPURenderPassDescriptor createRenderPassDesc(const WGPURenderPassColorAttachment& renderPassColorAttach)
+WGPURenderPassDescriptor createRenderPassDesc(const Attachments& attachments,
+bool bDepthStencilAttach)
 {
 	WGPURenderPassDescriptor renderPassDesc = {};
 	
 	renderPassDesc.nextInChain = nullptr;
 	renderPassDesc.colorAttachmentCount = 1;
-	renderPassDesc.colorAttachments = &renderPassColorAttach;
-	renderPassDesc.depthStencilAttachment = nullptr;
+	renderPassDesc.colorAttachments = &attachments.colorAttach;
+	if (bDepthStencilAttach)
+	{
+		// Add Depth Stencil Attachment
+		renderPassDesc.depthStencilAttachment = &attachments.depthStencilAttach;
+	}
 	renderPassDesc.timestampWrites = nullptr;
+	puts("Created a Render Pass Descriptor");
 	
 	return renderPassDesc;
 }
@@ -70,7 +77,7 @@ WGPUShaderModuleWGSLDescriptor createShaderCodeDesc(const char* shaderCode)
 	return shaderCodeDesc;
 }
 
-WGPUShaderModuleDescriptor createShaderModDesc(const WGPUChainedStruct* shaderCodeChain)
+WGPUShaderModuleDescriptor createShaderModDesc(WGPUChainedStruct* shaderCodeChain)
 {
 	WGPUShaderModuleDescriptor shaderModDesc = {};
 
@@ -82,12 +89,13 @@ WGPUShaderModuleDescriptor createShaderModDesc(const WGPUChainedStruct* shaderCo
 
 	// Connect the chain
 	shaderModDesc.nextInChain = shaderCodeChain;
+	puts("Created a Shader Module Descriptor");
 
 	return shaderModDesc;
 }
 
 WGPUBindGroupDescriptor createBindGroupDesc(const WGPUBindGroupLayout& bindGroupLayout,
-WGPUBindGroupEntry* pBinding)
+size_t bindingCount, WGPUBindGroupEntry* pBindings)
 {
 	WGPUBindGroupDescriptor bindGroupDesc = {};
 	
@@ -96,8 +104,9 @@ WGPUBindGroupEntry* pBinding)
 	bindGroupDesc.label = "BindGroup";
 	bindGroupDesc.layout = bindGroupLayout;
 	// There must be as many bindings as declared in the layout!
-	bindGroupDesc.entryCount = 1;
-	bindGroupDesc.entries = pBinding;
+	bindGroupDesc.entryCount = bindingCount;
+	bindGroupDesc.entries = pBindings;
+	puts("Created a Bind Group Descriptor");
 	
 	return bindGroupDesc;
 }
@@ -105,7 +114,7 @@ WGPUBindGroupEntry* pBinding)
 WGPURenderPipelineDescriptor createRenderPipelineDesc(const WGPUShaderModule& shaderMod,
 const States& states)
 {
-	WGPURenderPipelineDescriptor pipelineDesc{};
+	WGPURenderPipelineDescriptor pipelineDesc = {};
 	
 	// Define the Pipeline Layout
 	pipelineDesc.nextInChain = nullptr;
@@ -131,8 +140,8 @@ const States& states)
 	
 	// Set the Fragment State
 	pipelineDesc.fragment = &states.fragment;
-	// We do not use stencil/depth testing for now
-	pipelineDesc.depthStencil = nullptr;
+	// Set the Depth Stencil
+	pipelineDesc.depthStencil = &states.depthStencil;	
 	
 	// Samples per pixel
 	pipelineDesc.multisample.count = 1;
@@ -140,19 +149,21 @@ const States& states)
 	pipelineDesc.multisample.mask = ~0u;
 	// Default value as well (irrelevant for count = 1 anyways)
 	pipelineDesc.multisample.alphaToCoverageEnabled = false;
+	puts("Created a Render Pipeline Descriptor");
 	
 	return pipelineDesc;
 }
 
-Descriptors createDescriptors(const WGPURenderPassColorAttachment& colorAttach)
+Descriptors createDescriptors(const Attachments& attachments,
+bool bDepthStencilAttach)
 {
-	Descriptors descriptors;
+	Descriptors descriptors = {};
 	
 	// DESCRIPTORS
 	// Command Encoder Descriptor
 	descriptors.encoderDesc = createEncoderDesc();
 	// Render Pass Descriptor
-	descriptors.renderPassDesc = createRenderPassDesc(colorAttach);
+	descriptors.renderPassDesc = createRenderPassDesc(attachments, bDepthStencilAttach);
 	// Command Buffer Descriptor
 	descriptors.cmdBufferDesc = createCmdBufferDesc();
 	puts("Created the Descriptors");

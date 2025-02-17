@@ -54,6 +54,4 @@ public:
 	void Draw(const WGPURenderPassEncoder& renderPass);
 };
 
-Mesh* loadMesh(const GPUEnv& gpuEnv);
-
 #endif	// MESH_HPP_INCLUDED

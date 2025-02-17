@@ -17,6 +17,9 @@ private:
 	mat4x4 m_model, m_proj, m_mp;
 	// Buffers
 	WGPUBuffer m_mpBuffer;
+	// Bind Group
+	WGPUBindGroup m_bindGroup;
+	
 	// Mesh
 	Mesh* m_pMesh;
 	
@@ -28,7 +31,7 @@ public:
 	~Actor();
 	
 	// Getters
-	WGPUBuffer& GetTransformBuffer();
+	WGPUBuffer& GetTBuffer();
 	
 	// Setters
 	void SetDefaults();
@@ -37,6 +40,7 @@ public:
 	// Main Methods
 	void InitMatrices();
 	void CreateTransform(const GPUEnv& gpuEnv);
+	void CreateBindGroup(const WGPUDevice& device, const WGPUBindGroupLayout& bindGroupLayout);
 	void Update(const WGPUQueue& queue);
 	void Draw(const WGPURenderPassEncoder& renderPass);
 	
@@ -47,7 +51,7 @@ public:
 	void RotateZ(float z);
 	
 	// Load
-	void LoadMesh(const GPUEnv& gpuEnv);
+	void LoadMesh(const GPUEnv& gpuEnv, const char* fileName);
 };
 
 #endif	// ACTOR_HPP_INCLUDED

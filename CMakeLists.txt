@@ -22,6 +22,7 @@ add_executable(App
 	src/graphics/inspect.cpp
 	src/graphics/shader.cpp
 	src/graphics/mesh.cpp
+	src/graphics/texture.cpp
 	src/graphics/bind.cpp
 	src/graphics/pipeline.cpp
 	src/graphics/buffer.cpp
@@ -34,6 +35,7 @@ add_executable(App
 	src/structs/layout.cpp
 	src/error/callback.cpp
 	src/util/freader.cpp
+	src/util/obj_loader.cpp
 	src/glfw3webgpu/glfw3webgpu.c
 )
 

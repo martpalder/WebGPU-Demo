@@ -1,8 +1,8 @@
 #include "./pipeline.hpp"
+#include "./state.hpp"
 #include "./desc.hpp"
 #include "./attrib.hpp"
 #include "./layout.hpp"
-#include "./state.hpp"
 #include "./callback.hpp"
 #include "./myassert.hpp"
 
@@ -13,18 +13,8 @@ WGPUBindGroupLayout* pBindGroupLayout)
 {
     WGPURenderPipeline pipeline;
     
-    // Configure Pipeline States:
-    States states;
-    // Create Blend State and Color Target State
-	WGPUBlendState blendState = createBlendState();
-	WGPUColorTargetState colorTarget = createColorTargetState(blendState);
-	// Create Vertex and Fragment State
-	states.vertex = createVertexState(shaderMod);
-	states.fragment = createFragmentState(shaderMod, colorTarget);
-    
-	// Create a Render Pipeline Descriptor
-    WGPURenderPipelineDescriptor pipelineDesc = {};
-    pipelineDesc = createRenderPipelineDesc(shaderMod, states);
+    // Create the Pipeline States
+    States states = createStates(shaderMod);
 	
 	// VERTEX FETCH
 	// Create Vertex Attributes
@@ -34,6 +24,10 @@ WGPUBindGroupLayout* pBindGroupLayout)
 	};
 	// Set Vertex Size
 	size_t vertexSz = 6 * sizeof(float);	// 6 Floats
+	
+	// Create a Render Pipeline Descriptor
+	WGPURenderPipelineDescriptor pipelineDesc = {};
+	pipelineDesc = createRenderPipelineDesc(shaderMod, states);
 	
 	// Create and set the Buffer Layout
 	WGPUVertexBufferLayout bufferLayout = {};

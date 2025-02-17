@@ -5,8 +5,6 @@
 #include <webgpu/webgpu.h>
 
 typedef struct {
-	// Binding
-	WGPUBindGroupEntry binding;
 	// Layouts
 	WGPUBindGroupLayoutEntry bindingLayout;
 	WGPUBindGroupLayout bindGroupLayout;
@@ -15,9 +13,11 @@ typedef struct {
 } Bind;
 
 WGPUBindGroupEntry createBinding(int idx, const WGPUBuffer& buffer);
-WGPUBindGroup createBindGroup(const WGPUDevice& device, const WGPUBindGroupLayout& bindGroupLayout,
-WGPUBindGroupEntry* pBinding);
 
-Bind bindBuffer(const WGPUDevice& device, int idx, const WGPUBuffer& buffer);
+WGPUBindGroup createBindGroup(const WGPUDevice& device, const WGPUBindGroupLayout& bindGroupLayout,
+size_t bindingCount, WGPUBindGroupEntry* pBindings);
+
+Bind bindBuffer(const WGPUDevice& device, int idx,
+WGPUBindGroupEntry* pBindings);
 
 #endif	// BIND_HPP_INCLUDED

@@ -4,6 +4,13 @@
 
 #include <webgpu/webgpu.h>
 
-WGPURenderPassColorAttachment createRenderPassColorAttach(float r, float g, float b);
+typedef struct {
+	WGPURenderPassColorAttachment colorAttach;
+	WGPURenderPassDepthStencilAttachment depthStencilAttach;
+} Attachments;
+
+WGPURenderPassColorAttachment createColorAttach(float r, float g, float b);
+WGPURenderPassDepthStencilAttachment createDepthStencilAttach(const WGPUDevice& device,
+const WGPUTexture& depthTexture);
 
 #endif	// ATTACH_HPP_INCLUDED

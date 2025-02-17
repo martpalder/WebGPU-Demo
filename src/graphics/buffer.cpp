@@ -112,7 +112,7 @@ WGPUBuffer createBufferMatrix(const GPUEnv& gpuEnv, const mat4x4& matrix)
 	}
 	else
 	{
-		puts("Created a Matrix Buffer");
+		puts("Created a Uniform Matrix Buffer");
 	}
 	
 	// Assert
