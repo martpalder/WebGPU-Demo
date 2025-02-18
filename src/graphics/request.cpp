@@ -1,11 +1,10 @@
 ﻿#include "./request.hpp"
 #include "./myassert.hpp"
+#include "./stdafx.h"
 
-#include <webgpu/webgpu.h>
 #ifdef __EMSCRIPTEN__
 #include <emscripten/emscripten.h>
 #endif
-#include <iostream>
 
 void onAdapterRequestEnded(
     WGPURequestAdapterStatus status, // a success status

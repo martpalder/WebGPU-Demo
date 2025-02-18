@@ -7,44 +7,33 @@
 #include "./freader.hpp"
 #include "./string_utils.hpp"
 
-typedef struct {
-	float val;
-	size_t span;
-} ExtFloat;
-
-typedef struct {
-	uint16_t val;
-	size_t span;
-} ExtUInt16;
-
 Mesh* loadOBJ(const GPUEnv& gpuEnv, const char* path);
 
-inline ExtFloat extractFloat(char* el, char* start)
+inline float extractFloat(char* el, char** pStart)
 {
-	ExtFloat ext;
-	
-	// Get an Element Span
-	ext.span = strcspn(start, " ");
+	// Get the Element Span
+	size_t span = strcspn(*pStart, " ");
 	// Copy the Element String
-	copyLineN(el, start, ext.span);
-	// Convert to Float
-	ext.val = atof(el);
+	copyLineN(el, *pStart, span);
+	// Change the Start Location
+	*pStart += span + 1;
 	
-	return ext;
+	// Convert to Float
+	return atof(el);
 }
 
-inline ExtUInt16 extractUInt16(char* el, char* start)
+inline float extractUInt16(char* el, char** pStart)
 {
-	ExtUInt16 ext;
-	
-	// Get an Element Span
-	ext.span = strcspn(start, " ");
+	// Get the Element Span
+	size_t span = strcspn(*pStart, " ");
 	// Copy the Element String
-	copyLineN(el, start, ext.span);
-	// Convert to UInt16
-	ext.val = (uint16_t)atol(el);
+	copyLineN(el, *pStart, span);
+	// Change the Start Location
+	*pStart += span + 1;
 	
-	return ext;
+	// Convert to UInt16
+	return (uint16_t)atol(el);
 }
 
 #endif	// OBJ_LOADER_HPP
+

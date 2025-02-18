@@ -3,6 +3,7 @@
 #define ACTOR_HPP_INCLUDED
 
 #include "./mesh.hpp"
+#include "./stdafx.h"
 
 class Actor
 {
@@ -13,10 +14,10 @@ private:
 	
 	// Components
 	// Matrices
-	mat4x4 m_t, m_r;
-	mat4x4 m_model, m_proj, m_mp;
+	mat4x4 m_t, m_r, m_s;
+	mat4x4 m_model, m_mvp;
 	// Buffers
-	WGPUBuffer m_mpBuffer;
+	WGPUBuffer m_mvpBuffer;
 	// Bind Group
 	WGPUBindGroup m_bindGroup;
 	
@@ -33,15 +34,19 @@ public:
 	// Getters
 	WGPUBuffer& GetTBuffer();
 	
+	// Getters
+	vec3& GetPos();
+	
 	// Setters
 	void SetPos(float x, float y, float z);
+	void SetPos(const vec3& pos);
 	void SetMesh(Mesh* pMesh);
 	
 	// Main Methods
 	void Init();
 	void CreateTransform(const GPUEnv& gpuEnv);
 	void CreateBindGroup(const GPUEnv& gpuEnv, const WGPUBindGroupLayout& bindGroupLayout);
-	void Update(const WGPUQueue& queue);
+	void Update(const WGPUQueue& queue, const mat4x4& vp);
 	void Draw(const WGPURenderPassEncoder& renderPass);
 	
 	// Transformations

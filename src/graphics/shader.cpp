@@ -3,9 +3,7 @@
 #include "./freader.hpp"
 #include "./callback.hpp"
 #include "./myassert.hpp"
-
-#include <iostream>
-#include <cstring>
+#include "./stdafx.h"
 
 Shader::Shader()
 {

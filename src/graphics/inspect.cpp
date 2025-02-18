@@ -1,7 +1,5 @@
 #include "./inspect.hpp"
-
-#include <iostream>
-#include <vector>
+#include "./stdafx.h"
 
 void inspectAdapter(const WGPUAdapter& adapter)
 {

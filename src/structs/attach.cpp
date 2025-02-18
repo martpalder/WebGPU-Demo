@@ -1,8 +1,7 @@
 #include "./attach.hpp"
 #include "./texture.hpp"
 #include "./callback.hpp"
-
-#include <cstdio>
+#include "./stdafx.h"
 
 WGPURenderPassColorAttachment createColorAttach(float r, float g, float b)
 {

@@ -1,6 +1,5 @@
 #include "./attrib.hpp"
-
-#include <cstdio>
+#include "./stdafx.h"
 
 WGPUVertexAttribute createAttribVertFloat(int numFloats, int idx, int offset, const char* label)
 {

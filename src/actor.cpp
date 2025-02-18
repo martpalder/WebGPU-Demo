@@ -1,8 +1,6 @@
 #include "./actor.hpp"
 #include "./buffer.hpp"
 
-#include <cstring>
-
 Actor::Actor()
 {
 	// Initialize
@@ -17,7 +15,7 @@ Actor::~Actor()
 
 WGPUBuffer& Actor::GetTBuffer()
 {
-	return m_mpBuffer;
+	return m_mvpBuffer;
 }
 
 void Actor::Init()
@@ -33,9 +31,14 @@ void Actor::Init()
 	// Initialize Matrices
 	mat4x4_identity(m_t);
 	mat4x4_identity(m_r);
+	mat4x4_identity(m_s);
 	mat4x4_identity(m_model);
-	mat4x4_identity(m_proj);
-	mat4x4_identity(m_mp);
+	mat4x4_identity(m_mvp);
+}
+
+vec3& Actor::GetPos()
+{
+	return m_pos;
 }
 
 void Actor::SetPos(float x, float y, float z)
@@ -49,27 +52,43 @@ void Actor::SetPos(float x, float y, float z)
 	mat4x4_translate(m_t, m_pos[0], m_pos[1], m_pos[2]);
 }
 
+void Actor::SetPos(const vec3& pos)
+{
+	// Set the Position
+	m_pos[0] = pos[0];
+	m_pos[1] = pos[1];
+	m_pos[2] = pos[2];
+	
+	// Set the Translation Matrix
+	mat4x4_translate(m_t, m_pos[0], m_pos[1], m_pos[2]);
+}
+
 void Actor::SetMesh(Mesh* pMesh)
 {
-	m_pMesh = pMesh;
+	if (pMesh != nullptr)
+	{
+		m_pMesh = pMesh;
+		puts("Set the Mesh");
+	}
 }
 
 void Actor::CreateBindGroup(const GPUEnv& gpuEnv,
 const WGPUBindGroupLayout& bindGroupLayout)
 {
-	// Set the Projection Matrix
-	float fov = 90.0f;
-	mat4x4_perspective(m_proj, fov, 4 / 3.0f, 0.1f, 100.0f);
-	// Set the Translation Matrix
+	// Setup the Matrices
 	mat4x4_translate(m_t, m_pos[0], m_pos[1], m_pos[2]);
+	float scale = 1.0f;
+	mat4x4_scale_aniso(m_s, m_s, scale, scale, scale);
 	
-	// Create the Transform Buffer
-	m_mpBuffer = createBufferMatrix(gpuEnv, m_mp);
+	// Create the Model-View-Projection Buffer
+	m_mvpBuffer = createBufferMatrix(gpuEnv, m_mvp);
 	
-	// Bind the Transform Buffer
+	// Create the Bindings
 	WGPUBindGroupEntry bindings[] = {
-		createBinding(0, m_mpBuffer),
+		createBinding(0, m_mvpBuffer),
 	};
+	
+	// Create the Bind Group
 	m_bindGroup = createBindGroup(gpuEnv.dev, bindGroupLayout, 1, &bindings[0]);
 }
 
@@ -91,24 +110,24 @@ void Actor::Release()
 		puts("Released the Mesh");
 	}
 
-	if (m_mpBuffer != nullptr)
+	if (m_mvpBuffer != nullptr)
 	{
 		// Release the Transform Buffer
-		wgpuBufferRelease(m_mpBuffer);
-		m_mpBuffer = nullptr;
+		wgpuBufferRelease(m_mvpBuffer);
+		m_mvpBuffer = nullptr;
 		puts("Released the Transform Buffer");
 	}
 }
 
-void Actor::Update(const WGPUQueue& queue)
+void Actor::Update(const WGPUQueue& queue, const mat4x4& vp)
 {
 	// Combine the Transformation Matrices
-	mat4x4_mul(m_model, m_t, m_r);
-	// Combine Model, View and Projection
-	mat4x4_mul(m_mp, m_proj, m_model);	// Check correct ordering
+	mat4x4_mul(m_model, m_r, m_t);	// Check correct ordering
+	// Combine the View-Projection and the Model
+	mat4x4_mul(m_mvp, vp, m_model);	// Check correct ordering
 	
 	// Update the Uniform Buffer
-	wgpuQueueWriteBuffer(queue, m_mpBuffer, 0, m_mp, sizeof(m_mp));
+	wgpuQueueWriteBuffer(queue, m_mvpBuffer, 0, m_mvp, sizeof(m_mvp));
 }
 
 void Actor::Draw(const WGPURenderPassEncoder& renderPass)

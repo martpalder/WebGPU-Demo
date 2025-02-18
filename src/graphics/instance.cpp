@@ -1,8 +1,6 @@
 #include "./instance.hpp"
 #include "./myassert.hpp"
-
-#include <iostream>
-#include <cstdio>
+#include "./stdafx.h"
 
 #define WGPU_DEBUG_LEVEL 1
 

@@ -5,9 +5,7 @@
 #include "./inspect.hpp"
 #include "./config.hpp"
 #include "./callback.hpp"
-
-#include <webgpu/webgpu.h>
-#include <cstdio>
+#include "./stdafx.h"
 
 #ifndef __EMSCRIPTEN__
 #include <glfw3webgpu.h>

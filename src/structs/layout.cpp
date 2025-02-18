@@ -1,8 +1,7 @@
 #include "./layout.hpp"
 #include "./callback.hpp"
 #include "./myassert.hpp"
-
-#include <cstdio>
+#include "./stdafx.h"
 
 WGPUVertexBufferLayout createLayoutBufferVert(size_t vertexSz, size_t attribCount,
 WGPUVertexAttribute* pAttribs)

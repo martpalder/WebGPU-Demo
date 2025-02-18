@@ -1,8 +1,6 @@
 #include "./obj_loader.hpp"
 #include "./color.hpp"
-
-#include <cstdio>
-#include <vector>
+#include "./stdafx.h"
 
 Mesh* loadOBJ(const GPUEnv& gpuEnv, const char* path)
 {
@@ -34,53 +32,20 @@ Mesh* loadOBJ(const GPUEnv& gpuEnv, const char* path)
 		// Vertex
 		if (tok[0] == 'v')
 		{
-			// Get the X
-			ExtFloat extX = extractFloat(el, start);
-			start += extX.span + 1;
-			// Get the Y
-			ExtFloat extY = extractFloat(el, start);
-			start += extY.span + 1;
-			// Get the Z
-			ExtFloat extZ = extractFloat(el, start);
-			start += extZ.span + 1;
-			
-			// Add the Position
-			vertices.push_back(extX.val);
-			vertices.push_back(extY.val);
-			vertices.push_back(extZ.val);
-			
-			// Get the Red
-			ExtFloat extR = extractFloat(el, start);
-			start += extR.span + 1;
-			// Get the Green
-			ExtFloat extG = extractFloat(el, start);
-			start += extG.span + 1;
-			// Get the Blue
-			ExtFloat extB = extractFloat(el, start);
-			start += extB.span + 1;
-			
-			// Add the Color
-			vertices.push_back(extR.val);
-			vertices.push_back(extG.val);
-			vertices.push_back(extB.val);
+			// Add the Vertex with 6 Floats
+			for (uint8_t i = 0; i < 6; ++i)
+			{
+				vertices.push_back(extractFloat(el, &start));
+			}
 		}
 		// Fragment
 		if (tok[0] == 'f')
 		{
-			// Get the Index0
-			ExtUInt16 extIdx0 = extractUInt16(el, start);
-			start += extIdx0.span + 1;
-			// Get the Index1
-			ExtUInt16 extIdx1 = extractUInt16(el, start);
-			start += extIdx1.span + 1;
-			// Get the Index2
-			ExtUInt16 extIdx2 = extractUInt16(el, start);
-			start += extIdx2.span + 1;
-			
-			// Add the Indices
-			indices.push_back(extIdx0.val);
-			indices.push_back(extIdx1.val);
-			indices.push_back(extIdx2.val);
+			// Add 3 Indices(A Triangle)
+			for (uint8_t i = 0; i < 3; ++i)
+			{
+				indices.push_back(extractUInt16(el, &start));
+			}
 		}
 		
 		// Take the Next Line

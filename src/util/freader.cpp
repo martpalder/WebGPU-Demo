@@ -1,8 +1,5 @@
 #include "./freader.hpp"
-
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
+#include "./stdafx.h"
 
 char* readFileText(const char* PATH)
 {

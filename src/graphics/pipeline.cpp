@@ -5,8 +5,7 @@
 #include "./layout.hpp"
 #include "./callback.hpp"
 #include "./myassert.hpp"
-
-#include <cstdio>
+#include "./stdafx.h"
 
 WGPURenderPipeline createRenderPipeline(const WGPUDevice& device, const WGPUShaderModule& shaderMod,
 WGPUBindGroupLayout* pBindGroupLayout)

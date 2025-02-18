@@ -1,7 +1,5 @@
 #include "./window.hpp"
-
-#include <cstdio>
-#include <cstdlib>
+#include "./stdafx.h"
 
 GLFWwindow* createWindow(int w, int h, const char* title)
 {

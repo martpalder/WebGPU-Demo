@@ -35,8 +35,12 @@ private:
 	// Mesh Manager
 	MeshManager m_meshMgr;
 	
+	// Matrices
+	mat4x4 m_p;
 	// World
 	World m_world;
+	// Camera
+	Camera* m_pCam;
 	// Actors
 	Actor* m_pPlayer;
 	
@@ -50,9 +54,10 @@ private:
 	void Init(int w, int h, const char* title);
 	void Quit();
 	
-	// Creation Methods
+	// Create Methods
 	void CreateAttachments();
 	void CreatePipeline();
+	void SetupActors();
 	
 	// Main Methods
 	void Cls();

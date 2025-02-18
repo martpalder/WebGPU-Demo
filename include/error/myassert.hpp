@@ -2,7 +2,7 @@
 #ifndef MYASSERT_HPP_INCLUDED
 #define MYASSERT_HPP_INCLUDED
 
-#include <iostream>
+#include "./stdafx.h"
 
 inline void my_assert(bool condition, const char* function, const char* file, int line)
 {

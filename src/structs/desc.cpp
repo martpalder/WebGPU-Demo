@@ -1,7 +1,6 @@
 #include "./desc.hpp"
 #include "./callback.hpp"
-
-#include <cstdio>
+#include "./stdafx.h"
 
 WGPUDeviceDescriptor createDeviceDesc()
 {

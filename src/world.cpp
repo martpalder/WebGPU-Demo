@@ -1,10 +1,14 @@
 #include "./world.hpp"
-
-#include <cstdio>
+#include "./stdafx.h"
 
 World::World()
 {
 	puts("Created the World");
+}
+
+Camera* World::GetCam()
+{
+	return &m_cam;
 }
 
 void World::CreateBindGroups(const GPUEnv& gpuEnv,
@@ -20,17 +24,28 @@ const WGPUBindGroupLayout& bindGroupLayout)
 
 Actor* World::AddActor(float x, float y, float z, const char* tag)
 {
-	m_actors.push_back(new Actor());
-	puts("Added an Actor");
+	Actor* pActor = new Actor();
 	
-	return m_actors.back();
+	pActor->SetPos(x, y, z);
+	m_actors.push_back(pActor);
+	printf("Added an Actor: '%s'\n", tag);
+	
+	return pActor;
 }
 
-void World::Update(const WGPUQueue& queue)
+void World::Update(const WGPUQueue& queue, const mat4x4& p)
 {
+	// Update the Camera
+	m_cam.Update();
+	
+	// Combine the View-Projection Matrix
+	mat4x4 vp;
+	mat4x4_mul(vp, p, m_cam.GetView());
+	
+	// Update all Actors
 	for (Actor* pActor : m_actors)
 	{
-		pActor->Update(queue);
+		pActor->Update(queue, vp);
 	}
 }
 

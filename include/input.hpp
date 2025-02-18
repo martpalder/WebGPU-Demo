@@ -2,9 +2,11 @@
 #ifndef INPUT_HPP_INCLUDED
 #define INPUT_HPP_INCLUDED
 
+#include "./stdafx.h"
 #include <GLFW/glfw3.h>
 
-inline void keyCallback(GLFWwindow* wnd, int key, int scancode, int action, int mods);
+inline static void keyCallback(GLFWwindow* wnd, int key, int scancode, int action, int mods);
+inline static void cursorPosCallback(GLFWwindow* wnd, double xpos, double ypos);
 
 class Input
 {
@@ -14,6 +16,7 @@ public:
 	
 	// Getters
 	float GetAxis(uint8_t axis);
+	vec2& GetMouseDelta();
 	bool IsKeyPressed(int key);
 	
 	// Methods

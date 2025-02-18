@@ -1,7 +1,6 @@
 #include "./mesh_manager.hpp"
 #include "./obj_loader.hpp"
-
-#include <cstdio>
+#include "./stdafx.h"
 
 MeshManager::MeshManager()
 {

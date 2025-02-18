@@ -1,8 +1,7 @@
 #include "./mesh.hpp"
 #include "./vertex.hpp"
 #include "./buffer.hpp"
-
-#include <cstdio>
+#include "./stdafx.h"
 
 Mesh::Mesh()
 {

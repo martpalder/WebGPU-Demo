@@ -7,8 +7,8 @@
 #include "./texture.hpp"
 #include "./view.hpp"
 #include "./callback.hpp"
+#include "./stdafx.h"
 
-#include <cstdio>
 #ifdef __EMSCRIPTEN__
 #include <emscripten/emscripten.h>
 #endif
@@ -16,7 +16,11 @@
 App::App(int w, int h, const char* title)
 {
 	// Set Default Values
-	this->SetDefaults();
+	m_wnd = nullptr;
+	m_pCam = nullptr;
+	m_pPlayer = nullptr;
+	mat4x4_identity(m_p);
+	
 	// INITIALIZATION
 	this->Init(w, h, title);
 }
@@ -36,27 +40,26 @@ void App::Init(int w, int h, const char* title)
 	m_gpuEnv = initGPUEnv(m_wnd);
 	// Initialize Input
 	m_input.Init(m_wnd);
-	
 	// Create the Attachments and Descriptors
 	this->CreateAttachments();
 	m_descriptors = createDescriptors(m_attachments, true);
-
+	
 	// Load a Shader
 	m_shader.Load(m_gpuEnv.dev, "basic3d_color.wgsl");
-	// Load Meshes
-	Mesh* pMesh = m_meshMgr.Load(m_gpuEnv, "cube.obj");
-	
-	// Add the Player
-	m_pPlayer = m_world.AddActor(0.0f, 0.0f, 0.0f, "Player");
-	m_pPlayer->SetMesh(pMesh);
+	// Setup Actors
+	this->SetupActors();
 	
 	// Create the Render Pipeline
 	this->CreatePipeline();
+	
+	// Setup Projection Matrix
+	mat4x4_perspective(m_p, 90.0f, 4 / 3.0f, 0.1f, 100.0f);
 	puts("Initialized the App");
 }
 
 void App::Quit()
 {
+	// Release the Layouts
 	if (m_bindGroupLayout != nullptr)
 	{
 		wgpuBindGroupLayoutRelease(m_bindGroupLayout);
@@ -81,29 +84,20 @@ WGPUBool App::IsRunning()
 	#endif
 }
 
-void App::SetDefaults()
-{
-	// Set Default Values
-	// Window
-	m_wnd = nullptr;
-}
-
 void App::CreateAttachments()
 {
 	// Create a Depth Texture
 	WGPUTexture depthTexture = createDepthTexture(m_gpuEnv.dev, 800, 600);
 	
-	// ATTACHMENTS
-	// Render Pass Color Attachment
+	// Create Attachments
 	m_attachments.colorAttach = createColorAttach(0.1f, 0.1f, 0.1f);
 	m_attachments.depthStencilAttach = createDepthStencilAttach(m_gpuEnv.dev, depthTexture);
-	// TODO: Depth Stencil Attachment
 	puts("Created the Attachments");
 }
 
 void App::CreatePipeline()
 {
-	// Create Bind Group Layout
+	// Create the Layouts
 	m_bindingLayout = createLayoutBinding(sizeof(mat4x4));
 	m_bindGroupLayout = createLayoutBindGroup(m_gpuEnv.dev, &m_bindingLayout);
 	
@@ -116,6 +110,25 @@ void App::CreatePipeline()
 		m_shader.GetShaderMod(),
 		&m_bindGroupLayout
 	);
+}
+
+void App::SetupActors()
+{
+	// Load Meshes
+	Mesh* pCube = m_meshMgr.Load(m_gpuEnv, "cube.obj");
+	Mesh* pPlane = m_meshMgr.Load(m_gpuEnv, "plane.obj");
+	
+	// Get the Camera
+	m_pCam = m_world.GetCam();
+	
+	// Add the Actors with Meshes
+	// Player
+	m_pPlayer = m_world.AddActor(0.0f, 0.0f, 0.0f, "Player");
+	m_pPlayer->SetMesh(pCube);
+	m_pCam->SetParent(m_pPlayer);
+	// Billboard
+	Actor* pBill = m_world.AddActor(0.0f, 0.0f, -1.0f, "Billboard");
+	pBill->SetMesh(pPlane);
 }
 
 void App::Cls()
@@ -161,14 +174,15 @@ void App::RenderPass(const WGPUCommandEncoder& encoder)
 void App::Update()
 {
 	// {{Update}}
-	m_world.Update(m_gpuEnv.queue);
+	m_world.Update(m_gpuEnv.queue, m_p);
 	
 	// Get Move Input
 	float h = m_input.GetAxis(0);
 	float v = m_input.GetAxis(1);
 	
 	// If there's Move Input
-	if (h != 0.0f || v != 0.0f)
+	bool bMoveInput = (h != 0.0f || v != 0.0f);
+	if (bMoveInput && m_pPlayer != nullptr)
 	{
 		// Move tbe Player
 		m_pPlayer->Translate(h, 0.0f, -v);

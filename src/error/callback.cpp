@@ -1,6 +1,5 @@
 #include "./callback.hpp"
-
-#include <iostream>
+#include "./stdafx.h"
 
 void errorCallback(WGPUErrorType type, const char* message, void* /* pUserData */)
 {
