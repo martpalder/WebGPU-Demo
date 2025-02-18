@@ -19,6 +19,7 @@ set(INCLUDE_DIRS
     include/graphics
     include/structs
     include/managers
+    include/loaders
     include/util
     include/error
     external/linmath
@@ -51,10 +52,12 @@ set(HEADER_FILES
     include/structs/layout.hpp
     include/env/gpuenv.hpp
     include/managers/mesh_manager.hpp
-    include/error/callback.hpp
+    include/loaders/obj_loader.hpp
+    include/util/mymath.h
     include/util/freader.hpp
-    include/util/obj_loader.hpp
+    include/error/callback.hpp
     include/glfw3webgpu/glfw3webgpu.h
+    external/stb/stb_image.h
 )
 
 # Include wgpu-native directory, to define the 'wgpu-native' target
@@ -85,9 +88,9 @@ set(SOURCE_FILES
     src/structs/layout.cpp
     src/env/gpuenv.cpp
     src/managers/mesh_manager.cpp
-    src/error/callback.cpp
+    src/loaders/obj_loader.cpp
     src/util/freader.cpp
-    src/util/obj_loader.cpp
+    src/error/callback.cpp
     src/glfw3webgpu/glfw3webgpu.c
     external/stb/stb_image.h
 )

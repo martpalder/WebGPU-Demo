@@ -16,11 +16,12 @@ public:
 	
 	// Getters
 	float GetAxis(uint8_t axis);
-	vec2& GetMouseDelta();
+	vec2& GetMDelta();
 	bool IsKeyPressed(int key);
 	
 	// Methods
 	void Init(GLFWwindow* wnd);
+	void Reset();
 };
 
 #endif	// INPUT_HPP_INCLUDED

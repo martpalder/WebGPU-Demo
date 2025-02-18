@@ -13,6 +13,8 @@
 #include <GLFW/glfw3.h>
 #include <linmath.h>
 
+const static vec3 VEC3_UP { 0.0f, 1.0f, 0.0f };
+
 class App
 {
 private:

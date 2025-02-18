@@ -25,6 +25,7 @@ void Actor::Init()
 	m_pos[1] = 0.0f;
 	m_pos[2] = -1.5f;
 	m_speed = 0.2f;
+	m_yaw = 0.0f;
 	m_bindGroup = nullptr;
 	m_pMesh = nullptr;
 	
@@ -39,6 +40,16 @@ void Actor::Init()
 vec3& Actor::GetPos()
 {
 	return m_pos;
+}
+
+const char* Actor::GetTag()
+{
+	return m_tag;
+}
+
+WGPUBool Actor::CompareTag(const char* tag)
+{
+	return (strcmp(m_tag, tag) == 0);
 }
 
 void Actor::SetPos(float x, float y, float z)
@@ -61,6 +72,21 @@ void Actor::SetPos(const vec3& pos)
 	
 	// Set the Translation Matrix
 	mat4x4_translate(m_t, m_pos[0], m_pos[1], m_pos[2]);
+}
+
+void Actor::SetYaw(float yaw)
+{
+	// Set the Yaw
+	m_yaw = -yaw;
+	
+	// Set the Rotation Matrix
+	mat4x4_identity(m_r);
+	mat4x4_rotate_Y(m_r, m_r, m_yaw);
+}
+
+void Actor::SetTag(const char* tag)
+{
+	m_tag = tag;
 }
 
 void Actor::SetMesh(Mesh* pMesh)
@@ -122,7 +148,7 @@ void Actor::Release()
 void Actor::Update(const WGPUQueue& queue, const mat4x4& vp)
 {
 	// Combine the Transformation Matrices
-	mat4x4_mul(m_model, m_r, m_t);	// Check correct ordering
+	mat4x4_mul(m_model, m_t, m_r);	// Check correct ordering
 	// Combine the View-Projection and the Model
 	mat4x4_mul(m_mvp, vp, m_model);	// Check correct ordering
 	
@@ -147,15 +173,23 @@ void Actor::Draw(const WGPURenderPassEncoder& renderPass)
 	}
 }
 
-void Actor::Translate(float x, float y, float z)
+void Actor::Translate(float stepX, float stepY, float stepZ)
 {
 	// Change the Position
-	m_pos[0] += x * m_speed;
-	m_pos[1] += y * m_speed;
-	m_pos[2] += z * m_speed;
+	m_pos[0] += stepX;
+	m_pos[1] += stepY;
+	m_pos[2] += stepZ;
 	
 	// Set the Translation Matrix
 	mat4x4_translate(m_t, m_pos[0], m_pos[1], m_pos[2]);
+}
+
+void Actor::MoveAndCollide(vec2& moveDir)
+{
+	// Normalize the Move Direction
+	vec2_norm(moveDir, moveDir);
+	// Translate the Actor
+	this->Translate(moveDir[0] * m_speed, 0.0f, moveDir[1] * m_speed);
 }
 
 void Actor::RotateX(float x)

@@ -5,13 +5,19 @@
 #include "./actor.hpp"
 #include "./stdafx.h"
 
-const static vec3 VEC3_UP = { 0, 1, 0 };
+# define M_PI 3.14159265358979323846f  /* pi */
 
 class Camera
 {
 private:
+	// Constants
+	const vec3 VEC3_UP = { 0, 1, 0 };
+	const float PITCH_MIN = -85.0f * M_PI / 180;
+	const float PITCH_MAX = -5.0f * M_PI / 180;
+	
 	// Members
-	float m_dist, m_deg;
+	float m_dist, m_rotSpeed;
+	float m_pitch, m_yaw;
 	vec3 m_pos, m_dirF;
 	float m_center[3];
 	mat4x4 m_v;
@@ -24,6 +30,8 @@ public:
 	Camera();
 	
 	// Getters
+	float GetYaw();
+	vec3& GetForward();
 	mat4x4& GetView();
 	
 	// Setters
@@ -31,7 +39,7 @@ public:
 	void SetParent(Actor* pActor);
 	
 	// Methods
-	void Orbit(float y);
+	void Orbit(const vec2& mDelta);
 	void Update();
 };
 

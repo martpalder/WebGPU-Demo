@@ -4,19 +4,25 @@
 // Key Buffer
 bool g_keys[350];
 vec2 g_mPosCurr, g_mPosLast;
+vec2 g_mDelta;
 
-static void keyCallback(GLFWwindow* wnd, int key, int scancode, int action, int mods)
+inline static void keyCallback(GLFWwindow* wnd, int key, int scancode, int action, int mods)
 {
 	if (action == GLFW_PRESS) { g_keys[key] = true; }
 	else if (action == GLFW_RELEASE) { g_keys[key] = false; }
 };
 
-static void cursorPosCallback(GLFWwindow* wnd, double x, double y)
+inline static void cursorPosCallback(GLFWwindow* wnd, double x, double y)
 {
+	// Set Mouse Positions
 	g_mPosLast[0] = g_mPosCurr[0];
 	g_mPosLast[1] = g_mPosCurr[1];
 	g_mPosCurr[0] = x;
 	g_mPosCurr[1] = y;
+	
+	// Set Mouse Delta
+	g_mDelta[0] = g_mPosCurr[0] - g_mPosLast[0];
+	g_mDelta[1] = g_mPosCurr[1] - g_mPosLast[1];
 }
 
 Input::Input()
@@ -53,16 +59,18 @@ float Input::GetAxis(uint8_t axis)
 	return 0.0f;
 }
 
-vec2& Input::GetMouseDelta()
-{
-	vec2 mDelta;
-	mDelta[0] = g_mPosCurr[0] - g_mPosLast[0];
-	mDelta[1] = g_mPosCurr[1] - g_mPosLast[1];
-	
-	return mDelta;
+vec2& Input::GetMDelta()
+{	
+	return g_mDelta;
 }
 
 bool Input::IsKeyPressed(int key)
 {
 	return g_keys[key];
+}
+
+void Input::Reset()
+{
+	g_mDelta[0] = 0.0f;
+	g_mDelta[1] = 0.0f;
 }

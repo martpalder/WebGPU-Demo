@@ -7,6 +7,7 @@
 #include "./texture.hpp"
 #include "./view.hpp"
 #include "./callback.hpp"
+#include "./mymath.h"
 #include "./stdafx.h"
 
 #ifdef __EMSCRIPTEN__
@@ -115,8 +116,9 @@ void App::CreatePipeline()
 void App::SetupActors()
 {
 	// Load Meshes
-	Mesh* pCube = m_meshMgr.Load(m_gpuEnv, "cube.obj");
-	Mesh* pPlane = m_meshMgr.Load(m_gpuEnv, "plane.obj");
+	Mesh* pCubeMesh = m_meshMgr.Load(m_gpuEnv, "cube.obj");
+	Mesh* pGroundMesh = m_meshMgr.Load(m_gpuEnv, "ground.obj");
+	Mesh* pPlaneMesh = m_meshMgr.Load(m_gpuEnv, "plane.obj");
 	
 	// Get the Camera
 	m_pCam = m_world.GetCam();
@@ -124,11 +126,14 @@ void App::SetupActors()
 	// Add the Actors with Meshes
 	// Player
 	m_pPlayer = m_world.AddActor(0.0f, 0.0f, 0.0f, "Player");
-	m_pPlayer->SetMesh(pCube);
+	m_pPlayer->SetMesh(pCubeMesh);
 	m_pCam->SetParent(m_pPlayer);
+	// Ground
+	Actor* pGround = m_world.AddActor(0.0f, -0.5f, 0.0f, "Ground");
+	pGround->SetMesh(pGroundMesh);
 	// Billboard
-	Actor* pBill = m_world.AddActor(0.0f, 0.0f, -1.0f, "Billboard");
-	pBill->SetMesh(pPlane);
+	Actor* pBill = m_world.AddActor(0.0f, 0.5f, -2.0f, "Billboard");
+	pBill->SetMesh(pPlaneMesh);
 }
 
 void App::Cls()
@@ -172,21 +177,31 @@ void App::RenderPass(const WGPUCommandEncoder& encoder)
 }
 
 void App::Update()
-{
-	// {{Update}}
-	m_world.Update(m_gpuEnv.queue, m_p);
-	
+{	
 	// Get Move Input
 	float h = m_input.GetAxis(0);
 	float v = m_input.GetAxis(1);
 	
 	// If there's Move Input
-	bool bMoveInput = (h != 0.0f || v != 0.0f);
-	if (bMoveInput && m_pPlayer != nullptr)
+	if ((h || v) && m_pPlayer != nullptr)
 	{
-		// Move tbe Player
-		m_pPlayer->Translate(h, 0.0f, -v);
+		// Calculate the Move Direction
+		vec2 moveDir;
+		calcMoveDir(h, v, m_pCam->GetYaw(), moveDir);
+		// Move the Player
+		m_pPlayer->MoveAndCollide(moveDir);
 	}
+	
+	// Get the Mouse Position
+	vec2 mDelta;
+	setVec2(mDelta, m_input.GetMDelta());
+	// Rotate the Camera
+	m_pCam->Orbit(mDelta);
+	// Reset Input
+	m_input.Reset();
+	
+	// {{Update}}
+	m_world.Update(m_gpuEnv.queue, m_p);
 }
 
 void App::Draw()

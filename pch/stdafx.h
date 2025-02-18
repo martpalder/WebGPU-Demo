@@ -3,9 +3,11 @@
 #define STDAFX_H_INCLUDED
 
 #include <iostream>
-#include <vector>
 #include <string>
+#include <vector>
 #include <cstdio>
+#include <cstring>
+#include <cstdlib>
 // Add other headers you use frequently here
 #include <webgpu/webgpu.h>
 #include <linmath.h>

@@ -25,8 +25,8 @@ const WGPUBindGroupLayout& bindGroupLayout)
 Actor* World::AddActor(float x, float y, float z, const char* tag)
 {
 	Actor* pActor = new Actor();
-	
 	pActor->SetPos(x, y, z);
+	pActor->SetTag(tag);
 	m_actors.push_back(pActor);
 	printf("Added an Actor: '%s'\n", tag);
 	
@@ -46,6 +46,11 @@ void World::Update(const WGPUQueue& queue, const mat4x4& p)
 	for (Actor* pActor : m_actors)
 	{
 		pActor->Update(queue, vp);
+		
+		if (pActor->CompareTag("Billboard"))
+		{
+			pActor->SetYaw(m_cam.GetYaw());
+		}
 	}
 }
 

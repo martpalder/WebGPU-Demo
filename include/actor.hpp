@@ -10,7 +10,8 @@ class Actor
 private:
 	// Members
 	vec3 m_pos;
-	float m_speed;
+	float m_speed, m_yaw;
+	const char* m_tag;
 	
 	// Components
 	// Matrices
@@ -36,10 +37,14 @@ public:
 	
 	// Getters
 	vec3& GetPos();
+	const char* GetTag();
+	WGPUBool CompareTag(const char* tag);
 	
 	// Setters
 	void SetPos(float x, float y, float z);
 	void SetPos(const vec3& pos);
+	void SetYaw(float yaw);
+	void SetTag(const char* tag);
 	void SetMesh(Mesh* pMesh);
 	
 	// Main Methods
@@ -50,7 +55,8 @@ public:
 	void Draw(const WGPURenderPassEncoder& renderPass);
 	
 	// Transformations
-	void Translate(float x, float y, float z);
+	void Translate(float stepX, float stepY, float stepZ);
+	void MoveAndCollide(vec2& moveDir);
 	void RotateX(float x);
 	void RotateY(float y);
 	void RotateZ(float z);
