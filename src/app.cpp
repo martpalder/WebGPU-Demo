@@ -119,10 +119,10 @@ void App::CreatePipeline()
 void App::LoadData()
 {
 	// Load a Shader
-	m_shaderMgr.Load(m_gpuEnv.dev, "basic2d.wgsl");
+	m_shaderMgr.Load(m_gpuEnv.dev, "basic3d_color.wgsl");
 	
 	// Load Meshes
-	Mesh* pMesh = m_meshMgr.Load(m_gpuEnv, "triangle.obj");
+	Mesh* pMesh = m_meshMgr.Load(m_gpuEnv, "triangle3d_color.obj");
 	
 	// TODO: Load Textures
 	//m_texMgr.Load(m_gpuEnv, "char_base.png");
@@ -137,7 +137,7 @@ void App::SetupActors()
 	// Add the Actors with Meshes
 	// Player
 	m_pPlayer = m_world.AddActor(m_gpuEnv, 0.0f, 0.0f, 0.0f, "Player");
-	m_pPlayer->SetMesh(m_meshMgr.Get("triangle.obj"));
+	m_pPlayer->SetMesh(m_meshMgr.Get("triangle3d_color.obj"));
 	// Ground
 	/*Actor* pGround = m_world.AddActor(m_gpuEnv, 0.0f, -0.5f, 0.0f, "Ground");
 	pGround->SetMesh(m_meshMgr.Get("ground.obj"));

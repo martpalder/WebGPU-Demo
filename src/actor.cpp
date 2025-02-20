@@ -193,7 +193,7 @@ void Actor::Draw(const WGPURenderPassEncoder& renderPass)
 	if (m_pMesh != nullptr)
 	{
 		// Draw the Mesh
-		m_pMesh->DrawTriangle(renderPass);;
+		m_pMesh->Draw(renderPass);;
 	}
 	else
 	{

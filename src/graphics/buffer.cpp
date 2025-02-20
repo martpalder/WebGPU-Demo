@@ -1,13 +1,18 @@
 #include "./buffer.hpp"
 #include "./myassert.hpp"
 
+size_t getAlignedSize(size_t dataSz)
+{
+	return ( ((dataSz + COPY_BUFFER_ALIGNMENT - 1) / COPY_BUFFER_ALIGNMENT) * COPY_BUFFER_ALIGNMENT );
+}
+
 void uploadToBuffer(const WGPUQueue& queue, const WGPUBuffer& buffer,
 size_t dataSz, const void* data)
 {
 	wgpuQueueWriteBuffer(queue, buffer, 0, data, dataSz);
 }
 
-WGPUBuffer createBufferVert(const WGPUDevice& device, size_t dataSize)
+WGPUBuffer createBufferVert(const WGPUDevice& device, size_t dataSz)
 {
 	WGPUBuffer vertexBuffer = nullptr;
 	
@@ -15,7 +20,7 @@ WGPUBuffer createBufferVert(const WGPUDevice& device, size_t dataSize)
 	WGPUBufferDescriptor bufferDesc = {};
 	bufferDesc.nextInChain = nullptr;
 	bufferDesc.label = "VertexBuffer";
-	bufferDesc.size = dataSize;
+	bufferDesc.size = dataSz;
 	bufferDesc.usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_Vertex; // Vertex usage here!
 	bufferDesc.mappedAtCreation = false;
 	
@@ -39,7 +44,7 @@ WGPUBuffer createBufferVert(const WGPUDevice& device, size_t dataSize)
 	return vertexBuffer;
 }
 
-WGPUBuffer createBufferIdx(const WGPUDevice& device, size_t dataSize)
+WGPUBuffer createBufferIdx(const WGPUDevice& device, size_t dataSz)
 {
 	WGPUBuffer indexBuffer;
 	
@@ -47,7 +52,7 @@ WGPUBuffer createBufferIdx(const WGPUDevice& device, size_t dataSize)
 	WGPUBufferDescriptor bufferDesc = {};
 	bufferDesc.nextInChain = nullptr;
 	bufferDesc.label = "IndexBuffer";
-	bufferDesc.size = dataSize;
+	bufferDesc.size = dataSz;
 	bufferDesc.usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_Index ; // Index usage here!
 	bufferDesc.mappedAtCreation = false;
 	

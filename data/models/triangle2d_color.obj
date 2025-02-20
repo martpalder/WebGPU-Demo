@@ -1,0 +1,10 @@
+# Triangle File
+o triangle
+# Bottom Left
+v -0.5 -0.5 1.0 1.0 1.0
+# Bottom Right
+v 0.5 -0.5 1.0 1.0 1.0
+# Top
+v 0.0 0.5 1.0 1.0 1.0
+# Indices
+f 0 1 2

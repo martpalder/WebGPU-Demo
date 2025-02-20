@@ -12,13 +12,10 @@ const States& states, WGPUBindGroupLayout* pBindGroupLayout)
     WGPURenderPipeline pipeline;
 	
 	// VERTEX FETCH
-	// Create Vertex Attributes
-	WGPUVertexAttribute attribs[] = {
-		createAttribVertFloat(2, 0, 0, "pos"),
-		//createAttribVertFloat(3, 1, 3 * sizeof(float), "color"),
-	};
-	// Set Vertex Size
-	float numFloats = 2;
+	// Create the Vertex Attributes
+	WGPUVertexAttribute* pAttribs = attrib3DPosColor();
+	// Calculate the Vertex Size
+	int numFloats = 6;
 	size_t vertexSz = numFloats * sizeof(float);
 	
 	// Create a Render Pipeline Descriptor
@@ -27,7 +24,7 @@ const States& states, WGPUBindGroupLayout* pBindGroupLayout)
 	
 	// Create and set the Buffer Layout
 	WGPUVertexBufferLayout bufferLayout = {};
-	bufferLayout = createLayoutBufferVert(vertexSz, 1, &attribs[0]);
+	bufferLayout = createLayoutBufferVert(vertexSz, 2, pAttribs); // Number of Attributes
 	pipelineDesc.vertex.bufferCount = 1;
 	pipelineDesc.vertex.buffers = &bufferLayout;
 	
@@ -35,12 +32,16 @@ const States& states, WGPUBindGroupLayout* pBindGroupLayout)
 	// Assign the PipelineLayout to the RenderPipelineDescriptor's layout field
 	pipelineDesc.layout = createLayoutPipeline(gpuEnv.dev, pBindGroupLayout);
 	puts("Assigned the PipelineLayout to the RenderPipelineDescriptor");
-
+	
 	// Create the Render Pipeline:
     // Use the device to create the render pipeline.
 	pushError(gpuEnv.dev);
 	pipeline = wgpuDeviceCreateRenderPipeline(gpuEnv.dev, &pipelineDesc);
 	popError(gpuEnv.dev);
+	
+	// Release the Attributes
+	delete[] pAttribs;
+	pAttribs = nullptr;
 	
 	// Chek for Errors
 	if (pipeline == nullptr)

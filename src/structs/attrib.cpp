@@ -23,3 +23,37 @@ WGPUVertexAttribute createAttribVertFloat(int numFloats, int idx, int offset, co
 	
 	return attrib;
 }
+
+WGPUVertexAttribute* attrib2DPos()
+{
+	WGPUVertexAttribute* pAttribs = new WGPUVertexAttribute[1];
+	pAttribs[0] = createAttribVertFloat(2, 0, 0, "pos");
+	
+	return pAttribs;
+}
+
+WGPUVertexAttribute* attrib2DPosColor()
+{
+	WGPUVertexAttribute* pAttribs = new WGPUVertexAttribute[2];
+	pAttribs[0] = createAttribVertFloat(2, 0, 0, "pos");
+	pAttribs[1] = createAttribVertFloat(3, 1, 2 * sizeof(float), "color");
+	
+	return pAttribs;
+}
+
+WGPUVertexAttribute* attrib3DPos()
+{
+	WGPUVertexAttribute* pAttribs = new WGPUVertexAttribute[1];
+	pAttribs[0] = createAttribVertFloat(3, 0, 0, "pos");
+	
+	return pAttribs;
+}
+
+WGPUVertexAttribute* attrib3DPosColor()
+{
+	WGPUVertexAttribute* pAttribs = new WGPUVertexAttribute[1];
+	pAttribs[0] = createAttribVertFloat(3, 0, 0, "pos");
+	pAttribs[1] = createAttribVertFloat(3, 1, 3 * sizeof(float), "color");
+	
+	return pAttribs;
+}

@@ -23,7 +23,7 @@ public:
 	~MeshManager();
 	
 	// Members
-	Mesh* Get(const std::string& fileName);
+	Mesh* Get(const std::string& key);
 	Mesh* Load(const GPUEnv& gpuEnv, const char* fileName);
 };
 

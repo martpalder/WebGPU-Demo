@@ -5,6 +5,10 @@
 #include "./gpuenv.hpp"
 #include "./stdafx.h"
 
+#define COPY_BUFFER_ALIGNMENT 16
+
+size_t getAlignedSize(size_t dataSz);
+
 void uploadToBuffer(const WGPUQueue& queue, const WGPUBuffer& buffer,
 size_t dataSz, const void* data);
 

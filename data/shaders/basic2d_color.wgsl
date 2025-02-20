@@ -3,16 +3,13 @@ struct VSOut {
     @location(0) color : vec3f,
 };
 
-// The memory location of the uniform is given by a pair of a *bind group* and a *binding*
-//@group(0) @binding(0) var<uniform> uMVP: mat4x4f;
-
 @vertex
-fn vs_main(@location(0) pos : vec3f, @location(1) color : vec3f) -> VSOut
+fn vs_main(@location(0) pos: vec2f,  @location(1) color : vec3f) -> VSOut
 {
 	var out : VSOut;
-	out.position = vec4f(pos, 1.0);
+	out.position = vec4f(pos, 0.0, 1.0);
 	out.color = color;
-
+	
 	return out;
 }
 

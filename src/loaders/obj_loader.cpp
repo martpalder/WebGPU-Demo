@@ -23,29 +23,30 @@ Mesh* loadOBJ(const GPUEnv& gpuEnv, const char* path)
 		char* start = tok;
 		
 		// Get an Element Span
-		size_t span = strcspn(start, " \n");
+		size_t span = strcspn(start, " ");
 		// Copy the Element
 		copyLineN(el, start, span);
-		// Move the Start Location
+		// Set the Start Location
 		start += span + 1;
 		
 		// Check the Element Type
 		// Vertex
 		if (tok[0] == 'v')
 		{
-			// TODO: Count the Components
-			// Add the Vertex with 2 Floats
-			for (uint8_t i = 0; i < 2; ++i)
+			// Until the End of String
+			while (*(start - 1) != '\0')
 			{
+				// Add a Vertex Float
 				pMesh->AddVertexFloat(extractFloat(el, &start));
 			}
 		}
 		// Fragment
 		if (tok[0] == 'f')
 		{
-			// Add 3 Indices(A Triangle)
-			for (uint8_t i = 0; i < 3; ++i)
+			// Until the End of String
+			while (*(start - 1) != '\0')
 			{
+				// Add an Index
 				pMesh->AddIndex(extractUInt16(el, &start));
 			}
 		}

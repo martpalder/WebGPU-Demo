@@ -17,6 +17,7 @@ class Mesh
 private:
 	// Members
 	size_t m_vertexSz;
+	size_t m_vertexDataSz, m_indexDataSz;
 	// Buffers
 	WGPUBuffer m_vertexBuffer;
 	WGPUBuffer m_indexBuffer;

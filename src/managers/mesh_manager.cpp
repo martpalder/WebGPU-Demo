@@ -19,9 +19,16 @@ MeshManager::~MeshManager()
 	m_meshMap.clear();
 }
 
-Mesh* MeshManager::Get(const std::string& fileName)
+Mesh* MeshManager::Get(const std::string& key)
 {
-	return m_meshMap[fileName];
+	if (m_meshMap.count(key) > 0)
+	{
+		return m_meshMap[key];
+	}
+	
+	fprintf(stderr, "[ERROR]: Failed to get Mesh: '%s'\n", key.c_str());
+	
+	return nullptr;
 }
 
 Mesh* MeshManager::Load(const GPUEnv& gpuEnv, const char* fileName)

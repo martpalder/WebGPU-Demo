@@ -5,15 +5,13 @@
 #include "./myassert.hpp"
 #include "./stdafx.h"
 
-const static float vertexData[] = {
-	-0.5f, -0.5f,
-	0.5f, -0.5f,
-	0.0f, 0.5f,
-};
-
 Mesh::Mesh()
 {
+	// Set Values
 	m_vertexSz = 0;
+	m_vertexDataSz = 0;
+	m_indexDataSz = 0;
+	
 	// Set Pointers
 	m_vertexBuffer = nullptr;
 	m_indexBuffer = nullptr;
@@ -81,7 +79,6 @@ void Mesh::SetBuffers(const WGPURenderPassEncoder& renderPass)
 			wgpuBufferGetSize(m_indexBuffer)
 		);
 	}
-	puts("Buffers");
 }
 
 void Mesh::CreateBuffers(const GPUEnv& gpuEnv, size_t vertexSz)
@@ -89,25 +86,25 @@ void Mesh::CreateBuffers(const GPUEnv& gpuEnv, size_t vertexSz)
 	// Set the Vertex Size
 	m_vertexSz = vertexSz;
 	
-	// Caluclate the Data Sizes
-	size_t vertexDataSz = m_vertices.size() * sizeof(vertexSz);
-	size_t indexDataSz = m_indices.size() * sizeof(uint16_t);
+	// Calculate and align the Data Size
+	m_vertexDataSz = getAlignedSize(m_vertices.size() * sizeof(vertexSz));
+	m_indexDataSz = getAlignedSize(m_indices.size() * sizeof(uint16_t));
 	
 	// Create the Vertex Buffer
-	m_vertexBuffer = createBufferVert(gpuEnv.dev, vertexDataSz);
+	m_vertexBuffer = createBufferVert(gpuEnv.dev, m_vertexDataSz);
 	// Upload the Geometry Data
 	pushError(gpuEnv.dev);
-	uploadToBuffer(gpuEnv.queue, m_vertexBuffer, vertexDataSz, &m_vertices[0]);
+	uploadToBuffer(gpuEnv.queue, m_vertexBuffer, m_vertexDataSz, &m_vertices[0]);
 	popError(gpuEnv.dev);
 	
 	// If has Indices
 	if (m_indices.size() > 0)
 	{
 		// Create the Index Buffer
-		m_indexBuffer = createBufferIdx(gpuEnv.dev, indexDataSz);
+		m_indexBuffer = createBufferIdx(gpuEnv.dev, m_indexDataSz);
 		// Upload the Geometry Data
 		pushError(gpuEnv.dev);
-		uploadToBuffer(gpuEnv.queue, m_indexBuffer, indexDataSz, &m_indices[0]);
+		uploadToBuffer(gpuEnv.queue, m_indexBuffer, m_indexDataSz, &m_indices[0]);
 		popError(gpuEnv.dev);
 	}
 }
