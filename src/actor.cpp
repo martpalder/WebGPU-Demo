@@ -29,41 +29,37 @@ Actor::~Actor()
 
 void Actor::Init(const GPUEnv& gpuEnv, const mat4x4& vp)
 {
-	// Set the Translation Matrix
-	mat4x4_translate(m_t, m_pos[0], m_pos[1], m_pos[2]);
-	// Combine the Transformation Matrices
-	mat4x4_mul(m_model, m_t, m_r);	// Check correct ordering
-	// Combine the View-Projection and the Model
-	mat4x4_mul(m_mvp, vp, m_model);	// Check correct ordering
+	// Create the Uniform Buffer
+	m_mvpBuffer = createBufferUniformMat(gpuEnv, m_mvp);
 	
-	// Create and set the Uniform Buffer
-	/*m_mvpBuffer = createBufferMatrix(gpuEnv, m_mvp);
-	pushError(gpuEnv.dev);
+	// Compute the MVP Matrix
+	this->ComputeMVP(vp);
+	
+	// Upload to Shader
 	wgpuQueueWriteBuffer(gpuEnv.queue, m_mvpBuffer, 0, m_mvp, sizeof(mat4x4));
-	popError(gpuEnv.dev);*/
 }
 
-vec3& Actor::GetPos()
+const vec3& Actor::GetPos() const
 {
 	return m_pos;
 }
 
-const char* Actor::GetTag()
+const char* Actor::GetTag() const
 {
 	return m_tag;
 }
 
-const BoundingBox& Actor::GetBounds()
+const BoundingBox& Actor::GetBounds() const
 {
 	return m_box;
 }
 
-WGPUBool Actor::IsColliding(const BoundingBox& other)
+const WGPUBool Actor::IsColliding(const BoundingBox& other) const
 {
 	return intersects(m_box, other);
 }
 
-WGPUBool Actor::CompareTag(const char* tag)
+const WGPUBool Actor::CompareTag(const char* tag) const
 {
 	return (strcmp(m_tag, tag) == 0);
 }
@@ -122,6 +118,16 @@ void Actor::SetMesh(Mesh* pMesh)
 	}
 }
 
+void Actor::ComputeMVP(const mat4x4& vp)
+{
+	// Set the Translation Matrix
+	mat4x4_translate(m_t, m_pos[0], m_pos[1], m_pos[2]);
+	// Combine the Transformation Matrices
+	mat4x4_mul(m_model, m_t, m_r);	// Check correct ordering
+	// Combine the View-Projection and the Model
+	mat4x4_mul(m_mvp, vp, m_model);	// Check correct ordering
+}
+
 void Actor::CreateBindGroup(const GPUEnv& gpuEnv,
 const WGPUBindGroupLayout& bindGroupLayout)
 {
@@ -163,30 +169,20 @@ void Actor::Release()
 
 void Actor::Update(const WGPUQueue& queue, const mat4x4& vp)
 {
-	// Combine the Transformation Matrices
-	mat4x4_mul(m_model, m_t, m_r);	// Check correct ordering
-	// Combine the View-Projection Matrix
-	mat4x4_mul(m_mvp, vp, m_t);	// Check correct ordering
+	// Compute the MVP Matrix
+	this->ComputeMVP(vp);
 	
-	// If has MVP Buffer
-	/*if (m_mvpBuffer != nullptr)
-	{
-		// Update the Uniform Buffer
-		wgpuQueueWriteBuffer(queue, m_mvpBuffer, 0, m_t, sizeof(mat4x4));
-	}*/
+	// Upload to Shader
+	wgpuQueueWriteBuffer(queue, m_mvpBuffer, 0, m_mvp, sizeof(mat4x4));
 }
 
-void Actor::Draw(const WGPURenderPassEncoder& renderPass)
+void Actor::Draw(const WGPURenderPassEncoder& renderPass) const
 {
 	// {{Set the binding groups here!}}
 	if (m_bindGroup != nullptr)
 	{
 		// Set the Bind Group
 		wgpuRenderPassEncoderSetBindGroup(renderPass, 0, m_bindGroup, 0, nullptr);
-	}
-	else
-	{
-		perror("[ERROR]: No Bind Group");
 	}
 	
 	// If has Mesh
@@ -199,9 +195,6 @@ void Actor::Draw(const WGPURenderPassEncoder& renderPass)
 	{
 		perror("[ERROR]: No Mesh");
 	}
-	
-	// Draw a Triangle
-	//m_pMesh->DrawTriangle(renderPass);
 }
 
 void Actor::Translate(float stepX, float stepY, float stepZ)
@@ -214,13 +207,11 @@ void Actor::Translate(float stepX, float stepY, float stepZ)
 	// Set the Translation Matrix
 	mat4x4_translate(m_t, m_pos[0], m_pos[1], m_pos[2]);
 	// Update the Bounding Box
-	updateBoundingBox(m_box, m_pos, m_radius);
+	//updateBoundingBox(m_box, m_pos, m_radius);
 }
 
 void Actor::MoveAndCollide(vec2& moveDir)
 {
-	// Normalize the Move Direction
-	vec2_norm(moveDir, moveDir);
 	// Translate the Actor
 	this->Translate(moveDir[0] * m_speed, 0.0f, moveDir[1] * m_speed);
 }

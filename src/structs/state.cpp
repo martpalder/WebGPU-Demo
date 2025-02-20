@@ -70,7 +70,7 @@ const WGPUColorTargetState& colorTarget)
 	return fragmentState;
 }
 
-WGPUDepthStencilState createDepthStencilState()
+WGPUDepthStencilState createDepthStencilState(WGPUTextureFormat format)
 {
 	WGPUDepthStencilState depthStencilState = {};
 	
@@ -91,7 +91,7 @@ WGPUDepthStencilState createDepthStencilState()
 	// Define the Depth Stencil State
 	// Depth
 	depthStencilState.nextInChain = nullptr;
-	depthStencilState.format = WGPUTextureFormat_Depth24Plus;
+	depthStencilState.format = format;
 	depthStencilState.depthWriteEnabled = true;
 	depthStencilState.depthCompare = WGPUCompareFunction_Less;
 	// Stencil
@@ -107,7 +107,7 @@ WGPUDepthStencilState createDepthStencilState()
 	return depthStencilState;
 }
 
-States createStates(const WGPUShaderModule& shaderMod)
+States createStates(const WGPUShaderModule& shaderMod, WGPUTextureFormat depthFormat)
 {
 	States states = {};
 	
@@ -119,7 +119,7 @@ States createStates(const WGPUShaderModule& shaderMod)
 	states.fragment = createFragmentState(shaderMod, states.colorTarget);
 	states.depthStencil = {};
 	// Create the Depth Stencil State
-	states.depthStencil = createDepthStencilState();
+	states.depthStencil = createDepthStencilState(depthFormat);
 	
 	return states;
 }

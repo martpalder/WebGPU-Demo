@@ -15,6 +15,9 @@
 #include <emscripten/emscripten.h>
 #endif
 
+#define PLAYER_OBJ "triangle3d_color.obj"
+#define SHADER_NAME "basic3d_color.wgsl"
+
 App::App(int w, int h, const char* title)
 {
 	// Set Default Values
@@ -61,6 +64,13 @@ void App::Init(int w, int h, const char* title)
 
 void App::Quit()
 {
+	// Release the Depth View
+	wgpuTextureViewRelease(m_depthView);
+	printRelease("Depth View");
+	// Release the Depth Texture
+	wgpuTextureRelease(m_depthTexture);
+	printRelease("Depth Texture");
+	
 	// Release the Target View
 	wgpuTextureViewRelease(m_targetView);
 	printRelease("Target View");
@@ -90,60 +100,63 @@ WGPUBool App::IsRunning()
 	#endif
 }
 
-void App::CreatePipeline()
-{
-	// Create a Depth Texture and View
-	/*WGPUTexture depthTexture = createDepthTexture(m_gpuEnv.dev, m_w, m_h);
-	WGPUTextureView depthView = createDepthView(depthTexture);*/
-	
-	// Create the Attachments
-	m_attach.colorAttach = createColorAttach(0.1f, 0.1f, 0.1f);
-	puts("Created the Attachments");
-	
-	// Create the Descriptors
-	m_desc = createDescriptors(&m_attach.colorAttach, nullptr);
-	
-	// Create the Layouts
-	/*m_bindingLayout = createLayoutBinding(sizeof(mat4x4));
-	m_bindGroupLayout = createLayoutBindGroup(m_gpuEnv.dev, &m_bindingLayout);
-	// Create the Bind Groups
-	m_world.CreateBindGroups(m_gpuEnv, m_bindGroupLayout);*/
-	
-	// Create the Pipeline States
-    States states = createStates(m_shaderMgr.Get("shader1"));
-	
-	// Create the Render Pipeline
-	m_gpuEnv.pipeline = createRenderPipeline(m_gpuEnv, states, nullptr);
-}
-
 void App::LoadData()
 {
 	// Load a Shader
-	m_shaderMgr.Load(m_gpuEnv.dev, "basic3d_color.wgsl");
+	m_shaderMgr.Load(m_gpuEnv.dev, SHADER_NAME);
 	
 	// Load Meshes
-	Mesh* pMesh = m_meshMgr.Load(m_gpuEnv, "triangle3d_color.obj");
+	m_meshMgr.Load(m_gpuEnv, PLAYER_OBJ);
+	m_meshMgr.Load(m_gpuEnv, "ground.obj");
 	
 	// TODO: Load Textures
 	//m_texMgr.Load(m_gpuEnv, "char_base.png");
 }
 
-void App::SetupActors()
+void App::CreatePipeline()
 {
-	// Set the Actor Radiuses
-	vec3 playerRadius;
-	setVec3(playerRadius, 0.5f, 0.5f, 0.5f);
+	// Create a Depth Texture and View
+	WGPUTextureFormat depthFormat = WGPUTextureFormat_Depth16Unorm;
+	m_depthTexture = createDepthTexture(m_gpuEnv.dev, m_w, m_h, depthFormat);
+	m_depthView = createDepthView(m_depthTexture);
 	
+	// Create the Attachments
+	m_attach.colorAttach = createColorAttach(0.1f, 0.1f, 0.1f);
+	m_attach.depthStencilAttach = createDepthStencilAttach(m_gpuEnv.dev, m_depthView);
+	puts("Created the Attachments");
+	
+	// Create the Descriptors
+	bool bDepthStencil = true;
+	m_desc = createDescriptors(m_attach, bDepthStencil);
+	
+	// Create the Pipeline States
+    States states = createStates(m_shaderMgr.Get(SHADER_NAME), depthFormat);
+    // Create the Pipeline Descriptor
+	WGPURenderPipelineDescriptor pipelineDesc = createRenderPipelineDesc(states, bDepthStencil);
+	
+	// Create the Layouts
+	m_bindingLayout = createLayoutBinding(sizeof(mat4x4));
+	m_bindGroupLayout = createLayoutBindGroup(m_gpuEnv.dev, &m_bindingLayout);
+	// Create the Bind Groups
+	m_world.CreateBindGroups(m_gpuEnv, m_bindGroupLayout);
+    
+    // PIPELINE LAYOUT
+	// Assign the PipelineLayout to the RenderPipelineDescriptor's layout field
+	pipelineDesc.layout = createLayoutPipeline(m_gpuEnv.dev, &m_bindGroupLayout);
+	puts("Assigned the PipelineLayout to the RenderPipelineDescriptor");
+	
+	// Create the Render Pipeline
+	m_gpuEnv.pipeline = createRenderPipeline(m_gpuEnv, pipelineDesc);
+}
+
+void App::SetupActors()
+{	
 	// Add the Actors with Meshes
 	// Player
 	m_pPlayer = m_world.AddActor(m_gpuEnv, 0.0f, 0.0f, 0.0f, "Player");
-	m_pPlayer->SetMesh(m_meshMgr.Get("triangle3d_color.obj"));
-	// Ground
-	/*Actor* pGround = m_world.AddActor(m_gpuEnv, 0.0f, -0.5f, 0.0f, "Ground");
+	m_pPlayer->SetMesh(m_meshMgr.Get(PLAYER_OBJ));
+	Actor* pGround = m_world.AddActor(m_gpuEnv, 0.0f, -0.5f, 0.0f, "Ground");
 	pGround->SetMesh(m_meshMgr.Get("ground.obj"));
-	// Billboard
-	Actor* pBill = m_world.AddActor(m_gpuEnv, 0.0f, 0.5f, -3.0f, "Billboard");
-	pBill->SetMesh(m_meshMgr.Get("plane.obj"));*/
 	
 	// Get and attach the Camera
 	m_pCam = m_world.GetCam();
@@ -197,23 +210,23 @@ void App::Update()
 	float v = m_input.GetAxis(1);
 	
 	// If there's Move Input and Player
-	/*if ((h || v) && m_pPlayer != nullptr)
+	if ((h || v) && m_pPlayer != nullptr)
 	{
 		// Calculate the Move Direction
 		vec2 moveDir;
-		calcMoveDir(h, v, m_pCam->GetYaw(), moveDir);
+		calcMoveDir(h, v, 0.0f, moveDir);
 		// Move the Player
-		//m_pPlayer->MoveAndCollide(moveDir);
+		m_pPlayer->MoveAndCollide(moveDir);
 		
 		// Get the Camera Yaw
-		float yaw = m_pCam->GetYaw();
+		/*float yaw = m_pCam->GetYaw();
 		// Rotate the Player
 		if (v < 0.0f){ yaw += M_PI; };
-		m_pPlayer->SetYaw(yaw - h * HALF_PI);
+		m_pPlayer->SetYaw(yaw - h * HALF_PI);*/
 	}
 	
 	// If there's Camera
-	if (m_pCam != nullptr)
+	/*if (m_pCam != nullptr)
 	{
 		// Get the Mouse Position
 		vec2 mDelta;

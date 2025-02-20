@@ -2,7 +2,8 @@
 #include "./callback.hpp"
 #include "./myassert.hpp"
 
-WGPUTexture createDepthTexture(const WGPUDevice& device, uint32_t w, uint32_t h)
+WGPUTexture createDepthTexture(const WGPUDevice& device, uint32_t w, uint32_t h,
+WGPUTextureFormat format)
 {
 	WGPUTexture depthTexture = {};
 	
@@ -16,7 +17,7 @@ WGPUTexture createDepthTexture(const WGPUDevice& device, uint32_t w, uint32_t h)
 	textureDesc.usage = WGPUTextureUsage_RenderAttachment | WGPUTextureUsage_TextureBinding;
 	textureDesc.dimension = WGPUTextureDimension_2D;
 	textureDesc.size = extent;
-	textureDesc.format = WGPUTextureFormat_Depth24Plus;
+	textureDesc.format = format;
 	textureDesc.mipLevelCount = 1;
 	textureDesc.sampleCount = 1;
 	textureDesc.viewFormatCount = 0;

@@ -15,9 +15,9 @@ public:
 	Input();
 	
 	// Getters
-	float GetAxis(uint8_t axis);
-	vec2& GetMDelta();
-	bool IsKeyPressed(int key);
+	const float GetAxis(uint8_t axis) const;
+	const vec2& GetMDelta() const;
+	const bool IsKeyPressed(int key) const;
 	
 	// Methods
 	void Init(GLFWwindow* wnd);

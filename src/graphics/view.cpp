@@ -11,10 +11,10 @@ void getNextTargetView(const WGPUSurface& surf, WGPUTextureView* pTargetView)
 		return;
 	}
 	
-    // {{Create surface texture view}}
+    // Define text Texture View
 	WGPUTextureViewDescriptor viewDescriptor = {};
 	viewDescriptor.nextInChain = nullptr;
-	viewDescriptor.label = "Surface texture view";
+	viewDescriptor.label = "SurfaceTextureView";
 	viewDescriptor.format = wgpuTextureGetFormat(surfaceTexture.texture);
 	viewDescriptor.dimension = WGPUTextureViewDimension_2D;
 	viewDescriptor.baseMipLevel = 0;
@@ -22,6 +22,8 @@ void getNextTargetView(const WGPUSurface& surf, WGPUTextureView* pTargetView)
 	viewDescriptor.baseArrayLayer = 0;
 	viewDescriptor.arrayLayerCount = 1;
 	viewDescriptor.aspect = WGPUTextureAspect_All;
+	
+	// {{Create surface texture view}}
 	*pTargetView = wgpuTextureCreateView(surfaceTexture.texture, &viewDescriptor);
 	
 	#ifdef __EMSCRIPTEN__

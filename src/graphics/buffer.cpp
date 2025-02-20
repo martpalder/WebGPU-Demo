@@ -79,7 +79,7 @@ WGPUBuffer createBufferIdx(const WGPUDevice& device, size_t dataSz)
 	return indexBuffer;
 }
 
-WGPUBuffer createBufferMatrix(const GPUEnv& gpuEnv, const mat4x4& matrix)
+WGPUBuffer createBufferUniformMat(const GPUEnv& gpuEnv, const mat4x4& matrix)
 {
 	WGPUBuffer matrixBuffer;
 	

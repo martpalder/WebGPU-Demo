@@ -29,17 +29,18 @@ private:
 	
 	// Methods
 	void Release();
+	void ComputeMVP(const mat4x4& vp);
 
 public:
 	Actor(float x, float y, float z);
 	~Actor();
 	
 	// Getters
-	vec3& GetPos();
-	const char* GetTag();
-	const BoundingBox& GetBounds();
-	WGPUBool CompareTag(const char* tag);
-	WGPUBool IsColliding(const BoundingBox& other);
+	const vec3& GetPos() const;
+	const char* GetTag() const;
+	const BoundingBox& GetBounds() const;
+	const WGPUBool IsColliding(const BoundingBox& other) const;
+	const WGPUBool CompareTag(const char* tag) const;
 	
 	// Setters
 	void SetPos(float x, float y, float z);
@@ -53,7 +54,7 @@ public:
 	void Init(const GPUEnv& gpuEnv, const mat4x4& vp);
 	void CreateBindGroup(const GPUEnv& gpuEnv, const WGPUBindGroupLayout& bindGroupLayout);
 	void Update(const WGPUQueue& queue, const mat4x4& vp);
-	void Draw(const WGPURenderPassEncoder& renderPass);
+	void Draw(const WGPURenderPassEncoder& renderPass) const;
 	
 	// Transformations
 	void Translate(float stepX, float stepY, float stepZ);

@@ -34,15 +34,19 @@ WGPUCommandEncoderDescriptor createEncoderDesc()
 	return encoderDesc;
 }
 
-WGPURenderPassDescriptor createRenderPassDesc(WGPURenderPassColorAttachment* pColorAttach,
-WGPURenderPassDepthStencilAttachment* pDepthStencilAttach)
+WGPURenderPassDescriptor createRenderPassDesc(const Attachments& attach, bool bDepthStencil)
 {
 	WGPURenderPassDescriptor renderPassDesc = {};
 	
 	renderPassDesc.nextInChain = nullptr;
 	renderPassDesc.colorAttachmentCount = 1;
-	renderPassDesc.colorAttachments = pColorAttach;
-	renderPassDesc.depthStencilAttachment = pDepthStencilAttach;
+	renderPassDesc.colorAttachments = &attach.colorAttach;
+	renderPassDesc.depthStencilAttachment = nullptr;
+	if (bDepthStencil)
+	{
+		renderPassDesc.depthStencilAttachment = &attach.depthStencilAttach;
+		puts("Set the Depth Stencil Attachment");
+	}
 	renderPassDesc.timestampWrites = nullptr;
 	puts("Created a Render Pass Descriptor");
 	
@@ -152,8 +156,7 @@ WGPURenderPipelineDescriptor createRenderPipelineDesc(const States& states, bool
 	return pipelineDesc;
 }
 
-Descriptors createDescriptors(WGPURenderPassColorAttachment* pColorAttach,
-WGPURenderPassDepthStencilAttachment* pDepthStencilAttach)
+Descriptors createDescriptors(const Attachments& attach, bool bDepthStencil)
 {
 	Descriptors descriptors = {};
 	
@@ -161,7 +164,7 @@ WGPURenderPassDepthStencilAttachment* pDepthStencilAttach)
 	// Command Encoder Descriptor
 	descriptors.encoderDesc = createEncoderDesc();
 	// Render Pass Descriptor
-	descriptors.renderPassDesc = createRenderPassDesc(pColorAttach, pDepthStencilAttach);
+	descriptors.renderPassDesc = createRenderPassDesc(attach, bDepthStencil);
 	// Command Buffer Descriptor
 	descriptors.cmdBufferDesc = createCmdBufferDesc();
 	puts("Created the Descriptors");

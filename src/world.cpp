@@ -12,11 +12,11 @@ World::World()
 	m_cam.Update();
 	
 	// Combine the View-Projection Matrix
-	mat4x4_mul(m_vp, m_p, m_cam.GetView());
+	mat4x4_mul(m_vp, m_p, m_cam.GetView());	// Check correct ordering
 	puts("Created the World");
 }
 
-Camera* World::GetCam()
+const Camera* World::GetCam() const
 {
 	return &m_cam;
 }
@@ -48,19 +48,13 @@ void World::Update(const WGPUQueue& queue)
 {
 	// Update the Camera
 	m_cam.Update();
-	
 	// Combine the View-Projection Matrix
-	mat4x4_mul(m_vp, m_p, m_cam.GetView());
+	mat4x4_mul(m_vp, m_p, m_cam.GetView());	// Check correct ordering
 	
 	// Update all Actors
 	for (Actor* pActor : m_actors)
 	{
 		pActor->Update(queue, m_vp);
-		
-		if (pActor->CompareTag("Billboard"))
-		{
-			pActor->SetYaw(m_cam.GetYaw());
-		}
 	}
 }
 

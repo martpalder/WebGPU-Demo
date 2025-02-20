@@ -29,14 +29,12 @@ WGPUBindGroupDescriptor createBindGroupDesc(const WGPUBindGroupLayout& bindGroup
 size_t bindingCount, WGPUBindGroupEntry* pBindings);
 
 // Render Pass
-WGPURenderPassDescriptor createRenderPassDesc(WGPURenderPassColorAttachment* pColorAttach,
-WGPURenderPassDepthStencilAttachment* pDepthStencilAttach);
+WGPURenderPassDescriptor createRenderPassDesc(const Attachments& attach, bool bDepthStencil);
 
 // Render Pipeline
 WGPURenderPipelineDescriptor createRenderPipelineDesc(const States& states, bool bDepthStencil);
 
 // Descriptors
-Descriptors createDescriptors(WGPURenderPassColorAttachment* pColorAttach,
-WGPURenderPassDepthStencilAttachment* pDepthStencilAttach);
+Descriptors createDescriptors(const Attachments& attach, bool bDepthStencil);
 
 #endif	// DESC_HPP_INCLUDED

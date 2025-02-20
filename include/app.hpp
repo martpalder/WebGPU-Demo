@@ -23,8 +23,10 @@ private:
 	Input m_input;
 	GLFWwindow* m_wnd;
 	
-	/*WGPUTexture depthTexture;
-	WGPUTextureView depthView;*/
+	// Depth
+	WGPUTexture m_depthTexture;
+	WGPUTextureView m_depthView;
+	
 	// Attachments and Descriptors
 	Attachments m_attach;
 	Descriptors m_desc;
@@ -38,7 +40,7 @@ private:
 	// World
 	World m_world;
 	// Camera
-	Camera* m_pCam;
+	const Camera* m_pCam;
 	// Actors
 	Actor* m_pPlayer;
 	
@@ -58,12 +60,11 @@ private:
 	void Init(int w, int h, const char* title);
 	void Quit();
 	
-	// Create Methods
-	void CreateAttachments();
-	void CreatePipeline();
-	
 	// Load Methods
 	void LoadData();
+	
+	// Create Methods
+	void CreatePipeline();
 	
 	// Setup Mehods
 	void SetupActors();

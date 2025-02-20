@@ -7,6 +7,6 @@
 #include "./stdafx.h"
 
 WGPURenderPipeline createRenderPipeline(const GPUEnv& gpuEnv,
-const States& states, WGPUBindGroupLayout* pBindGroupLayout);
+WGPURenderPipelineDescriptor& pipelineDesc);
 
 #endif  // PIPELINE_HPP_INCLUDED

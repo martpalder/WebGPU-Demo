@@ -19,7 +19,7 @@ public:
 	World();
 	
 	// Getters
-	Camera* GetCam();
+	const Camera* GetCam() const;
 	
 	// Create Functions
 	void CreateBindGroups(const GPUEnv& gpuEnv,

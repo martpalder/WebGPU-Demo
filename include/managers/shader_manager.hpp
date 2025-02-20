@@ -19,7 +19,6 @@ private:
 	
     // Methods
     void Release();
-    void CreateMod(const WGPUDevice& device, const char* shaderCode);
 
 public:
     // Constructor/Destructor
@@ -30,7 +29,10 @@ public:
     const WGPUShaderModule& Get(const std::string& key);
 
     // Methods
-    void Load(WGPUDevice device, const char* fileName);
+    WGPUShaderModule CreateShaderMod(const WGPUDevice& device,
+    const char* shaderCode);
+    
+    WGPUShaderModule Load(WGPUDevice device, const char* fileName);
 };
 
 #endif	// SHADER_MANAGER_HPP_INCLUDED

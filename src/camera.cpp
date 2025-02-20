@@ -1,7 +1,4 @@
 #include "./camera.hpp"
-#include "./mymath.h"
-
-const static vec3 VEC3_UP = { 0.0f, 1.0f, 0.0f };
 
 Camera::Camera()
 {
@@ -13,32 +10,31 @@ Camera::Camera()
 	m_pParent = nullptr;
 	// Position
 	m_pos[0] = 0.0f;
-	m_pos[1] = 2.0f;
+	m_pos[1] = 1.0f;
 	m_pos[2] = m_dist;
 	// Forward Direction
 	m_dirF[0] = 0.0f;
-	m_dirF[1] = 0.0f;
-	m_dirF[2] = -1.0f;
+	m_dirF[1] = -0.77f;
+	m_dirF[2] = -0.77f;
 	
 	// Initialize the View Matrix
 	mat4x4_identity(m_v);
 	
-	// Set the View Matrix
-	vec3 center = { 0, 0, 0 };
-	mat4x4_look_at(m_v, m_pos, center, VEC3_UP);
+	// Compute the View Matrix
+	this->ComputeView();
 }
 
-float Camera::GetYaw()
+float Camera::GetYaw() const
 {
 	return m_yaw;
 }
 
-vec3& Camera::GetForward()
+const vec3& Camera::GetForward() const
 {	
 	return m_dirF;
 }
 
-mat4x4& Camera::GetView()
+const mat4x4& Camera::GetView() const
 {
 	return m_v;
 }
@@ -55,6 +51,24 @@ void Camera::SetParent(Actor* pParent)
 {
 	m_pParent = pParent;
 	puts("Set the Camera Parent");
+}
+
+void Camera::ComputeView()
+{
+	// If has a Parent
+	if (m_pParent != nullptr)
+	{	
+		// Get the Center
+		memcpy(m_center, m_pParent->GetPos(), sizeof(vec3));
+	}
+	
+	// Set the Position from the Center
+	m_pos[0] = m_center[0] - m_dirF[0] * m_dist;
+	m_pos[1] = m_center[1] - m_dirF[1] * m_dist;
+	m_pos[2] = m_center[2] - m_dirF[2] * m_dist;
+	
+	// Set the View Matrix
+	mat4x4_look_at(m_v, m_pos, m_center, VEC3_UP);
 }
 
 void Camera::Orbit(const vec2& mDelta)
@@ -76,17 +90,5 @@ void Camera::Orbit(const vec2& mDelta)
 
 void Camera::Update()
 {
-	if (m_pParent != nullptr)
-	{	
-		// Get the Center
-		memcpy(m_center, m_pParent->GetPos(), sizeof(vec3));
-
-		// Set the Position from the Center
-		m_pos[0] = m_center[0] - m_dirF[0] * m_dist;
-		m_pos[1] = m_center[1] - m_dirF[1] * m_dist;
-		m_pos[2] = m_center[2] - m_dirF[2] * m_dist;
-		
-		// Set the View Matrix
-		mat4x4_look_at(m_v, m_pos, m_center, VEC3_UP);
-	}
+	this->ComputeView();
 }

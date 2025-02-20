@@ -5,7 +5,7 @@
 #include "./actor.hpp"
 #include "./stdafx.h"
 
-# define M_PI 3.14159265358979323846f  /* pi */
+#include "./mymath.h"
 
 class Camera
 {
@@ -19,20 +19,23 @@ private:
 	float m_dist, m_rotSpeed;
 	float m_pitch, m_yaw;
 	vec3 m_pos, m_dirF;
-	float m_center[3];
+	vec3 m_center;
 	mat4x4 m_v;
 	
 	// Components
 	Actor* m_pParent;
+	
+	// Components
+	void ComputeView();
 
 public:
 	// Constructor
 	Camera();
 	
 	// Getters
-	float GetYaw();
-	vec3& GetForward();
-	mat4x4& GetView();
+	float GetYaw() const;
+	const vec3& GetForward() const;
+	const mat4x4& GetView() const;
 	
 	// Setters
 	void SetPos(float x, float y, float z);

@@ -4,6 +4,7 @@
 
 #include "./stdafx.h"
 
+#define M_PI 3.14159265358979323846f  /* pi */
 #define HALF_PI (M_PI / 2)
 
 inline float clampf(float val, float vMin, float vMax)

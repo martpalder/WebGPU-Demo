@@ -37,14 +37,17 @@ void ShaderManager::Release()
 }
 
 
-void ShaderManager::CreateMod(const WGPUDevice& device, const char* shaderCode)
+WGPUShaderModule ShaderManager::CreateShaderMod(const WGPUDevice& device,
+const char* shaderCode)
 {
 	WGPUShaderModule shaderMod;
 	
-	// Shader Code Description
-	WGPUShaderModuleWGSLDescriptor shaderCodeDesc = createShaderCodeDesc(shaderCode);
-	// Shader Module Description
-	WGPUShaderModuleDescriptor shaderModDesc = createShaderModDesc(&shaderCodeDesc.chain);
+	// Create Shader Code Description
+	WGPUShaderModuleWGSLDescriptor shaderCodeDesc = {};
+	shaderCodeDesc = createShaderCodeDesc(shaderCode);
+	// Create Shader Module Description
+	WGPUShaderModuleDescriptor shaderModDesc = {};
+	shaderModDesc = createShaderModDesc(&shaderCodeDesc.chain);
 	
 	// Create a Shader Module
 	pushError(device);
@@ -55,26 +58,31 @@ void ShaderManager::CreateMod(const WGPUDevice& device, const char* shaderCode)
 	if (shaderMod == nullptr)
 	{
 		std::cerr << "[ERROR]: Failed to Create a Shader Module" << std::endl;
-		return;
+		exit(-1);
 	}
 	
 	// Assert
 	MY_ASSERT(shaderMod != nullptr);
-	// Add the Shader Module
-	m_shaderMap["shader1"] = shaderMod;
+	
+	return shaderMod;
 }
 
-void ShaderManager::Load(WGPUDevice device, const char* fileName)
+WGPUShaderModule ShaderManager::Load(WGPUDevice device, const char* fileName)
 {
 	// Set the Filepath
 	char path[48];
 	sprintf(path, SHADER_DIR, fileName);
 	
-	// Read the Code and create the Shader Module
+	// Read the Shder Code and create a Module
 	const char* code = readFileText(path);
-	this->CreateMod(device, code);
+	WGPUShaderModule shaderMod = this->CreateShaderMod(device, code);
+	
+	// Add the Shader Module
+	m_shaderMap[fileName] = shaderMod;
 
 	// Release the Code
 	free((void*)code);
 	code = NULL;
+	
+	return shaderMod;
 }

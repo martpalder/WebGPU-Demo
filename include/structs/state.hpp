@@ -19,8 +19,8 @@ WGPUVertexState createVertexState(const WGPUShaderModule& shaderMod);
 WGPUFragmentState createFragmentState(const WGPUShaderModule& shaderMod,
 const WGPUColorTargetState& colorTarget);
 
-WGPUDepthStencilState createDepthStencilState();
+WGPUDepthStencilState createDepthStencilState(WGPUTextureFormat format);
 
-States createStates(const WGPUShaderModule& shaderMod);
+States createStates(const WGPUShaderModule& shaderMod, WGPUTextureFormat depthFormat);
 
 #endif	// STATE_HPP_INCLUDED
