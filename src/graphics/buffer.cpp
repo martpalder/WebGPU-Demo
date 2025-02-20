@@ -1,13 +1,15 @@
 #include "./buffer.hpp"
-#include "./callback.hpp"
 #include "./myassert.hpp"
 
-#include <cstdio>
-
-WGPUBuffer createBufferVert(const GPUEnv& gpuEnv,
-size_t dataSize, const void* pVertexData)
+void uploadToBuffer(const WGPUQueue& queue, const WGPUBuffer& buffer,
+size_t dataSz, const void* data)
 {
-	WGPUBuffer vertexBuffer;
+	wgpuQueueWriteBuffer(queue, buffer, 0, data, dataSz);
+}
+
+WGPUBuffer createBufferVert(const WGPUDevice& device, size_t dataSize)
+{
+	WGPUBuffer vertexBuffer = nullptr;
 	
 	// Describe Vertex Buffer
 	WGPUBufferDescriptor bufferDesc = {};
@@ -18,9 +20,9 @@ size_t dataSize, const void* pVertexData)
 	bufferDesc.mappedAtCreation = false;
 	
 	// Create a Vertex Buffer
-	wgpuDevicePushErrorScope(gpuEnv.dev, WGPUErrorFilter_Validation);
-	vertexBuffer = wgpuDeviceCreateBuffer(gpuEnv.dev, &bufferDesc);
-	wgpuDevicePopErrorScope(gpuEnv.dev, errorCallback, nullptr);
+	pushError(device);
+	vertexBuffer = wgpuDeviceCreateBuffer(device, &bufferDesc);
+	popError(device);
 	
 	// Check for Errors
 	if (vertexBuffer == nullptr)
@@ -29,24 +31,15 @@ size_t dataSize, const void* pVertexData)
 		
 		return nullptr;
 	}
-	else
-	{
-		puts("Created a Vertex Buffer");
-	}
+	puts("Created a Vertex Buffer");
 	
 	// Assert
 	MY_ASSERT(vertexBuffer != nullptr);
 
-	// Upload the Geometry Data to the Buffer
-	wgpuDevicePushErrorScope(gpuEnv.dev, WGPUErrorFilter_Validation);
-	wgpuQueueWriteBuffer(gpuEnv.queue, vertexBuffer, 0, pVertexData, bufferDesc.size);
-	wgpuDevicePopErrorScope(gpuEnv.dev, errorCallback, nullptr);
-
 	return vertexBuffer;
 }
 
-WGPUBuffer createBufferIdx(const GPUEnv& gpuEnv,
-size_t dataSize, const void* pIndexData)
+WGPUBuffer createBufferIdx(const WGPUDevice& device, size_t dataSize)
 {
 	WGPUBuffer indexBuffer;
 	
@@ -59,9 +52,9 @@ size_t dataSize, const void* pIndexData)
 	bufferDesc.mappedAtCreation = false;
 	
 	// Create the Index Buffer
-	wgpuDevicePushErrorScope(gpuEnv.dev, WGPUErrorFilter_Validation);
-	indexBuffer = wgpuDeviceCreateBuffer(gpuEnv.dev, &bufferDesc);
-	wgpuDevicePopErrorScope(gpuEnv.dev, errorCallback, nullptr);
+	pushError(device);
+	indexBuffer = wgpuDeviceCreateBuffer(device, &bufferDesc);
+	popError(device);
 	
 	// Check for Errors
 	if (indexBuffer == nullptr)
@@ -77,11 +70,6 @@ size_t dataSize, const void* pIndexData)
 	
 	// Assert
 	MY_ASSERT(indexBuffer != nullptr);
-
-	// Upload the Geometry Data to the Buffer
-	wgpuDevicePushErrorScope(gpuEnv.dev, WGPUErrorFilter_Validation);
-	wgpuQueueWriteBuffer(gpuEnv.queue, indexBuffer, 0, pIndexData, bufferDesc.size);
-	wgpuDevicePopErrorScope(gpuEnv.dev, errorCallback, nullptr);
 
 	return indexBuffer;
 }
@@ -99,9 +87,9 @@ WGPUBuffer createBufferMatrix(const GPUEnv& gpuEnv, const mat4x4& matrix)
 	bufferDesc.mappedAtCreation = false;
 	
 	// Create a Uniform Buffer
-	wgpuDevicePushErrorScope(gpuEnv.dev, WGPUErrorFilter_Validation);
+	pushError(gpuEnv.dev);
 	matrixBuffer = wgpuDeviceCreateBuffer(gpuEnv.dev, &bufferDesc);
-	wgpuDevicePopErrorScope(gpuEnv.dev, errorCallback, nullptr);
+	popError(gpuEnv.dev);
 	
 	// Check for Errors
 	if (matrixBuffer == nullptr)
@@ -119,9 +107,9 @@ WGPUBuffer createBufferMatrix(const GPUEnv& gpuEnv, const mat4x4& matrix)
 	MY_ASSERT(matrixBuffer != nullptr);
 
 	// Upload the Matrix to the Buffer
-	wgpuDevicePushErrorScope(gpuEnv.dev, WGPUErrorFilter_Validation);
+	pushError(gpuEnv.dev);
 	wgpuQueueWriteBuffer(gpuEnv.queue, matrixBuffer, 0, matrix, bufferDesc.size);
-	wgpuDevicePopErrorScope(gpuEnv.dev, errorCallback, nullptr);
+	popError(gpuEnv.dev);
 
 	return matrixBuffer;
 }

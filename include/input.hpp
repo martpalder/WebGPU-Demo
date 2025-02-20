@@ -5,8 +5,8 @@
 #include "./stdafx.h"
 #include <GLFW/glfw3.h>
 
-inline static void keyCallback(GLFWwindow* wnd, int key, int scancode, int action, int mods);
-inline static void cursorPosCallback(GLFWwindow* wnd, double xpos, double ypos);
+inline void keyCallback(GLFWwindow* wnd, int key, int scancode, int action, int mods);
+inline void cursorPosCallback(GLFWwindow* wnd, double xpos, double ypos);
 
 class Input
 {

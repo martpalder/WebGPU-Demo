@@ -33,6 +33,7 @@ WGPUVertexState createVertexState(const WGPUShaderModule& shaderMod)
 	WGPUVertexState vertexState = {};
 	
 	// Create a pipeline layout to define the input structure.
+	vertexState.nextInChain = nullptr;
 	vertexState.bufferCount = 0;
 	vertexState.buffers = nullptr;
 	
@@ -116,6 +117,7 @@ States createStates(const WGPUShaderModule& shaderMod)
 	// Create Vertex and Fragment State
 	states.vertex = createVertexState(shaderMod);
 	states.fragment = createFragmentState(shaderMod, states.colorTarget);
+	states.depthStencil = {};
 	// Create the Depth Stencil State
 	states.depthStencil = createDepthStencilState();
 	

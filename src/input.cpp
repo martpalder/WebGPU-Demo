@@ -6,13 +6,13 @@ bool g_keys[350];
 vec2 g_mPosCurr, g_mPosLast;
 vec2 g_mDelta;
 
-inline static void keyCallback(GLFWwindow* wnd, int key, int scancode, int action, int mods)
+inline void keyCallback(GLFWwindow* wnd, int key, int scancode, int action, int mods)
 {
 	if (action == GLFW_PRESS) { g_keys[key] = true; }
 	else if (action == GLFW_RELEASE) { g_keys[key] = false; }
 };
 
-inline static void cursorPosCallback(GLFWwindow* wnd, double x, double y)
+inline void cursorPosCallback(GLFWwindow* wnd, double x, double y)
 {
 	// Set Mouse Positions
 	g_mPosLast[0] = g_mPosCurr[0];

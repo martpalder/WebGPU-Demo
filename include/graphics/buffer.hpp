@@ -3,15 +3,13 @@
 #define BUFFER_HPP_INCLUDED
 
 #include "./gpuenv.hpp"
-#include "./vertex.hpp"
+#include "./stdafx.h"
 
-#include <webgpu/webgpu.h>
-#include <linmath.h>
+void uploadToBuffer(const WGPUQueue& queue, const WGPUBuffer& buffer,
+size_t dataSz, const void* data);
 
-WGPUBuffer createBufferVert(const GPUEnv& gpuEnv,
-size_t dataSize, const void* pVertexData);
-WGPUBuffer createBufferIdx(const GPUEnv& gpuEnv,
-size_t dataSize, const void* pIndexData);
+WGPUBuffer createBufferVert(const WGPUDevice& device, size_t dataSize);
+WGPUBuffer createBufferIdx(const WGPUDevice& device, size_t dataSize);
 WGPUBuffer createBufferMatrix(const GPUEnv& gpuEnv, const mat4x4& matrix);
 
 #endif	// BUFFER_HPP_INCLUDED

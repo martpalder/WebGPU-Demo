@@ -22,24 +22,8 @@ WGPURenderPassColorAttachment createColorAttach(float r, float g, float b)
 }
 
 WGPURenderPassDepthStencilAttachment createDepthStencilAttach(const WGPUDevice& device,
-const WGPUTexture& depthTexture)
-{	
-	// Define Depth Texture View
-	WGPUTextureViewDescriptor depthViewDesc = {};
-	depthViewDesc.nextInChain = nullptr;
-	depthViewDesc.label = "DepthView";
-	depthViewDesc.format = wgpuTextureGetFormat(depthTexture);
-	depthViewDesc.dimension = WGPUTextureViewDimension_2D;
-	depthViewDesc.baseMipLevel = 0;
-	depthViewDesc.mipLevelCount = 1;
-	depthViewDesc.baseArrayLayer = 0;
-	depthViewDesc.arrayLayerCount = 1;
-
-	// Create a Depth Texture View
-	wgpuDevicePushErrorScope(device, WGPUErrorFilter_Validation);
-	WGPUTextureView depthView = wgpuTextureCreateView(depthTexture, &depthViewDesc);
-	wgpuDevicePopErrorScope(device, errorCallback, nullptr);
-	
+const WGPUTextureView& depthView)
+{
 	// The Depth Stencil Attachment handles Z-Buffering
 	WGPURenderPassDepthStencilAttachment depthStencilAttach = {};
 	

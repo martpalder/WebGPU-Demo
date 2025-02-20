@@ -65,9 +65,12 @@ WGPUBindGroupLayoutEntry* pBindingLayout)
 	WGPUBindGroupLayoutDescriptor bindGroupLayoutDesc{};
 	bindGroupLayoutDesc.nextInChain = nullptr;
 	bindGroupLayoutDesc.label = "BindGroupLayout";
-	// Set the Entries
+	bindGroupLayoutDesc.entryCount = 0;
+	bindGroupLayoutDesc.entries = nullptr;
+	// If has a Binding Layout
 	if (pBindingLayout != nullptr)
 	{
+		// Set the Bind Group Layout Entries
 		bindGroupLayoutDesc.entryCount = 1;
 		bindGroupLayoutDesc.entries = pBindingLayout;
 	}
@@ -103,7 +106,7 @@ WGPUBindGroupLayout* pBindGroupLayout)
 	layoutDesc.nextInChain = nullptr;
 	layoutDesc.bindGroupLayoutCount = 0;
 	layoutDesc.bindGroupLayouts = nullptr;
-	
+	// If has a Binding Layout
 	if (pBindGroupLayout != nullptr)
 	{
 		// Set the Bind Group Layout

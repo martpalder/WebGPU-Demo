@@ -28,9 +28,6 @@ GLFWwindow* createWindow(int w, int h, const char* title)
 		exit(-1);
 	}
 	
-	// Set Mouse Mode
-	glfwSetInputMode(wnd, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-	
 	return wnd;
 }
 

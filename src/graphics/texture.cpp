@@ -1,12 +1,6 @@
 #include "./texture.hpp"
 #include "./callback.hpp"
 #include "./myassert.hpp"
-#include "./stb_image.h"
-#include "./stdafx.h"
-
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
-#include <cmath> // For std::log2 and std::floor
 
 WGPUTexture createDepthTexture(const WGPUDevice& device, uint32_t w, uint32_t h)
 {
@@ -47,31 +41,4 @@ WGPUTexture createDepthTexture(const WGPUDevice& device, uint32_t w, uint32_t h)
 	MY_ASSERT(depthTexture != nullptr);
 	
 	return depthTexture;
-}
-
-WGPUTexture loadTexture(const GPUEnv& gpuEnv, const char* fileName)
-{
-	WGPUTexture texture = {};
-	
-	// Set the Filepath
-	char path[32];
-	sprintf(path, "./data/textures/%s", fileName);
-	
-	// Load an Image
-	int x, y, nCh;
-	stbi_uc* data = stbi_load(path, &x, &y, &nCh, 3);
-	
-	// TODO: Write the Texture
-	/*wgpuQueueWriteTexture(
-		gpuEnv.queue,
-		&texture,
-		img->data, size_t dataSize,
-		WGPUTextureDataLayout const *dataLayout,
-		WGPUExtent3D const *writeSize
-	);*/
-	
-	// Release the Image Data
-	stbi_image_free(data);
-	
-	return texture;
 }

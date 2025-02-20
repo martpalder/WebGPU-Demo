@@ -6,7 +6,7 @@ void errorCallback(WGPUErrorType type, const char* message, void* /* pUserData *
 	switch (type)
 	{
 	case WGPUErrorType_NoError:
-		std::cout << "No Error" << std::endl;
+		//std::cout << "No Error" << std::endl;
 		break;
 	case WGPUErrorType_Validation:
 		std::cerr << "[Validation Error]: " << message << std::endl;

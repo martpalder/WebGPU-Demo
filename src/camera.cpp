@@ -1,6 +1,8 @@
 #include "./camera.hpp"
 #include "./mymath.h"
 
+const static vec3 VEC3_UP = { 0.0f, 1.0f, 0.0f };
+
 Camera::Camera()
 {
 	// Set Defaults
@@ -11,7 +13,7 @@ Camera::Camera()
 	m_pParent = nullptr;
 	// Position
 	m_pos[0] = 0.0f;
-	m_pos[1] = 0.0f;
+	m_pos[1] = 2.0f;
 	m_pos[2] = m_dist;
 	// Forward Direction
 	m_dirF[0] = 0.0f;
@@ -22,9 +24,8 @@ Camera::Camera()
 	mat4x4_identity(m_v);
 	
 	// Set the View Matrix
-	vec3 up = { 0, 1, 0 };
 	vec3 center = { 0, 0, 0 };
-	mat4x4_look_at(m_v, m_pos, center, up);
+	mat4x4_look_at(m_v, m_pos, center, VEC3_UP);
 }
 
 float Camera::GetYaw()

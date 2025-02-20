@@ -10,14 +10,16 @@ WGPUVertexAttribute createAttribVertFloat(int numFloats, int idx, int offset, co
 	// Set the Corrrect Format
 	switch(numFloats)
 	{
+		case 1: attrib.format = WGPUVertexFormat_Float32; break;
 		case 2: attrib.format = WGPUVertexFormat_Float32x2; break;
 		case 3: attrib.format = WGPUVertexFormat_Float32x3; break;
+		case 4: attrib.format = WGPUVertexFormat_Float32x4; break;
 	}
 	// Offset from the first element
 	attrib.offset = offset;
 	// Corresponds to @location(...)
 	attrib.shaderLocation = idx;
-	printf("Created a Vertex Attribute%d: '%s'\n", idx, label);
+	printf("Created a Vertex attrib%d: '%s'\n", idx, label);
 	
 	return attrib;
 }

@@ -3,20 +3,29 @@
 #include "./stdafx.h"
 
 MeshManager::MeshManager()
-{
-	puts("Created a Mesh Manager");
-}
+{}
 
 MeshManager::~MeshManager()
 {
-	// Clear the Meshes
-	m_meshes.clear();
-	puts("Cleared the Meshes");
+	// Reöease the Meshes
+	for (pair<const std::string, Mesh*> keyVal : m_meshMap)
+	{
+		delete keyVal.second;
+		keyVal.second = nullptr;
+	}
+	puts("Released the Meshes");
+	
+	// Clear the Mesh Map
+	m_meshMap.clear();
+}
+
+Mesh* MeshManager::Get(const std::string& fileName)
+{
+	return m_meshMap[fileName];
 }
 
 Mesh* MeshManager::Load(const GPUEnv& gpuEnv, const char* fileName)
 {
-	//this->CreateTransform(gpuEnv);
 	Mesh* pMesh = nullptr;
 	
 	// Set the Filepath
@@ -27,17 +36,21 @@ Mesh* MeshManager::Load(const GPUEnv& gpuEnv, const char* fileName)
 	const char* fileExt = strrchr(fileName, '.');
 	
 	// Check the File Extension
-	if (strcmp(fileExt, ".obj") == 0)
+	if (compareStrings(fileExt, ".obj"))
 	{
 		// Load an OBJ
 		pMesh = loadOBJ(gpuEnv, path);
-		printf("Loaded a Mesh: '%s'\n", fileName);
 	}
 	
+	// Check if loaded
 	if (pMesh != nullptr)
 	{
-		m_meshes.push_back(pMesh);
+		// Add to Mesh Map
+		m_meshMap[fileName] = pMesh;
+		printf("Loaded a Mesh: '%s'\n", fileName);
+		
+		return pMesh;
 	}
 	
-	return m_meshes.back();
+	return nullptr;
 }

@@ -1,4 +1,5 @@
 #include "./obj_loader.hpp"
+#include "./freader.hpp"
 #include "./color.hpp"
 #include "./stdafx.h"
 
@@ -32,10 +33,11 @@ Mesh* loadOBJ(const GPUEnv& gpuEnv, const char* path)
 		// Vertex
 		if (tok[0] == 'v')
 		{
-			// Add the Vertex with 6 Floats
-			for (uint8_t i = 0; i < 6; ++i)
+			// TODO: Count the Components
+			// Add the Vertex with 2 Floats
+			for (uint8_t i = 0; i < 2; ++i)
 			{
-				vertices.push_back(extractFloat(el, &start));
+				pMesh->AddVertexFloat(extractFloat(el, &start));
 			}
 		}
 		// Fragment
@@ -44,7 +46,7 @@ Mesh* loadOBJ(const GPUEnv& gpuEnv, const char* path)
 			// Add 3 Indices(A Triangle)
 			for (uint8_t i = 0; i < 3; ++i)
 			{
-				indices.push_back(extractUInt16(el, &start));
+				pMesh->AddIndex(extractUInt16(el, &start));
 			}
 		}
 		
@@ -52,16 +54,12 @@ Mesh* loadOBJ(const GPUEnv& gpuEnv, const char* path)
 		tok = strtok(nullptr, "\n");
 	}
 
-	// Assign the Vertices
-	uint32_t vertexCount = (uint32_t)vertices.size();
-	pMesh->AssignVertices(gpuEnv, vertexCount, &vertices[0]);
+	// Create the Buffers
+	pMesh->CreateBuffers(gpuEnv, 2 * sizeof(float));
 	
-	// Assign the Indices
-	uint32_t indexCount = (uint32_t)indices.size();
-	pMesh->AssignIndices(gpuEnv, indexCount, &indices[0]);
-	
-	// Free the Text
+	// Release the Text
 	free(text);
+	text = nullptr;
 		
 	return pMesh;
 }

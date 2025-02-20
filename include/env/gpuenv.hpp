@@ -2,9 +2,9 @@
 #ifndef GPUENV_HPP_INCLUDED
 #define GPUENV_HPP_INCLUDED
 
+#include "./stdafx.h"
+
 #include <GLFW/glfw3.h>
-#include <webgpu/webgpu.h>
-#include <cstdio>
 
 typedef struct {
 	WGPUInstance inst;
@@ -12,7 +12,6 @@ typedef struct {
 	WGPUDevice dev;
 	WGPUQueue queue;
 	WGPURenderPipeline pipeline;
-	WGPUTextureView targetView;
 } GPUEnv;
 
 WGPURequestAdapterOptions createAdapterOpts(const WGPUSurface& surf);

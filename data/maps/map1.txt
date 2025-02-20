@@ -1,0 +1,3 @@
++0.0,+0.0,+0.0,Player,player.obj
++0.0,-0.5,+0.0,Ground,ground.obj
++0.0,+0.5,-3.0,Bill,plane.obj

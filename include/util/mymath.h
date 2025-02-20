@@ -4,6 +4,8 @@
 
 #include "./stdafx.h"
 
+#define HALF_PI (M_PI / 2)
+
 inline float clampf(float val, float vMin, float vMax)
 {
 	val = (val < vMin) ? vMin : val;
@@ -12,9 +14,27 @@ inline float clampf(float val, float vMin, float vMax)
 	return val;
 }
 
-inline void setVec2(void* dst, const void* src)
+inline void setVec2(vec2& v, float x, float y)
+{
+	v[0] = x;
+	v[1] = y;
+}
+
+inline void setVec3(vec3& v, float x, float y, float z)
+{
+	v[0] = x;
+	v[1] = y;
+	v[2] = z;
+}
+
+inline void copyVec2(void* dst, const void* src)
 {
 	memcpy(dst, src, sizeof(vec2));
+}
+
+inline void copyVec3(void* dst, const void* src)
+{
+	memcpy(dst, src, sizeof(vec3));
 }
 
 inline void calcMoveDir(float h, float v, float yaw, vec2& moveDir)

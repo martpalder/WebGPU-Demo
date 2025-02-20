@@ -3,19 +3,21 @@
 #define ACTOR_HPP_INCLUDED
 
 #include "./mesh.hpp"
+#include "./bounding_box.hpp"
 #include "./stdafx.h"
 
 class Actor
 {
 private:
 	// Members
-	vec3 m_pos;
+	vec3 m_pos, m_radius;
 	float m_speed, m_yaw;
+	BoundingBox m_box;
 	const char* m_tag;
 	
 	// Components
 	// Matrices
-	mat4x4 m_t, m_r, m_s;
+	mat4x4 m_t, m_r;
 	mat4x4 m_model, m_mvp;
 	// Buffers
 	WGPUBuffer m_mvpBuffer;
@@ -29,16 +31,15 @@ private:
 	void Release();
 
 public:
-	Actor();
+	Actor(float x, float y, float z);
 	~Actor();
-	
-	// Getters
-	WGPUBuffer& GetTBuffer();
 	
 	// Getters
 	vec3& GetPos();
 	const char* GetTag();
+	const BoundingBox& GetBounds();
 	WGPUBool CompareTag(const char* tag);
+	WGPUBool IsColliding(const BoundingBox& other);
 	
 	// Setters
 	void SetPos(float x, float y, float z);
@@ -46,10 +47,10 @@ public:
 	void SetYaw(float yaw);
 	void SetTag(const char* tag);
 	void SetMesh(Mesh* pMesh);
+	void SetBoundingBox(const vec3& radius);
 	
 	// Main Methods
-	void Init();
-	void CreateTransform(const GPUEnv& gpuEnv);
+	void Init(const GPUEnv& gpuEnv, const mat4x4& vp);
 	void CreateBindGroup(const GPUEnv& gpuEnv, const WGPUBindGroupLayout& bindGroupLayout);
 	void Update(const WGPUQueue& queue, const mat4x4& vp);
 	void Draw(const WGPURenderPassEncoder& renderPass);
@@ -63,6 +64,9 @@ public:
 	
 	// Load
 	void LoadMesh(const GPUEnv& gpuEnv, const char* fileName);
+	
+	// Print
+	void PrintPos();
 };
 
 #endif	// ACTOR_HPP_INCLUDED

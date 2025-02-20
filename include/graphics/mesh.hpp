@@ -9,25 +9,23 @@
 #include <webgpu/webgpu.h>
 #include <linmath.h>
 
-#define CUSTOM_INDEX uint16_t
-#define INDEX_SZ sizeof(CUSTOM_INDEX)
+#define CUSTOM_VERTEX Vertex2D_Pos
+#define VERTEX_SZ sizeof(CUSTOM_VERTEX)
 
 class Mesh
 {
 private:
 	// Members
-	// Counts
-	uint32_t m_vertexCount;
-	uint32_t m_indexCount;
-	// Buffer Sizes
-	uint64_t m_vertexBufferSz;
-	uint64_t m_indexBufferSz;
+	size_t m_vertexSz;
 	// Buffers
 	WGPUBuffer m_vertexBuffer;
 	WGPUBuffer m_indexBuffer;
 	// Datas
-	const void* m_pVertexData;
-	const void* m_pIndexData;
+	std::vector<float> m_vertices;
+	std::vector<uint16_t> m_indices;
+	
+	// Setters
+	void SetBuffers(const WGPURenderPassEncoder& renderPass);
 	
 	// Methods
 	void Release();
@@ -42,16 +40,16 @@ public:
 	uint32_t GetVertexCount();
 	uint32_t GetIndexCount();
 	
-	// Setters
-	void SetDefaults();
-	void SetBuffers(const WGPURenderPassEncoder& renderPass);
-	void AssignVertices(const GPUEnv& gpuEnv, uint32_t vertexCount,
-	const void* pVertexData);
-	void AssignIndices(const GPUEnv& gpuEnv, uint32_t indexCount,
-	const void* pIndexData);
-	
-	// Methods
+	// Main Methods
+	void CreateBuffers(const GPUEnv& gpuEnv, size_t vertexSz);
+	void AddVertexFloat(const float vFloat);
+	void AddIndex(const uint16_t idx);
+	void DrawTriangle(const WGPURenderPassEncoder& renderPass);
 	void Draw(const WGPURenderPassEncoder& renderPass);
+	
+	// Print
+	void PrintInfo();
+	void PrintData();
 };
 
 #endif	// MESH_HPP_INCLUDED

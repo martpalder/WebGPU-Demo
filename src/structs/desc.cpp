@@ -34,19 +34,15 @@ WGPUCommandEncoderDescriptor createEncoderDesc()
 	return encoderDesc;
 }
 
-WGPURenderPassDescriptor createRenderPassDesc(const Attachments& attachments,
-bool bDepthStencilAttach)
+WGPURenderPassDescriptor createRenderPassDesc(WGPURenderPassColorAttachment* pColorAttach,
+WGPURenderPassDepthStencilAttachment* pDepthStencilAttach)
 {
 	WGPURenderPassDescriptor renderPassDesc = {};
 	
 	renderPassDesc.nextInChain = nullptr;
 	renderPassDesc.colorAttachmentCount = 1;
-	renderPassDesc.colorAttachments = &attachments.colorAttach;
-	if (bDepthStencilAttach)
-	{
-		// Add Depth Stencil Attachment
-		renderPassDesc.depthStencilAttachment = &attachments.depthStencilAttach;
-	}
+	renderPassDesc.colorAttachments = pColorAttach;
+	renderPassDesc.depthStencilAttachment = pDepthStencilAttach;
 	renderPassDesc.timestampWrites = nullptr;
 	puts("Created a Render Pass Descriptor");
 	
@@ -58,7 +54,7 @@ WGPUCommandBufferDescriptor createCmdBufferDesc()
 	WGPUCommandBufferDescriptor cmdBufferDesc = {};
 	
 	cmdBufferDesc.nextInChain = nullptr;
-	cmdBufferDesc.label = "Command Buffer";
+	cmdBufferDesc.label = "CommandBuffer";
 	
 	return cmdBufferDesc;
 }
@@ -110,8 +106,7 @@ size_t bindingCount, WGPUBindGroupEntry* pBindings)
 	return bindGroupDesc;
 }
 
-WGPURenderPipelineDescriptor createRenderPipelineDesc(const WGPUShaderModule& shaderMod,
-const States& states)
+WGPURenderPipelineDescriptor createRenderPipelineDesc(const States& states, bool bDepthStencil)
 {
 	WGPURenderPipelineDescriptor pipelineDesc = {};
 	
@@ -139,8 +134,12 @@ const States& states)
 	
 	// Set the Fragment State
 	pipelineDesc.fragment = &states.fragment;
-	// Set the Depth Stencil
-	pipelineDesc.depthStencil = &states.depthStencil;	
+	pipelineDesc.depthStencil = nullptr;
+	if (bDepthStencil)
+	{
+		// Set the Depth Stencil
+		pipelineDesc.depthStencil = &states.depthStencil;
+	}
 	
 	// Samples per pixel
 	pipelineDesc.multisample.count = 1;
@@ -153,8 +152,8 @@ const States& states)
 	return pipelineDesc;
 }
 
-Descriptors createDescriptors(const Attachments& attachments,
-bool bDepthStencilAttach)
+Descriptors createDescriptors(WGPURenderPassColorAttachment* pColorAttach,
+WGPURenderPassDepthStencilAttachment* pDepthStencilAttach)
 {
 	Descriptors descriptors = {};
 	
@@ -162,7 +161,7 @@ bool bDepthStencilAttach)
 	// Command Encoder Descriptor
 	descriptors.encoderDesc = createEncoderDesc();
 	// Render Pass Descriptor
-	descriptors.renderPassDesc = createRenderPassDesc(attachments, bDepthStencilAttach);
+	descriptors.renderPassDesc = createRenderPassDesc(pColorAttach, pDepthStencilAttach);
 	// Command Buffer Descriptor
 	descriptors.cmdBufferDesc = createCmdBufferDesc();
 	puts("Created the Descriptors");

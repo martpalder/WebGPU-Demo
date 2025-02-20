@@ -1,11 +1,11 @@
 #include "./gpuenv.hpp"
 #include "./instance.hpp"
 #include "./request.hpp"
-#include "./desc.hpp"
 #include "./inspect.hpp"
+#include "./desc.hpp"
+#include "./view.hpp"
 #include "./config.hpp"
 #include "./callback.hpp"
-#include "./stdafx.h"
 
 #ifndef __EMSCRIPTEN__
 #include <glfw3webgpu.h>
@@ -17,8 +17,9 @@ WGPURequestAdapterOptions createAdapterOpts(const WGPUSurface& surf)
 	
 	adapterOpts.nextInChain = nullptr;
 	adapterOpts.compatibleSurface = surf;
-	adapterOpts.powerPreference = WGPUPowerPreference_LowPower;
+	adapterOpts.powerPreference = WGPUPowerPreference_Undefined;
 	adapterOpts.backendType = WGPUBackendType_Undefined;
+	adapterOpts.forceFallbackAdapter = true;
 	
 	return adapterOpts;
 }
@@ -79,11 +80,7 @@ GPUEnv initGPUEnv(GLFWwindow* wnd)
 }
 
 void quitGPUEnv(const GPUEnv& gpuEnv)
-{
-	// Release the Target View
-	wgpuTextureViewRelease(gpuEnv.targetView);
-	printRelease("Target View");
-	
+{	
 	// Release the Render Pipeline
 	wgpuRenderPipelineRelease(gpuEnv.pipeline);
 	printRelease("Render Pipeline");

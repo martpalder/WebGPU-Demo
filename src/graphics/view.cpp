@@ -1,4 +1,5 @@
 #include "./view.hpp"
+#include "./myassert.hpp"
 
 void getNextTargetView(const WGPUSurface& surf, WGPUTextureView* pTargetView)
 {
@@ -28,4 +29,35 @@ void getNextTargetView(const WGPUSurface& surf, WGPUTextureView* pTargetView)
 	// (NB: with wgpu-native, surface textures must not be manually released)
 	wgpuTextureRelease(surfaceTexture.texture);
 	#endif // __EMSCRIPTEN__
+}
+
+WGPUTextureView createDepthView(const WGPUTexture& depthTexture)
+{
+	WGPUTextureView depthView;
+	
+	// Define Depth Texture View
+	WGPUTextureViewDescriptor depthViewDesc = {};
+	depthViewDesc.nextInChain = nullptr;
+	depthViewDesc.label = "DepthView";
+	depthViewDesc.format = wgpuTextureGetFormat(depthTexture);
+	depthViewDesc.dimension = WGPUTextureViewDimension_2D;
+	depthViewDesc.baseMipLevel = 0;
+	depthViewDesc.mipLevelCount = 1;
+	depthViewDesc.baseArrayLayer = 0;
+	depthViewDesc.arrayLayerCount = 1;
+
+	// Create a Depth Texture View
+	depthView = wgpuTextureCreateView(depthTexture, &depthViewDesc);
+	
+	// Check for Error
+	if (depthView == nullptr)
+	{
+		perror("[ERROR]: Failed to create a Depth Texture View");
+		exit(-1);
+	}
+	
+	// Assert
+	MY_ASSERT(depthView != nullptr);
+	
+	return depthView;
 }

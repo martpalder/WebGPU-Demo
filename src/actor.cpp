@@ -1,29 +1,14 @@
 #include "./actor.hpp"
 #include "./buffer.hpp"
+#include "./mymath.h"
+#include "./myassert.hpp"
 
-Actor::Actor()
-{
-	// Initialize
-	this->Init();
-}
-
-Actor::~Actor()
-{
-	// Release the Actor
-	this->Release();
-}
-
-WGPUBuffer& Actor::GetTBuffer()
-{
-	return m_mvpBuffer;
-}
-
-void Actor::Init()
+Actor::Actor(float x, float y, float z)
 {
 	// Set Default Values
-	m_pos[0] = 0.0f;
-	m_pos[1] = 0.0f;
-	m_pos[2] = -1.5f;
+	m_pos[0] = x;
+	m_pos[1] = y;
+	m_pos[2] = z;
 	m_speed = 0.2f;
 	m_yaw = 0.0f;
 	m_bindGroup = nullptr;
@@ -32,9 +17,30 @@ void Actor::Init()
 	// Initialize Matrices
 	mat4x4_identity(m_t);
 	mat4x4_identity(m_r);
-	mat4x4_identity(m_s);
 	mat4x4_identity(m_model);
 	mat4x4_identity(m_mvp);
+}
+
+Actor::~Actor()
+{
+	// Release the Actor
+	this->Release();
+}
+
+void Actor::Init(const GPUEnv& gpuEnv, const mat4x4& vp)
+{
+	// Set the Translation Matrix
+	mat4x4_translate(m_t, m_pos[0], m_pos[1], m_pos[2]);
+	// Combine the Transformation Matrices
+	mat4x4_mul(m_model, m_t, m_r);	// Check correct ordering
+	// Combine the View-Projection and the Model
+	mat4x4_mul(m_mvp, vp, m_model);	// Check correct ordering
+	
+	// Create and set the Uniform Buffer
+	/*m_mvpBuffer = createBufferMatrix(gpuEnv, m_mvp);
+	pushError(gpuEnv.dev);
+	wgpuQueueWriteBuffer(gpuEnv.queue, m_mvpBuffer, 0, m_mvp, sizeof(mat4x4));
+	popError(gpuEnv.dev);*/
 }
 
 vec3& Actor::GetPos()
@@ -45,6 +51,16 @@ vec3& Actor::GetPos()
 const char* Actor::GetTag()
 {
 	return m_tag;
+}
+
+const BoundingBox& Actor::GetBounds()
+{
+	return m_box;
+}
+
+WGPUBool Actor::IsColliding(const BoundingBox& other)
+{
+	return intersects(m_box, other);
 }
 
 WGPUBool Actor::CompareTag(const char* tag)
@@ -74,6 +90,14 @@ void Actor::SetPos(const vec3& pos)
 	mat4x4_translate(m_t, m_pos[0], m_pos[1], m_pos[2]);
 }
 
+void Actor::SetBoundingBox(const vec3& radius)
+{
+	// Set the Box Radius
+	copyVec3(m_radius, radius);
+	// Update the Bounding Box
+	updateBoundingBox(m_box, m_pos, radius);
+}
+
 void Actor::SetYaw(float yaw)
 {
 	// Set the Yaw
@@ -94,21 +118,13 @@ void Actor::SetMesh(Mesh* pMesh)
 	if (pMesh != nullptr)
 	{
 		m_pMesh = pMesh;
-		puts("Set the Mesh");
+		printf("Set the Mesh for '%s'\n", m_tag);
 	}
 }
 
 void Actor::CreateBindGroup(const GPUEnv& gpuEnv,
 const WGPUBindGroupLayout& bindGroupLayout)
 {
-	// Setup the Matrices
-	mat4x4_translate(m_t, m_pos[0], m_pos[1], m_pos[2]);
-	float scale = 1.0f;
-	mat4x4_scale_aniso(m_s, m_s, scale, scale, scale);
-	
-	// Create the Model-View-Projection Buffer
-	m_mvpBuffer = createBufferMatrix(gpuEnv, m_mvp);
-	
 	// Create the Bindings
 	WGPUBindGroupEntry bindings[] = {
 		createBinding(0, m_mvpBuffer),
@@ -149,11 +165,15 @@ void Actor::Update(const WGPUQueue& queue, const mat4x4& vp)
 {
 	// Combine the Transformation Matrices
 	mat4x4_mul(m_model, m_t, m_r);	// Check correct ordering
-	// Combine the View-Projection and the Model
-	mat4x4_mul(m_mvp, vp, m_model);	// Check correct ordering
+	// Combine the View-Projection Matrix
+	mat4x4_mul(m_mvp, vp, m_t);	// Check correct ordering
 	
-	// Update the Uniform Buffer
-	wgpuQueueWriteBuffer(queue, m_mvpBuffer, 0, m_mvp, sizeof(m_mvp));
+	// If has MVP Buffer
+	/*if (m_mvpBuffer != nullptr)
+	{
+		// Update the Uniform Buffer
+		wgpuQueueWriteBuffer(queue, m_mvpBuffer, 0, m_t, sizeof(mat4x4));
+	}*/
 }
 
 void Actor::Draw(const WGPURenderPassEncoder& renderPass)
@@ -164,13 +184,24 @@ void Actor::Draw(const WGPURenderPassEncoder& renderPass)
 		// Set the Bind Group
 		wgpuRenderPassEncoderSetBindGroup(renderPass, 0, m_bindGroup, 0, nullptr);
 	}
+	else
+	{
+		perror("[ERROR]: No Bind Group");
+	}
 	
 	// If has Mesh
 	if (m_pMesh != nullptr)
 	{
 		// Draw the Mesh
-		m_pMesh->Draw(renderPass);
+		m_pMesh->DrawTriangle(renderPass);;
 	}
+	else
+	{
+		perror("[ERROR]: No Mesh");
+	}
+	
+	// Draw a Triangle
+	//m_pMesh->DrawTriangle(renderPass);
 }
 
 void Actor::Translate(float stepX, float stepY, float stepZ)
@@ -182,6 +213,8 @@ void Actor::Translate(float stepX, float stepY, float stepZ)
 	
 	// Set the Translation Matrix
 	mat4x4_translate(m_t, m_pos[0], m_pos[1], m_pos[2]);
+	// Update the Bounding Box
+	updateBoundingBox(m_box, m_pos, m_radius);
 }
 
 void Actor::MoveAndCollide(vec2& moveDir)
@@ -205,4 +238,9 @@ void Actor::RotateY(float y)
 void Actor::RotateZ(float z)
 {
 	mat4x4_rotate_Z(m_r, m_r, z);
+}
+
+void Actor::PrintPos()
+{
+	printf("Pos X: %f Y: %f Z: %f\n", m_pos[0], m_pos[1], m_pos[2]);
 }

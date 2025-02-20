@@ -2,49 +2,51 @@
 #ifndef APP_HPP_INCLUDED
 #define APP_HPP_INCLUDED
 
-#include "./env/gpuenv.hpp"
+#include "./gpuenv.hpp"
 #include "./input.hpp"
-#include "./desc.hpp"
 #include "./attach.hpp"
-#include "./shader.hpp"
-#include "./mesh_manager.hpp"
+#include "./desc.hpp"
 #include "./world.hpp"
+#include "./mesh_manager.hpp"
+#include "./texture_manager.hpp"
+#include "./shader_manager.hpp"
 
 #include <GLFW/glfw3.h>
-#include <linmath.h>
-
-const static vec3 VEC3_UP { 0.0f, 1.0f, 0.0f };
+#include "./stdafx.h"
 
 class App
 {
 private:
 	// Main Members
+	int m_w, m_h;
 	GPUEnv m_gpuEnv;
 	Input m_input;
 	GLFWwindow* m_wnd;
 	
-	// Descriptors
-	Descriptors m_descriptors = {};
-	// Attachments
-	Attachments m_attachments = {};
+	/*WGPUTexture depthTexture;
+	WGPUTextureView depthView;*/
+	// Attachments and Descriptors
+	Attachments m_attach;
+	Descriptors m_desc;
+	
 	// Layouts
 	WGPUBindGroupLayoutEntry m_bindingLayout;
 	WGPUBindGroupLayout m_bindGroupLayout;
+	// Target Texture View
+	WGPUTextureView m_targetView;
 	
-	// RESOURCES
-	// Shaders
-	Shader m_shader;
-	// Mesh Manager
-	MeshManager m_meshMgr;
-	
-	// Matrices
-	mat4x4 m_p;
 	// World
 	World m_world;
 	// Camera
 	Camera* m_pCam;
 	// Actors
 	Actor* m_pPlayer;
+	
+	// RESOURCES
+	// Managers
+	MeshManager m_meshMgr;
+	TextureManager m_texMgr;
+	ShaderManager m_shaderMgr;
 	
 	// Getters
 	WGPUBool IsRunning();
@@ -59,6 +61,11 @@ private:
 	// Create Methods
 	void CreateAttachments();
 	void CreatePipeline();
+	
+	// Load Methods
+	void LoadData();
+	
+	// Setup Mehods
 	void SetupActors();
 	
 	// Main Methods

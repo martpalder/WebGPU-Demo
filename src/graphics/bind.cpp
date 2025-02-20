@@ -71,11 +71,11 @@ WGPUBindGroupEntry* pBindings)
 	
 	// Create the Bind Group Layout
 	bind.bindGroupLayout = createLayoutBindGroup(device, &bind.bindingLayout);
-	MY_ASSERT(bind.bindGroupLayout);
+	MY_ASSERT(bind.bindGroupLayout != nullptr);
 	
 	// Create the Bind Group
 	bind.bindGroup = createBindGroup(device, bind.bindGroupLayout, 1, pBindings);
-	MY_ASSERT(bind.bindGroup);
+	MY_ASSERT(bind.bindGroup != nullptr);
 	
 	return bind;
 }

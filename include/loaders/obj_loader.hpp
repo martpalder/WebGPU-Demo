@@ -2,10 +2,9 @@
 #ifndef OBJ_LOADER_HPP
 #define OBJ_LOADER_HPP
 
-#include "./gpuenv.hpp"
 #include "./mesh.hpp"
-#include "./freader.hpp"
 #include "./string_utils.hpp"
+#include "./stdafx.h"
 
 Mesh* loadOBJ(const GPUEnv& gpuEnv, const char* path);
 

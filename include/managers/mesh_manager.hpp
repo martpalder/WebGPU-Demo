@@ -4,13 +4,18 @@
 
 #include "./mesh.hpp"
 
-#include <vector>
+#include <map>
+
+using namespace std;
 
 class MeshManager
 {
 private:
+	// Constants
+	constexpr static char MESH_DIR[] = "./data/models/%s";
+	
 	// Members
-	std::vector<Mesh*> m_meshes;
+	map<const std::string, Mesh*> m_meshMap;
 
 public:
 	// Constructor/Destructor
@@ -18,6 +23,7 @@ public:
 	~MeshManager();
 	
 	// Members
+	Mesh* Get(const std::string& fileName);
 	Mesh* Load(const GPUEnv& gpuEnv, const char* fileName);
 };
 

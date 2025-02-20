@@ -37,13 +37,13 @@ set(HEADER_FILES
     include/graphics/instance.hpp
     include/graphics/request.hpp
     include/graphics/inspect.hpp
-    include/graphics/shader.hpp
     include/graphics/mesh.hpp
     include/graphics/texture.hpp
     include/graphics/bind.hpp
     include/graphics/pipeline.hpp
     include/graphics/buffer.hpp
     include/graphics/view.hpp
+    include/graphics/sampler.hpp
     include/structs/desc.hpp
     include/structs/config.hpp
     include/structs/attach.hpp
@@ -52,6 +52,8 @@ set(HEADER_FILES
     include/structs/layout.hpp
     include/env/gpuenv.hpp
     include/managers/mesh_manager.hpp
+    include/managers/texture_manager.hpp
+    include/managers/shader_manager.hpp
     include/loaders/obj_loader.hpp
     include/util/mymath.h
     include/util/freader.hpp
@@ -73,13 +75,13 @@ set(SOURCE_FILES
     src/graphics/instance.cpp
     src/graphics/request.cpp
     src/graphics/inspect.cpp
-    src/graphics/shader.cpp
     src/graphics/mesh.cpp
     src/graphics/texture.cpp
     src/graphics/bind.cpp
     src/graphics/pipeline.cpp
     src/graphics/buffer.cpp
     src/graphics/view.cpp
+    src/graphics/sampler.cpp
     src/structs/desc.cpp
     src/structs/config.cpp
     src/structs/attach.cpp
@@ -88,7 +90,10 @@ set(SOURCE_FILES
     src/structs/layout.cpp
     src/env/gpuenv.cpp
     src/managers/mesh_manager.cpp
+    src/managers/texture_manager.cpp
+    src/managers/shader_manager.cpp
     src/loaders/obj_loader.cpp
+    src/loaders/texture_loader.cpp
     src/util/freader.cpp
     src/error/callback.cpp
     src/glfw3webgpu/glfw3webgpu.c

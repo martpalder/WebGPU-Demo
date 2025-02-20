@@ -10,7 +10,8 @@ typedef struct {
 } Attachments;
 
 WGPURenderPassColorAttachment createColorAttach(float r, float g, float b);
+
 WGPURenderPassDepthStencilAttachment createDepthStencilAttach(const WGPUDevice& device,
-const WGPUTexture& depthTexture);
+const WGPUTextureView& depthView);
 
 #endif	// ATTACH_HPP_INCLUDED
