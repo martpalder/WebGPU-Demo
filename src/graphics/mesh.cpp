@@ -39,6 +39,7 @@ void Mesh::Release()
 		m_vertexBuffer = nullptr;
 		puts("Released the Vertex Buffer");
 	}
+	puts("Released a Mesh");
 }
 
 uint32_t Mesh::GetVertexCount()
@@ -81,7 +82,8 @@ void Mesh::SetBuffers(const WGPURenderPassEncoder& renderPass)
 	}
 }
 
-void Mesh::CreateBuffers(const GPUEnv& gpuEnv, size_t vertexSz)
+void Mesh::CreateBuffers(const GPUEnv& gpuEnv, size_t vertexSz,
+const char* label)
 {
 	// Set the Vertex Size
 	m_vertexSz = vertexSz;
@@ -91,7 +93,7 @@ void Mesh::CreateBuffers(const GPUEnv& gpuEnv, size_t vertexSz)
 	m_indexDataSz = getAlignedSize(m_indices.size() * sizeof(uint16_t));
 	
 	// Create the Vertex Buffer
-	m_vertexBuffer = createBufferVert(gpuEnv.dev, m_vertexDataSz);
+	m_vertexBuffer = createBufferVert(gpuEnv.dev, m_vertexDataSz, label);
 	// Upload the Geometry Data
 	pushError(gpuEnv.dev);
 	uploadToBuffer(gpuEnv.queue, m_vertexBuffer, m_vertexDataSz, &m_vertices[0]);
@@ -101,7 +103,7 @@ void Mesh::CreateBuffers(const GPUEnv& gpuEnv, size_t vertexSz)
 	if (m_indices.size() > 0)
 	{
 		// Create the Index Buffer
-		m_indexBuffer = createBufferIdx(gpuEnv.dev, m_indexDataSz);
+		m_indexBuffer = createBufferIdx(gpuEnv.dev, m_indexDataSz, label);
 		// Upload the Geometry Data
 		pushError(gpuEnv.dev);
 		uploadToBuffer(gpuEnv.queue, m_indexBuffer, m_indexDataSz, &m_indices[0]);

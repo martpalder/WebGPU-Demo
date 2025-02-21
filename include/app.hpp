@@ -23,14 +23,10 @@ private:
 	Input m_input;
 	GLFWwindow* m_wnd;
 	
-	// Layouts
-	WGPUBindGroupLayoutEntry m_bindingLayout;
-	WGPUBindGroupLayout m_bindGroupLayout;
-	
 	// World
 	World m_world;
 	// Camera
-	const Camera* m_pCam;
+	Camera* m_pCam;
 	// Actors
 	Actor* m_pPlayer;
 	
@@ -60,6 +56,7 @@ private:
 	void EventLoop();
 	void Update();
 	void Render();
+	void Controls();
 	
 	// Main Loops
 	void MainLoopGLFW();

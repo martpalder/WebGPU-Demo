@@ -16,10 +16,11 @@ private:
 	const float PITCH_MAX = -5.0f * M_PI / 180;
 	
 	// Members
-	float m_dist, m_rotSpeed;
+	float m_dist;
 	float m_pitch, m_yaw;
 	vec3 m_pos, m_dirF;
 	vec3 m_center;
+	mat4x4 m_t, m_r;
 	mat4x4 m_v;
 	
 	// Components
@@ -39,9 +40,12 @@ public:
 	
 	// Setters
 	void SetPos(float x, float y, float z);
+	void SetDir(float x, float y, float z);
 	void SetParent(Actor* pActor);
 	
 	// Methods
+	void Translate(float stepX, float stepY, float stepZ);
+	void Move(vec2& moveDir);
 	void Orbit(const vec2& mDelta);
 	void Update();
 };

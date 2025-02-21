@@ -12,14 +12,15 @@ size_t dataSz, const void* data)
 	wgpuQueueWriteBuffer(queue, buffer, 0, data, dataSz);
 }
 
-WGPUBuffer createBufferVert(const WGPUDevice& device, size_t dataSz)
+WGPUBuffer createBufferVert(const WGPUDevice& device, size_t dataSz,
+const char* label)
 {
 	WGPUBuffer vertexBuffer = nullptr;
 	
 	// Describe Vertex Buffer
 	WGPUBufferDescriptor bufferDesc = {};
 	bufferDesc.nextInChain = nullptr;
-	bufferDesc.label = "VertexBuffer";
+	bufferDesc.label = label;
 	bufferDesc.size = dataSz;
 	bufferDesc.usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_Vertex; // Vertex usage here!
 	bufferDesc.mappedAtCreation = false;
@@ -44,14 +45,15 @@ WGPUBuffer createBufferVert(const WGPUDevice& device, size_t dataSz)
 	return vertexBuffer;
 }
 
-WGPUBuffer createBufferIdx(const WGPUDevice& device, size_t dataSz)
+WGPUBuffer createBufferIdx(const WGPUDevice& device, size_t dataSz,
+const char* label)
 {
 	WGPUBuffer indexBuffer;
 	
 	// Describe the Index Buffer
 	WGPUBufferDescriptor bufferDesc = {};
 	bufferDesc.nextInChain = nullptr;
-	bufferDesc.label = "IndexBuffer";
+	bufferDesc.label = label;
 	bufferDesc.size = dataSz;
 	bufferDesc.usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_Index ; // Index usage here!
 	bufferDesc.mappedAtCreation = false;
@@ -88,7 +90,7 @@ const char* label)
 	WGPUBufferDescriptor bufferDesc = {};
 	bufferDesc.nextInChain = nullptr;
 	bufferDesc.label = label;
-	bufferDesc.size = sizeof(mat4x4);
+	bufferDesc.size = sizeof(matrix);
 	bufferDesc.usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_Uniform; // Uniform usage here!
 	bufferDesc.mappedAtCreation = false;
 	
@@ -111,11 +113,6 @@ const char* label)
 	
 	// Assert
 	MY_ASSERT(matrixBuffer != nullptr);
-
-	// Upload the Matrix to the Buffer
-	pushError(gpuEnv.dev);
-	wgpuQueueWriteBuffer(gpuEnv.queue, matrixBuffer, 0, matrix, bufferDesc.size);
-	popError(gpuEnv.dev);
 
 	return matrixBuffer;
 }

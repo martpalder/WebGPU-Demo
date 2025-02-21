@@ -12,8 +12,12 @@ size_t getAlignedSize(size_t dataSz);
 void uploadToBuffer(const WGPUQueue& queue, const WGPUBuffer& buffer,
 size_t dataSz, const void* data);
 
-WGPUBuffer createBufferVert(const WGPUDevice& device, size_t dataSize);
-WGPUBuffer createBufferIdx(const WGPUDevice& device, size_t dataSize);
+WGPUBuffer createBufferVert(const WGPUDevice& device, size_t dataSize,
+const char* label);
+
+WGPUBuffer createBufferIdx(const WGPUDevice& device, size_t dataSize,
+const char* label);
+
 WGPUBuffer createBufferUniformMat(const GPUEnv& gpuEnv, const mat4x4& matrix,
 const char* label);
 

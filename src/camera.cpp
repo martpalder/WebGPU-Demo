@@ -4,24 +4,24 @@ Camera::Camera()
 {
 	// Set Defaults
 	m_dist = 2.0f;
-	m_rotSpeed = 0.01f;
 	m_pitch = 0.0f;
 	m_yaw = 0.0f;
 	m_pParent = nullptr;
-	// Position
-	m_pos[0] = 0.0f;
-	m_pos[1] = 1.0f;
-	m_pos[2] = m_dist;
-	// Forward Direction
-	m_dirF[0] = 0.0f;
-	m_dirF[1] = -0.77f;
-	m_dirF[2] = -0.77f;
 	
-	// Initialize the View Matrix
+	// Position
+	this->SetPos(0.0f, 0.0f, -m_dist);
+	// Direction
+	this->SetDir(0.0f, 0.0f, 1.0f);
+	
+	// Initialize the Matrices
+	mat4x4_identity(m_t);
+	mat4x4_identity(m_r);
 	mat4x4_identity(m_v);
 	
-	// Compute the View Matrix
-	this->ComputeView();
+	// Set the View Matrix
+	mat4x4_translate(m_t, m_pos[0], m_pos[1], m_pos[2]);
+	mat4x4_rotate_X(m_r, m_r, 1.0f);
+	mat4x4_mul(m_v, m_t, m_r);
 }
 
 float Camera::GetYaw() const
@@ -41,10 +41,16 @@ const mat4x4& Camera::GetView() const
 
 void Camera::SetPos(float x, float y, float z)
 {
-	// Set the Position
 	m_pos[0] = x;
 	m_pos[1] = y;
 	m_pos[2] = z;
+}
+
+void Camera::SetDir(float x, float y, float z)
+{
+	m_dirF[0] = x;
+	m_dirF[1] = y;
+	m_dirF[2] = z;
 }
 
 void Camera::SetParent(Actor* pParent)
@@ -55,27 +61,35 @@ void Camera::SetParent(Actor* pParent)
 
 void Camera::ComputeView()
 {
-	// If has a Parent
-	if (m_pParent != nullptr)
-	{	
-		// Get the Center
-		memcpy(m_center, m_pParent->GetPos(), sizeof(vec3));
-	}
-	
-	// Set the Position from the Center
-	m_pos[0] = m_center[0] - m_dirF[0] * m_dist;
-	m_pos[1] = m_center[1] - m_dirF[1] * m_dist;
-	m_pos[2] = m_center[2] - m_dirF[2] * m_dist;
-	
 	// Set the View Matrix
-	mat4x4_look_at(m_v, m_pos, m_center, VEC3_UP);
+	mat4x4_mul(m_v, m_t, m_r);
+}
+
+void Camera::Translate(float stepX, float stepY, float stepZ)
+{
+	// Change the Position
+	m_pos[0] += stepX;
+	m_pos[1] += stepY;
+	m_pos[2] += stepZ;
+	
+	// Set the Translation Matrix
+	mat4x4_translate(m_t, m_pos[0], m_pos[1], m_pos[2]);
+	// Update the Bounding Box
+	//updateBoundingBox(m_box, m_pos, m_radius);
+}
+
+void Camera::Move(vec2& moveDir)
+{
+	// Translate the Actor
+	float speed = 0.1f;
+	this->Translate(moveDir[0] * speed, 0.0f, moveDir[1] * speed);
 }
 
 void Camera::Orbit(const vec2& mDelta)
 {
 	// Change the Yaw and Pitch
-	m_yaw += mDelta[0] * m_rotSpeed;
-	m_pitch += mDelta[1] * m_rotSpeed;
+	m_yaw += mDelta[0] * 0.1f;
+	m_pitch += mDelta[1] * 0.1f;
 	// Clamp the Pitch
 	m_pitch = clampf(m_pitch, PITCH_MIN, PITCH_MAX);
 	
@@ -86,6 +100,14 @@ void Camera::Orbit(const vec2& mDelta)
 	
 	// Normalize
 	vec3_norm(m_dirF, m_dirF);
+	
+	// Get the Center
+	memcpy(m_center, m_pParent->GetPos(), sizeof(vec3));
+	
+	// Set the Position from the Center
+	m_pos[0] = m_center[0] + m_dirF[0] * m_dist;
+	m_pos[1] = m_center[1] + m_dirF[1] * m_dist;
+	m_pos[2] = m_center[2] + m_dirF[2] * m_dist;
 }
 
 void Camera::Update()

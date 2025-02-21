@@ -1,5 +1,6 @@
 #include "./actor.hpp"
 #include "./desc.hpp"
+#include "./layout.hpp"
 #include "./buffer.hpp"
 #include "./mymath.h"
 #include "./myassert.hpp"
@@ -19,14 +20,28 @@ Actor::Actor(float x, float y, float z)
 	// Initialize Matrices
 	mat4x4_identity(m_t);
 	mat4x4_identity(m_r);
-	mat4x4_identity(m_model);
+	mat4x4_identity(m_m);
 	mat4x4_identity(m_mvp);
+	
+	// Set the Translation Matrix
+	mat4x4_translate(m_t, m_pos[0], m_pos[1], m_pos[2]);
 }
 
 Actor::~Actor()
 {
 	// Release the Actor
 	this->Release();
+}
+
+void Actor::Init(const GPUEnv& gpuEnv,
+const WGPUBindGroupLayout& bindGroupLayout)
+{
+	// Create the Uniform Buffer
+	m_mvpBuffer = createBufferUniformMat(gpuEnv, m_mvp, m_tag);
+	
+	// Create a Bind Group
+	this->CreateBindGroup(gpuEnv.dev, bindGroupLayout);
+	printf("Initialized Actor: '%s'\n", m_tag);
 }
 
 void Actor::Release()
@@ -46,24 +61,14 @@ void Actor::Release()
 		m_bindGroup = nullptr;
 		puts("Released the Bind Group");
 	}
-
+	
 	if (m_mvpBuffer != nullptr)
 	{
-		// Release the Transform Buffer
+		// Release the MVP Buffer
 		wgpuBufferRelease(m_mvpBuffer);
 		m_mvpBuffer = nullptr;
 		puts("Released the MVP Buffer");
 	}
-}
-
-void Actor::Init(const GPUEnv& gpuEnv, const mat4x4& vp)
-{
-	// Create the Uniform Buffer
-	m_mvpBuffer = createBufferUniformMat(gpuEnv, m_mvp, m_tag);
-	
-	// Compute the MVP Matrix
-	this->ComputeMVP(gpuEnv.queue, vp);
-	printf("Initialized Actor: '%s'\n", m_tag);
 }
 
 const vec3& Actor::GetPos() const
@@ -145,17 +150,13 @@ void Actor::SetMesh(Mesh* pMesh)
 	}
 }
 
-void Actor::ComputeMVP(const WGPUQueue& queue, const mat4x4& vp)
+void Actor::SetBindGroup(const WGPURenderPassEncoder& renderPass)
 {
-	// Set the Translation Matrix
-	mat4x4_translate(m_t, m_pos[0], m_pos[1], m_pos[2]);
-	// Combine the Transformation Matrices
-	mat4x4_mul(m_model, m_t, m_r);	// Check correct ordering
-	// Combine the View-Projection and the Model
-	mat4x4_mul(m_mvp, vp, m_model);	// Check correct ordering
-	
-	// Upload to Buffer
-	wgpuQueueWriteBuffer(queue, m_mvpBuffer, 0, m_mvp, sizeof(mat4x4));
+	if (m_bindGroup != nullptr)
+	{
+		// Set the Bind Group
+		wgpuRenderPassEncoderSetBindGroup(renderPass, 0, m_bindGroup, 0, nullptr);
+	}
 }
 
 void Actor::CreateBindGroup(const WGPUDevice& device,
@@ -163,31 +164,45 @@ const WGPUBindGroupLayout& bindGroupLayout)
 {
 	// Create the Bindings
 	WGPUBindGroupEntry bindings[] = {
-		createBinding(0, m_mvpBuffer),
+		createBinding(0, m_mvpBuffer)
 	};
 	
 	// Create a Bind Group Descriptor
-	WGPUBindGroupDescriptor bindGroupDesc = createBindGroupDesc(bindGroupLayout, 1, &bindings[0], m_tag);
+	WGPUBindGroupDescriptor bindGroupDesc = {};
+	bindGroupDesc = createBindGroupDesc(
+		bindGroupLayout,
+		1,
+		&bindings[0],
+		m_tag
+	);
 	
 	// Create the Bind Group
 	m_bindGroup = createBindGroup(device, bindGroupDesc);
 	printf("Created a Bind Group for '%s'\n", m_tag);
 }
 
-void Actor::Update(const WGPUQueue& queue, const mat4x4& vp)
+void Actor::ComputeMVP(const mat4x4& vp)
 {
-	// Compute the MVP Matrix
-	this->ComputeMVP(queue, vp);
+	// Combine the Transformation Matrices
+	mat4x4_mul(m_m, m_t, m_r);		// Check correct ordering
+	// Combine the MVP Matrix
+	mat4x4_mul(m_mvp, vp, m_m);		// Check correct ordering
 }
 
-void Actor::Draw(const WGPURenderPassEncoder& renderPass) const
-{	
+void Actor::Update(const mat4x4& vp)
+{
+	// Compute the MVP Matrix
+	this->ComputeMVP(vp);
+}
+
+void Actor::Draw(const WGPUQueue& queue,
+const WGPURenderPassEncoder& renderPass)
+{
 	// {{Set the binding groups here!}}
-	if (m_bindGroup != nullptr)
-	{
-		// Set the Bind Group
-		wgpuRenderPassEncoderSetBindGroup(renderPass, 0, m_bindGroup, 0, nullptr);
-	}
+	this->SetBindGroup(renderPass);
+	
+	// Upload the MVP to Shader
+	wgpuQueueWriteBuffer(queue, m_mvpBuffer, 0, m_mvp, sizeof(m_mvp));
 	
 	// If has Mesh
 	if (m_pMesh != nullptr)
@@ -201,12 +216,11 @@ void Actor::Draw(const WGPURenderPassEncoder& renderPass) const
 	}
 }
 
-void Actor::Translate(float stepX, float stepY, float stepZ)
+void Actor::TranslateH(float dirX, float dirZ)
 {
 	// Change the Position
-	m_pos[0] += stepX;
-	m_pos[1] += stepY;
-	m_pos[2] += stepZ;
+	m_pos[0] += dirX * m_speed;
+	m_pos[2] += dirZ * m_speed;
 	
 	// Set the Translation Matrix
 	mat4x4_translate(m_t, m_pos[0], m_pos[1], m_pos[2]);
@@ -217,7 +231,7 @@ void Actor::Translate(float stepX, float stepY, float stepZ)
 void Actor::MoveAndCollide(vec2& moveDir)
 {
 	// Translate the Actor
-	this->Translate(moveDir[0] * m_speed, 0.0f, moveDir[1] * m_speed);
+	this->TranslateH(moveDir[0], moveDir[1]);
 }
 
 void Actor::RotateX(float x)

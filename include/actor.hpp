@@ -15,10 +15,14 @@ private:
 	BoundingBox m_box;
 	const char* m_tag;
 	
+	// Layouts
+	WGPUBindGroupLayoutEntry m_bindingLayout;
+	WGPUBindGroupLayout m_bindGroupLayout;
+	
 	// Components
 	// Matrices
 	mat4x4 m_t, m_r;
-	mat4x4 m_model, m_mvp;
+	mat4x4 m_m, m_mvp;
 	// Buffers
 	WGPUBuffer m_mvpBuffer;
 	// Bind Group
@@ -29,11 +33,19 @@ private:
 	
 	// Methods
 	void Release();
-	void ComputeMVP(const WGPUQueue& queue, const mat4x4& vp);
+	void CreateBindGroup(const WGPUDevice& device,
+	const WGPUBindGroupLayout& bindGroupLayout);
+	void SetBindGroup(const WGPURenderPassEncoder& renderPass);
+	void ComputeMVP(const mat4x4& vp);
 
 public:
+	// Constructor/Destructor
 	Actor(float x, float y, float z);
 	~Actor();
+	
+	// Init
+	void Init(const GPUEnv& gpuEnv,
+	const WGPUBindGroupLayout& bindGroupLayout);
 	
 	// Getters
 	const vec3& GetPos() const;
@@ -51,15 +63,12 @@ public:
 	void SetBoundingBox(const vec3& radius);
 	
 	// Main Methods
-	void Init(const GPUEnv& gpuEnv, const mat4x4& vp);
-	void CreateBindGroup(const WGPUDevice& device,
-	const WGPUBindGroupLayout& bindGroupLayout);
-	
-	void Update(const WGPUQueue& queue, const mat4x4& vp);
-	void Draw(const WGPURenderPassEncoder& renderPass) const;
+	void Update(const mat4x4& vp);
+	void Draw(const WGPUQueue& queue,
+	const WGPURenderPassEncoder& renderPass);
 	
 	// Transformations
-	void Translate(float stepX, float stepY, float stepZ);
+	void TranslateH(float dirX, float dirZ);
 	void MoveAndCollide(vec2& moveDir);
 	void RotateX(float x);
 	void RotateY(float y);

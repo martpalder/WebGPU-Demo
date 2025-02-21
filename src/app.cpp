@@ -12,13 +12,13 @@
 
 #define SHADER_NAME "basic3d_color.wgsl"
 #define PLAYER_OBJ "cube.obj"
-#define GROUND_OBJ "ground.obj"
+#define GROUND_OBJ "plane.obj"
+Actor* pGround;
 
 App::App(int w, int h, const char* title)
 {
 	// Set Default Values
 	m_wnd = nullptr;
-	m_bindGroupLayout = nullptr;
 	m_pCam = nullptr;
 	m_pPlayer = nullptr;
 	
@@ -50,11 +50,11 @@ void App::Init(int w, int h, const char* title)
 	// Load Data
 	this->LoadData();
 	
-	// Setup Actors
-	this->SetupActors();
-	
 	// Initialize the World
 	m_world.Init(m_gpuEnv.dev, m_shaderMgr.Get(SHADER_NAME), m_w, m_h);
+	
+	// Setup Actors
+	this->SetupActors();
 	puts("Initialized the App");
 }
 
@@ -92,19 +92,13 @@ void App::LoadData()
 
 void App::SetupActors()
 {
-	// Create the Layouts
-	m_bindingLayout = createLayoutBinding(sizeof(mat4x4));
-	m_bindGroupLayout = createLayoutBindGroup(m_gpuEnv.dev, &m_bindingLayout);
-	
 	// Setup the Actors
-	// Player
-	m_pPlayer = m_world.AddActor(m_gpuEnv, 0.0f, 0.0f, 0.0f, "Player");
-	m_pPlayer->SetMesh(m_meshMgr.Get(PLAYER_OBJ));
-	m_pPlayer->CreateBindGroup(m_gpuEnv.dev, m_bindGroupLayout);
 	// Ground
-	Actor* pGround = m_world.AddActor(m_gpuEnv, 0.0f, 0.0f, 0.0f, "Ground");
+	pGround = m_world.AddActor(m_gpuEnv, 0.0f, 0.0f, -1.0f, "Ground");
 	pGround->SetMesh(m_meshMgr.Get(GROUND_OBJ));
-	pGround->CreateBindGroup(m_gpuEnv.dev, m_bindGroupLayout);
+	// Player
+	m_pPlayer = m_world.AddActor(m_gpuEnv, 0.0f, 0.0f, -1.0f, "Player");
+	m_pPlayer->SetMesh(m_meshMgr.Get(PLAYER_OBJ));
 	
 	// Get and attach the Camera
 	m_pCam = m_world.GetCam();
@@ -120,7 +114,7 @@ void App::EventLoop()
 	#endif
 }
 
-void App::Update()
+void App::Controls()
 {
 	// Get Move Input
 	float h = m_input.GetAxis(0);
@@ -134,12 +128,6 @@ void App::Update()
 		calcMoveDir(h, v, 0.0f, moveDir);
 		// Move the Player
 		m_pPlayer->MoveAndCollide(moveDir);
-		
-		// Get the Camera Yaw
-		/*float yaw = m_pCam->GetYaw();
-		// Rotate the Player
-		if (v < 0.0f){ yaw += M_PI; };
-		m_pPlayer->SetYaw(yaw - h * HALF_PI);*/
 	}
 	
 	// If there's Camera
@@ -153,9 +141,16 @@ void App::Update()
 		// Reset Input
 		m_input.Reset();
 	}*/
+	m_pPlayer->RotateX(0.1f);
+}
+
+void App::Update()
+{
+	// Player Controls
+	this->Controls();
 	
 	// {{Update}}
-	m_world.Update(m_gpuEnv.queue);
+	m_world.Update();
 }
 
 void App::Render()

@@ -42,7 +42,8 @@ public:
 	uint32_t GetIndexCount();
 	
 	// Main Methods
-	void CreateBuffers(const GPUEnv& gpuEnv, size_t vertexSz);
+	void CreateBuffers(const GPUEnv& gpuEnv, size_t vertexSz,
+	const char* label);
 	void AddVertexFloat(const float vFloat);
 	void AddIndex(const uint16_t idx);
 	void DrawTriangle(const WGPURenderPassEncoder& renderPass);

@@ -17,6 +17,7 @@ Mesh* loadOBJ(const GPUEnv& gpuEnv, const char* path)
 	
 	// Split the Text by Lines
 	char* tok = strtok(text, "\n");
+	size_t vertexSz = 0;
 	while (tok != nullptr)
 	{
 		// Set the Start Location
@@ -33,11 +34,13 @@ Mesh* loadOBJ(const GPUEnv& gpuEnv, const char* path)
 		// Vertex
 		if (tok[0] == 'v')
 		{
+			vertexSz = 0;
 			// Until the End of String
 			while (*(start - 1) != '\0')
 			{
 				// Add a Vertex Float
 				pMesh->AddVertexFloat(extractFloat(el, &start));
+				vertexSz += 4;
 			}
 		}
 		// Fragment
@@ -56,7 +59,7 @@ Mesh* loadOBJ(const GPUEnv& gpuEnv, const char* path)
 	}
 
 	// Create the Buffers
-	pMesh->CreateBuffers(gpuEnv, 2 * sizeof(float));
+	pMesh->CreateBuffers(gpuEnv, vertexSz, path);
 	
 	// Release the Text
 	free(text);

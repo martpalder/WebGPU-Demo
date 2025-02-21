@@ -34,16 +34,16 @@ private:
 	std::vector<Actor*> m_actors;
 	
 	// Methods
-	void RenderPass(const WGPUCommandEncoder& encoder,
-	const Descriptors& desc);
+	void Release();
+	void RunRenderPass(const WGPUQueue& queue,
+	const WGPUCommandEncoder& encoder);
 	void SubmitCommand(const WGPUQueue& queue,
 	const WGPUCommandBuffer& command);
 	
 	// Create Functions
 	void CreateLayouts(const WGPUDevice& device);
 	void CreatePipeline(const WGPUDevice& device,
-	const WGPUShaderModule& shaderMod,
-	int w, int h);
+	const WGPUShaderModule& shaderMod, int w, int h);
 
 public:
 	// Constructor
@@ -56,7 +56,7 @@ public:
 	int w, int h);
 	
 	// Getters
-	const Camera* GetCam() const;
+	Camera* GetCam();
 	
 	// Add Functions
 	Actor* AddActor(const GPUEnv& gpuEnv, float x, float y, float z,
@@ -65,9 +65,8 @@ public:
 	// Main Functions
 	void Cls(const WGPUSurface& surf);
 	void Flip(const WGPUSurface& surf);
-	void Update(const WGPUQueue& queue);
-	void Draw(const WGPUDevice& device,
-	const WGPUQueue& queue);
+	void Update();
+	void Draw(const WGPUDevice& device, const WGPUQueue& queue);
 };
 
 #endif	// WORLD_HPP_INCLUDED

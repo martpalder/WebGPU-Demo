@@ -29,7 +29,7 @@ WGPUCommandEncoderDescriptor createEncoderDesc()
 	WGPUCommandEncoderDescriptor encoderDesc = {};
 	
 	encoderDesc.nextInChain = nullptr;
-	encoderDesc.label = "Command Encoder";
+	encoderDesc.label = "CommandEncoder";
 	
 	return encoderDesc;
 }
@@ -79,15 +79,15 @@ WGPUShaderModuleWGSLDescriptor createShaderCodeDesc(const char* shaderCode)
 WGPUShaderModuleDescriptor createShaderModDesc(WGPUChainedStruct* shaderCodeChain)
 {
 	WGPUShaderModuleDescriptor shaderModDesc = {};
-
+	
+	// Connect the chain
+	shaderModDesc.nextInChain = shaderCodeChain;
+	// Other Properties
 	shaderModDesc.label = "Shader";
 	#ifdef WEBGPU_BACKEND_WGPU
 	shaderModDesc.hintCount = 0;
 	shaderModDesc.hints = nullptr;
 	#endif
-
-	// Connect the chain
-	shaderModDesc.nextInChain = shaderCodeChain;
 	puts("Created a Shader Module Descriptor");
 
 	return shaderModDesc;
@@ -105,19 +105,20 @@ size_t bindingCount, WGPUBindGroupEntry* pBindings, const char* label)
 	// There must be as many bindings as declared in the layout!
 	bindGroupDesc.entryCount = bindingCount;
 	bindGroupDesc.entries = pBindings;
-	puts("Created a Bind Group Descriptor");
+	printf("Created a Bind Group Descriptor: '%s'\n", label);
 	
 	return bindGroupDesc;
 }
 
-WGPURenderPipelineDescriptor createRenderPipelineDesc(const States& states, bool bDepthStencil)
+WGPURenderPipelineDescriptor createRenderPipelineDesc(const States& states,
+const WGPUPipelineLayout& pipelineLayout, bool bDepthStencil)
 {
 	WGPURenderPipelineDescriptor pipelineDesc = {};
 	
 	// Define the Pipeline Layout
 	pipelineDesc.nextInChain = nullptr;
 	pipelineDesc.label = "RenderPipeline";
-	pipelineDesc.layout = nullptr;
+	pipelineDesc.layout = pipelineLayout;
 	
 	// Set the Vertex State
 	pipelineDesc.vertex = states.vertex;
@@ -141,7 +142,7 @@ WGPURenderPipelineDescriptor createRenderPipelineDesc(const States& states, bool
 	pipelineDesc.depthStencil = nullptr;
 	if (bDepthStencil)
 	{
-		// Set the Depth Stencil
+		// Set the Depth Stencil State
 		pipelineDesc.depthStencil = &states.depthStencil;
 	}
 	

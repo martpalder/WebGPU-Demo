@@ -21,24 +21,24 @@ World::World()
 
 World::~World()
 {
-	// Clear the Actors
-	m_actors.clear();
-	
-	// Release the Render Pipeline
-	wgpuRenderPipelineRelease(m_pipeline);
-	printRelease("Render Pipeline");
-	
+	this->Release();
+}
+
+void World::Init(const WGPUDevice& device,
+const WGPUShaderModule& shaderMod,
+int w, int h)
+{
+	// Create Layouts and Pipeline
+	this->CreateLayouts(device);
+	this->CreatePipeline(device, shaderMod, w, h);
+	puts("Initializes the World");
+}
+
+void World::Release()
+{
 	// Release the Target View
 	wgpuTextureViewRelease(m_targetView);
 	printRelease("Target View");
-	
-	// Release the Layouts
-	if (m_layouts.bindGroupLayout != nullptr)
-	{
-		wgpuBindGroupLayoutRelease(m_layouts.bindGroupLayout);
-		m_layouts.bindGroupLayout = nullptr;
-		printRelease("Bind Group Layout");
-	}
 	
 	// Release the Depth View
 	wgpuTextureViewRelease(m_depthView);
@@ -46,18 +46,31 @@ World::~World()
 	// Release the Depth Texture
 	wgpuTextureRelease(m_depthTexture);
 	printRelease("Depth Texture");
+	
+	// Release the Render Pipeline
+	wgpuRenderPipelineRelease(m_pipeline);
+	printRelease("Render Pipeline");
+	
+	// Clear the Actors
+	m_actors.clear();
 	puts("Destroyed the World");
+	
+	if (m_layouts.pipelineLayout != nullptr)
+	{
+		// Release the Pipeline Layout
+		wgpuPipelineLayoutRelease(m_layouts.pipelineLayout);
+		puts("Released the Pipeline Layout");
+	}
+	
+	if (m_layouts.bindGroupLayout != nullptr)
+	{
+		// Release the Bind Group Layout
+		wgpuBindGroupLayoutRelease(m_layouts.bindGroupLayout);
+		puts("Released the Bind Group Layout");
+	}
 }
 
-void World::Init(const WGPUDevice& device,
-const WGPUShaderModule& shaderMod,
-int w, int h)
-{
-	this->CreateLayouts(device);
-	this->CreatePipeline(device, shaderMod, w, h);
-}
-
-const Camera* World::GetCam() const
+Camera* World::GetCam()
 {
 	return &m_cam;
 }
@@ -70,8 +83,7 @@ void World::CreateLayouts(const WGPUDevice& device)
 }
 
 void World::CreatePipeline(const WGPUDevice& device,
-const WGPUShaderModule& shaderMod,
-int w, int h)
+const WGPUShaderModule& shaderMod, int w, int h)
 {
 	// Create a Depth Texture and View
 	WGPUTextureFormat depthFormat = WGPUTextureFormat_Depth16Unorm;
@@ -90,12 +102,11 @@ int w, int h)
 	// Create the Pipeline States
     States states = createStates(shaderMod, depthFormat);
     // Create the Pipeline Descriptor
-	WGPURenderPipelineDescriptor pipelineDesc = createRenderPipelineDesc(states, bDepthStencil);
-    
-    // PIPELINE LAYOUT
-	// Assign the PipelineLayout to the RenderPipelineDescriptor's layout field
-	pipelineDesc.layout = createLayoutPipeline(device, &m_layouts.bindGroupLayout);
-	puts("Assigned the PipelineLayout to the RenderPipelineDescriptor");
+	WGPURenderPipelineDescriptor pipelineDesc = createRenderPipelineDesc(
+		states,
+		m_layouts.pipelineLayout,
+		bDepthStencil
+	);
 	
 	// Create the Render Pipeline
 	m_pipeline = createRenderPipeline(device, pipelineDesc);
@@ -105,8 +116,8 @@ Actor* World::AddActor(const GPUEnv& gpuEnv, float x, float y, float z,
 const char* tag)
 {
 	Actor* pActor = new Actor(x, y, z);
-	pActor->Init(gpuEnv, m_vp);
 	pActor->SetTag(tag);
+	pActor->Init(gpuEnv, m_layouts.bindGroupLayout);
 	m_actors.push_back(pActor);
 	printf("Added an Actor: '%s'\n", tag);
 	
@@ -128,12 +139,12 @@ void World::Flip(const WGPUSurface& surf)
 	#endif
 }
 
-void World::RenderPass(const WGPUCommandEncoder& encoder,
-const Descriptors& desc)
-{
+void World::RunRenderPass(const WGPUQueue& queue,
+const WGPUCommandEncoder& encoder)
+{	
 	// {{Begin the Render Pass}}
 	WGPURenderPassEncoder renderPass;
-	renderPass = wgpuCommandEncoderBeginRenderPass(encoder, &desc.renderPassDesc);
+	renderPass = wgpuCommandEncoderBeginRenderPass(encoder, &m_desc.renderPassDesc);
 	
 	// {{Set the Render Pipeline}}
 	wgpuRenderPassEncoderSetPipeline(renderPass, m_pipeline);
@@ -141,7 +152,7 @@ const Descriptors& desc)
 	// {{Draw}}
 	for (Actor* pActor : m_actors)
 	{
-		pActor->Draw(renderPass);
+		pActor->Draw(queue, renderPass);
 	}
 	
 	// {{End and release the Render Pass}}
@@ -158,17 +169,17 @@ const WGPUCommandBuffer& command)
 	puts("Command submitted.");
 }
 
-void World::Update(const WGPUQueue& queue)
+void World::Update()
 {
 	// Update the Camera
-	m_cam.Update();
+	m_cam.Update();;
 	// Combine the View-Projection Matrix
 	mat4x4_mul(m_vp, m_p, m_cam.GetView());	// Check correct ordering
 	
 	// Update all Actors
 	for (Actor* pActor : m_actors)
 	{
-		pActor->Update(queue, m_vp);
+		pActor->Update(m_p);
 	}
 }
 
@@ -179,8 +190,8 @@ const WGPUQueue& queue)
 	WGPUCommandEncoder encoder;
 	encoder = wgpuDeviceCreateCommandEncoder(device, &m_desc.encoderDesc);
 	
-	// {{Do a Render Pass}}
-	this->RenderPass(encoder, m_desc);
+	// {{Run a Render Pass}}
+	this->RunRenderPass(queue, encoder);
 	
 	// {{Finish encoding the Command}}
 	WGPUCommandBuffer command = wgpuCommandEncoderFinish(encoder, &m_desc.cmdBufferDesc);
