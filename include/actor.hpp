@@ -29,7 +29,7 @@ private:
 	
 	// Methods
 	void Release();
-	void ComputeMVP(const mat4x4& vp);
+	void ComputeMVP(const WGPUQueue& queue, const mat4x4& vp);
 
 public:
 	Actor(float x, float y, float z);
@@ -39,8 +39,8 @@ public:
 	const vec3& GetPos() const;
 	const char* GetTag() const;
 	const BoundingBox& GetBounds() const;
-	const WGPUBool IsColliding(const BoundingBox& other) const;
-	const WGPUBool CompareTag(const char* tag) const;
+	WGPUBool IsColliding(const BoundingBox& other) const;
+	WGPUBool CompareTag(const char* tag) const;
 	
 	// Setters
 	void SetPos(float x, float y, float z);
@@ -52,7 +52,9 @@ public:
 	
 	// Main Methods
 	void Init(const GPUEnv& gpuEnv, const mat4x4& vp);
-	void CreateBindGroup(const GPUEnv& gpuEnv, const WGPUBindGroupLayout& bindGroupLayout);
+	void CreateBindGroup(const WGPUDevice& device,
+	const WGPUBindGroupLayout& bindGroupLayout);
+	
 	void Update(const WGPUQueue& queue, const mat4x4& vp);
 	void Draw(const WGPURenderPassEncoder& renderPass) const;
 	

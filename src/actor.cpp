@@ -1,4 +1,5 @@
 #include "./actor.hpp"
+#include "./desc.hpp"
 #include "./buffer.hpp"
 #include "./mymath.h"
 #include "./myassert.hpp"
@@ -11,6 +12,7 @@ Actor::Actor(float x, float y, float z)
 	m_pos[2] = z;
 	m_speed = 0.2f;
 	m_yaw = 0.0f;
+	m_tag = "Actor";
 	m_bindGroup = nullptr;
 	m_pMesh = nullptr;
 	
@@ -27,16 +29,41 @@ Actor::~Actor()
 	this->Release();
 }
 
+void Actor::Release()
+{
+	if (m_pMesh != nullptr)
+	{
+		// Release the Mesh
+		delete m_pMesh;
+		m_pMesh = nullptr;
+		puts("Released the Mesh");
+	}
+	
+	if (m_bindGroup != nullptr)
+	{
+		// Release the Bind Group
+		wgpuBindGroupRelease(m_bindGroup);
+		m_bindGroup = nullptr;
+		puts("Released the Bind Group");
+	}
+
+	if (m_mvpBuffer != nullptr)
+	{
+		// Release the Transform Buffer
+		wgpuBufferRelease(m_mvpBuffer);
+		m_mvpBuffer = nullptr;
+		puts("Released the MVP Buffer");
+	}
+}
+
 void Actor::Init(const GPUEnv& gpuEnv, const mat4x4& vp)
 {
 	// Create the Uniform Buffer
-	m_mvpBuffer = createBufferUniformMat(gpuEnv, m_mvp);
+	m_mvpBuffer = createBufferUniformMat(gpuEnv, m_mvp, m_tag);
 	
 	// Compute the MVP Matrix
-	this->ComputeMVP(vp);
-	
-	// Upload to Shader
-	wgpuQueueWriteBuffer(gpuEnv.queue, m_mvpBuffer, 0, m_mvp, sizeof(mat4x4));
+	this->ComputeMVP(gpuEnv.queue, vp);
+	printf("Initialized Actor: '%s'\n", m_tag);
 }
 
 const vec3& Actor::GetPos() const
@@ -54,12 +81,12 @@ const BoundingBox& Actor::GetBounds() const
 	return m_box;
 }
 
-const WGPUBool Actor::IsColliding(const BoundingBox& other) const
+WGPUBool Actor::IsColliding(const BoundingBox& other) const
 {
 	return intersects(m_box, other);
 }
 
-const WGPUBool Actor::CompareTag(const char* tag) const
+WGPUBool Actor::CompareTag(const char* tag) const
 {
 	return (strcmp(m_tag, tag) == 0);
 }
@@ -118,7 +145,7 @@ void Actor::SetMesh(Mesh* pMesh)
 	}
 }
 
-void Actor::ComputeMVP(const mat4x4& vp)
+void Actor::ComputeMVP(const WGPUQueue& queue, const mat4x4& vp)
 {
 	// Set the Translation Matrix
 	mat4x4_translate(m_t, m_pos[0], m_pos[1], m_pos[2]);
@@ -126,9 +153,12 @@ void Actor::ComputeMVP(const mat4x4& vp)
 	mat4x4_mul(m_model, m_t, m_r);	// Check correct ordering
 	// Combine the View-Projection and the Model
 	mat4x4_mul(m_mvp, vp, m_model);	// Check correct ordering
+	
+	// Upload to Buffer
+	wgpuQueueWriteBuffer(queue, m_mvpBuffer, 0, m_mvp, sizeof(mat4x4));
 }
 
-void Actor::CreateBindGroup(const GPUEnv& gpuEnv,
+void Actor::CreateBindGroup(const WGPUDevice& device,
 const WGPUBindGroupLayout& bindGroupLayout)
 {
 	// Create the Bindings
@@ -136,48 +166,22 @@ const WGPUBindGroupLayout& bindGroupLayout)
 		createBinding(0, m_mvpBuffer),
 	};
 	
-	// Create the Bind Group
-	m_bindGroup = createBindGroup(gpuEnv.dev, bindGroupLayout, 1, &bindings[0]);
-}
-
-void Actor::Release()
-{
-	if (m_bindGroup != nullptr)
-	{
-		// Release the Bind Group
-		wgpuBindGroupRelease(m_bindGroup);
-		m_bindGroup = nullptr;
-		puts("Released the Bind Group");
-	}
+	// Create a Bind Group Descriptor
+	WGPUBindGroupDescriptor bindGroupDesc = createBindGroupDesc(bindGroupLayout, 1, &bindings[0], m_tag);
 	
-	if (m_pMesh != nullptr)
-	{
-		// Release the Mesh
-		delete m_pMesh;
-		m_pMesh = nullptr;
-		puts("Released the Mesh");
-	}
-
-	if (m_mvpBuffer != nullptr)
-	{
-		// Release the Transform Buffer
-		wgpuBufferRelease(m_mvpBuffer);
-		m_mvpBuffer = nullptr;
-		puts("Released the Transform Buffer");
-	}
+	// Create the Bind Group
+	m_bindGroup = createBindGroup(device, bindGroupDesc);
+	printf("Created a Bind Group for '%s'\n", m_tag);
 }
 
 void Actor::Update(const WGPUQueue& queue, const mat4x4& vp)
 {
 	// Compute the MVP Matrix
-	this->ComputeMVP(vp);
-	
-	// Upload to Shader
-	wgpuQueueWriteBuffer(queue, m_mvpBuffer, 0, m_mvp, sizeof(mat4x4));
+	this->ComputeMVP(queue, vp);
 }
 
 void Actor::Draw(const WGPURenderPassEncoder& renderPass) const
-{
+{	
 	// {{Set the binding groups here!}}
 	if (m_bindGroup != nullptr)
 	{
@@ -189,7 +193,7 @@ void Actor::Draw(const WGPURenderPassEncoder& renderPass) const
 	if (m_pMesh != nullptr)
 	{
 		// Draw the Mesh
-		m_pMesh->Draw(renderPass);;
+		m_pMesh->Draw(renderPass);
 	}
 	else
 	{

@@ -11,7 +11,6 @@ typedef struct {
 	WGPUSurface surf;
 	WGPUDevice dev;
 	WGPUQueue queue;
-	WGPURenderPipeline pipeline;
 } GPUEnv;
 
 WGPURequestAdapterOptions createAdapterOpts(const WGPUSurface& surf);

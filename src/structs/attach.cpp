@@ -21,8 +21,7 @@ WGPURenderPassColorAttachment createColorAttach(float r, float g, float b)
 	return colorAttach;
 }
 
-WGPURenderPassDepthStencilAttachment createDepthStencilAttach(const WGPUDevice& device,
-const WGPUTextureView& depthView)
+WGPURenderPassDepthStencilAttachment createDepthStencilAttach(const WGPUTextureView& depthView)
 {
 	// The Depth Stencil Attachment handles Z-Buffering
 	WGPURenderPassDepthStencilAttachment depthStencilAttach = {};

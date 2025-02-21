@@ -94,13 +94,13 @@ WGPUShaderModuleDescriptor createShaderModDesc(WGPUChainedStruct* shaderCodeChai
 }
 
 WGPUBindGroupDescriptor createBindGroupDesc(const WGPUBindGroupLayout& bindGroupLayout,
-size_t bindingCount, WGPUBindGroupEntry* pBindings)
+size_t bindingCount, WGPUBindGroupEntry* pBindings, const char* label)
 {
 	WGPUBindGroupDescriptor bindGroupDesc = {};
 	
 	// Define the Bind Group
 	bindGroupDesc.nextInChain = nullptr;
-	bindGroupDesc.label = "BindGroup";
+	bindGroupDesc.label = label;
 	bindGroupDesc.layout = bindGroupLayout;
 	// There must be as many bindings as declared in the layout!
 	bindGroupDesc.entryCount = bindingCount;

@@ -50,7 +50,6 @@ WGPUBindGroupLayoutEntry createLayoutBinding(size_t minBindingSize)
 	bindingLayout.storageTexture.access = WGPUStorageTextureAccess_Undefined;
 	bindingLayout.storageTexture.format = WGPUTextureFormat_Undefined;
 	bindingLayout.storageTexture.viewDimension = WGPUTextureViewDimension_Undefined;
-	
 	puts("Created a Binding Layout");
 	
 	return bindingLayout;
@@ -70,9 +69,10 @@ WGPUBindGroupLayoutEntry* pBindingLayout)
 	// If has a Binding Layout
 	if (pBindingLayout != nullptr)
 	{
-		// Set the Bind Group Layout Entries
+		// Set the Binding Group Layout Entries
 		bindGroupLayoutDesc.entryCount = 1;
 		bindGroupLayoutDesc.entries = pBindingLayout;
+		puts("Set the Binding Layout Entries");
 	}
 	
 	// Create the bind group layout

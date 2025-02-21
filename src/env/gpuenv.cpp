@@ -80,11 +80,7 @@ GPUEnv initGPUEnv(GLFWwindow* wnd)
 }
 
 void quitGPUEnv(const GPUEnv& gpuEnv)
-{	
-	// Release the Render Pipeline
-	wgpuRenderPipelineRelease(gpuEnv.pipeline);
-	printRelease("Render Pipeline");
-	
+{
 	// Unconfigure the Surface
 	wgpuSurfaceUnconfigure(gpuEnv.surf);
 	puts("Unconfigured the Surface");

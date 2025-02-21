@@ -23,19 +23,9 @@ private:
 	Input m_input;
 	GLFWwindow* m_wnd;
 	
-	// Depth
-	WGPUTexture m_depthTexture;
-	WGPUTextureView m_depthView;
-	
-	// Attachments and Descriptors
-	Attachments m_attach;
-	Descriptors m_desc;
-	
 	// Layouts
 	WGPUBindGroupLayoutEntry m_bindingLayout;
 	WGPUBindGroupLayout m_bindGroupLayout;
-	// Target Texture View
-	WGPUTextureView m_targetView;
 	
 	// World
 	World m_world;
@@ -63,19 +53,13 @@ private:
 	// Load Methods
 	void LoadData();
 	
-	// Create Methods
-	void CreatePipeline();
-	
 	// Setup Mehods
 	void SetupActors();
 	
 	// Main Methods
-	void Cls();
-	void Flip();
 	void EventLoop();
-	void RenderPass(const WGPUCommandEncoder& encoder);
 	void Update();
-	void Draw();
+	void Render();
 	
 	// Main Loops
 	void MainLoopGLFW();

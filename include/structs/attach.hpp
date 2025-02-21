@@ -11,7 +11,6 @@ typedef struct {
 
 WGPURenderPassColorAttachment createColorAttach(float r, float g, float b);
 
-WGPURenderPassDepthStencilAttachment createDepthStencilAttach(const WGPUDevice& device,
-const WGPUTextureView& depthView);
+WGPURenderPassDepthStencilAttachment createDepthStencilAttach(const WGPUTextureView& depthView);
 
 #endif	// ATTACH_HPP_INCLUDED

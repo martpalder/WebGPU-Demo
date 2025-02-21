@@ -79,15 +79,16 @@ WGPUBuffer createBufferIdx(const WGPUDevice& device, size_t dataSz)
 	return indexBuffer;
 }
 
-WGPUBuffer createBufferUniformMat(const GPUEnv& gpuEnv, const mat4x4& matrix)
+WGPUBuffer createBufferUniformMat(const GPUEnv& gpuEnv, const mat4x4& matrix,
+const char* label)
 {
 	WGPUBuffer matrixBuffer;
 	
 	// Describe the Matrix Buffer
 	WGPUBufferDescriptor bufferDesc = {};
 	bufferDesc.nextInChain = nullptr;
-	bufferDesc.label = "MatrixBuffer";
-	bufferDesc.size = sizeof(matrix);
+	bufferDesc.label = label;
+	bufferDesc.size = sizeof(mat4x4);
 	bufferDesc.usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_Uniform; // Uniform usage here!
 	bufferDesc.mappedAtCreation = false;
 	

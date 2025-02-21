@@ -14,7 +14,8 @@ size_t dataSz, const void* data);
 
 WGPUBuffer createBufferVert(const WGPUDevice& device, size_t dataSize);
 WGPUBuffer createBufferIdx(const WGPUDevice& device, size_t dataSize);
-WGPUBuffer createBufferUniformMat(const GPUEnv& gpuEnv, const mat4x4& matrix);
+WGPUBuffer createBufferUniformMat(const GPUEnv& gpuEnv, const mat4x4& matrix,
+const char* label);
 
 #endif	// BUFFER_HPP_INCLUDED
 

@@ -1,12 +1,7 @@
 #include "./app.hpp"
 #include "./window.hpp"
 #include "./attach.hpp"
-#include "./layout.hpp"
-#include "./pipeline.hpp"
-#include "./buffer.hpp"
-#include "./texture.hpp"
 #include "./view.hpp"
-#include "./sampler.hpp"
 #include "./texture_loader.hpp"
 #include "./mymath.h"
 #include "./stdafx.h"
@@ -15,8 +10,9 @@
 #include <emscripten/emscripten.h>
 #endif
 
-#define PLAYER_OBJ "triangle3d_color.obj"
 #define SHADER_NAME "basic3d_color.wgsl"
+#define PLAYER_OBJ "cube.obj"
+#define GROUND_OBJ "ground.obj"
 
 App::App(int w, int h, const char* title)
 {
@@ -42,6 +38,7 @@ void App::Init(int w, int h, const char* title)
 	m_w = w;
 	m_h = h;
 	m_wnd = createWindow(w, h, title);
+	
 	// Set the Mouse Mode
 	glfwSetInputMode(m_wnd, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	
@@ -56,33 +53,13 @@ void App::Init(int w, int h, const char* title)
 	// Setup Actors
 	this->SetupActors();
 	
-	// Create the Render Pipeline
-	this->CreatePipeline();
-	//createSampler(m_gpuEnv.dev);
+	// Initialize the World
+	m_world.Init(m_gpuEnv.dev, m_shaderMgr.Get(SHADER_NAME), m_w, m_h);
 	puts("Initialized the App");
 }
 
 void App::Quit()
 {
-	// Release the Depth View
-	wgpuTextureViewRelease(m_depthView);
-	printRelease("Depth View");
-	// Release the Depth Texture
-	wgpuTextureRelease(m_depthTexture);
-	printRelease("Depth Texture");
-	
-	// Release the Target View
-	wgpuTextureViewRelease(m_targetView);
-	printRelease("Target View");
-	
-	// Release the Layouts
-	if (m_bindGroupLayout != nullptr)
-	{
-		wgpuBindGroupLayoutRelease(m_bindGroupLayout);
-		m_bindGroupLayout = nullptr;
-		printRelease("Bind Group Layout");
-	}
-	
 	// Quit WebGPU
 	quitGPUEnv(m_gpuEnv);
 	// Destroy the Window
@@ -107,75 +84,31 @@ void App::LoadData()
 	
 	// Load Meshes
 	m_meshMgr.Load(m_gpuEnv, PLAYER_OBJ);
-	m_meshMgr.Load(m_gpuEnv, "ground.obj");
+	m_meshMgr.Load(m_gpuEnv, GROUND_OBJ);
 	
 	// TODO: Load Textures
 	//m_texMgr.Load(m_gpuEnv, "char_base.png");
 }
 
-void App::CreatePipeline()
+void App::SetupActors()
 {
-	// Create a Depth Texture and View
-	WGPUTextureFormat depthFormat = WGPUTextureFormat_Depth16Unorm;
-	m_depthTexture = createDepthTexture(m_gpuEnv.dev, m_w, m_h, depthFormat);
-	m_depthView = createDepthView(m_depthTexture);
-	
-	// Create the Attachments
-	m_attach.colorAttach = createColorAttach(0.1f, 0.1f, 0.1f);
-	m_attach.depthStencilAttach = createDepthStencilAttach(m_gpuEnv.dev, m_depthView);
-	puts("Created the Attachments");
-	
-	// Create the Descriptors
-	bool bDepthStencil = true;
-	m_desc = createDescriptors(m_attach, bDepthStencil);
-	
-	// Create the Pipeline States
-    States states = createStates(m_shaderMgr.Get(SHADER_NAME), depthFormat);
-    // Create the Pipeline Descriptor
-	WGPURenderPipelineDescriptor pipelineDesc = createRenderPipelineDesc(states, bDepthStencil);
-	
 	// Create the Layouts
 	m_bindingLayout = createLayoutBinding(sizeof(mat4x4));
 	m_bindGroupLayout = createLayoutBindGroup(m_gpuEnv.dev, &m_bindingLayout);
-	// Create the Bind Groups
-	m_world.CreateBindGroups(m_gpuEnv, m_bindGroupLayout);
-    
-    // PIPELINE LAYOUT
-	// Assign the PipelineLayout to the RenderPipelineDescriptor's layout field
-	pipelineDesc.layout = createLayoutPipeline(m_gpuEnv.dev, &m_bindGroupLayout);
-	puts("Assigned the PipelineLayout to the RenderPipelineDescriptor");
 	
-	// Create the Render Pipeline
-	m_gpuEnv.pipeline = createRenderPipeline(m_gpuEnv, pipelineDesc);
-}
-
-void App::SetupActors()
-{	
-	// Add the Actors with Meshes
+	// Setup the Actors
 	// Player
 	m_pPlayer = m_world.AddActor(m_gpuEnv, 0.0f, 0.0f, 0.0f, "Player");
 	m_pPlayer->SetMesh(m_meshMgr.Get(PLAYER_OBJ));
-	Actor* pGround = m_world.AddActor(m_gpuEnv, 0.0f, -0.5f, 0.0f, "Ground");
-	pGround->SetMesh(m_meshMgr.Get("ground.obj"));
+	m_pPlayer->CreateBindGroup(m_gpuEnv.dev, m_bindGroupLayout);
+	// Ground
+	Actor* pGround = m_world.AddActor(m_gpuEnv, 0.0f, 0.0f, 0.0f, "Ground");
+	pGround->SetMesh(m_meshMgr.Get(GROUND_OBJ));
+	pGround->CreateBindGroup(m_gpuEnv.dev, m_bindGroupLayout);
 	
 	// Get and attach the Camera
 	m_pCam = m_world.GetCam();
 	//m_pCam->SetParent(m_pPlayer);
-}
-
-void App::Cls()
-{
-	// Get the next Target Texture View
-	getNextTargetView(m_gpuEnv.surf, &m_targetView);
-	// Assign the Target Texture View to Color Attachment
-	m_attach.colorAttach.view = m_targetView;
-}
-
-void App::Flip()
-{
-	#ifndef __EMSCRIPTEN__
-	wgpuSurfacePresent(m_gpuEnv.surf);
-	#endif
 }
 
 void App::EventLoop()
@@ -185,22 +118,6 @@ void App::EventLoop()
 	// mouse/key event, which we don't use so far)
 	glfwPollEvents();
 	#endif
-}
-
-void App::RenderPass(const WGPUCommandEncoder& encoder)
-{
-	// {{Begin the Render Pass}}
-	WGPURenderPassEncoder renderPass;
-	renderPass = wgpuCommandEncoderBeginRenderPass(encoder, &m_desc.renderPassDesc);
-	// {{Set the Render Pipeline}}
-	wgpuRenderPassEncoderSetPipeline(renderPass, m_gpuEnv.pipeline);
-	
-	// {{Draw}}
-	m_world.Draw(renderPass);
-	
-	// {{End and release the Render Pass}}
-	wgpuRenderPassEncoderEnd(renderPass);
-	wgpuRenderPassEncoderRelease(renderPass);
 }
 
 void App::Update()
@@ -241,31 +158,11 @@ void App::Update()
 	m_world.Update(m_gpuEnv.queue);
 }
 
-void App::Draw()
+void App::Render()
 {
-	// Clear the Screen
-	this->Cls();
-	
-	// {{Create a Command Encoder}}
-	WGPUCommandEncoder encoder;
-	encoder = wgpuDeviceCreateCommandEncoder(m_gpuEnv.dev, &m_desc.encoderDesc);
-	
-	// {{Do a Render Pass}}
-	this->RenderPass(encoder);
-	
-	// {{Finish encoding the Command}}
-	WGPUCommandBuffer command = wgpuCommandEncoderFinish(encoder, &m_desc.cmdBufferDesc);
-	// {{Release the Command Encoder}}
-	wgpuCommandEncoderRelease(encoder);
-	
-	// {{Submit the Command}}
-	//puts("Submitting command...");
-	wgpuQueueSubmit(m_gpuEnv.queue, 1, &command);
-	wgpuCommandBufferRelease(command);
-	//puts("Command submitted.");
-	
-	// Flip the Display Buffer
-	this->Flip();
+	m_world.Cls(m_gpuEnv.surf);
+	m_world.Draw(m_gpuEnv.dev, m_gpuEnv.queue);
+	m_world.Flip(m_gpuEnv.surf);
 }
 
 void App::MainLoopGLFW()
@@ -277,8 +174,8 @@ void App::MainLoopGLFW()
 		this->EventLoop();	
 		// Update
 		this->Update();
-		// Draw
-		this->Draw();
+		// Render
+		this->Render();
 	}
 }
 
@@ -294,8 +191,8 @@ void App::MainLoopEM()
 		pApp->EventLoop();	
 		// Update
 		pApp->Update();
-		// Draw
-		pApp->Draw();
+		// Render
+		pApp->Render();
 	};
 	
 	// Set the Main Loop

@@ -6,7 +6,7 @@
 #include "./myassert.hpp"
 #include "./stdafx.h"
 
-WGPURenderPipeline createRenderPipeline(const GPUEnv& gpuEnv,
+WGPURenderPipeline createRenderPipeline(const WGPUDevice& device,
 WGPURenderPipelineDescriptor& pipelineDesc)
 {
     WGPURenderPipeline pipeline;
@@ -27,9 +27,9 @@ WGPURenderPipelineDescriptor& pipelineDesc)
 	
 	// Create the Render Pipeline:
     // Use the device to create the render pipeline.
-	pushError(gpuEnv.dev);
-	pipeline = wgpuDeviceCreateRenderPipeline(gpuEnv.dev, &pipelineDesc);
-	popError(gpuEnv.dev);
+	pushError(device);
+	pipeline = wgpuDeviceCreateRenderPipeline(device, &pipelineDesc);
+	popError(device);
 	
 	// Chek for Errors
 	if (pipeline == nullptr)

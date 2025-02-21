@@ -36,7 +36,7 @@ void Input::Init(GLFWwindow* wnd)
 	puts("Initialized Input");
 }
 
-const float Input::GetAxis(uint8_t axis) const
+float Input::GetAxis(uint8_t axis) const
 {
 	switch (axis)
 	{
@@ -59,12 +59,12 @@ const float Input::GetAxis(uint8_t axis) const
 	return 0.0f;
 }
 
-const vec2& Input::GetMDelta() const
+vec2& Input::GetMDelta() const
 {	
 	return g_mDelta;
 }
 
-const bool Input::IsKeyPressed(int key) const
+bool Input::IsKeyPressed(int key) const
 {
 	return g_keys[key];
 }

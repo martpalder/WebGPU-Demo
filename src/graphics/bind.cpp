@@ -32,13 +32,9 @@ WGPUBindGroupEntry createBinding(int idx, const WGPUBuffer& buffer)
 }
 
 WGPUBindGroup createBindGroup(const WGPUDevice& device,
-const WGPUBindGroupLayout& bindGroupLayout,
-size_t bindingCount, WGPUBindGroupEntry* pBindings)
+const WGPUBindGroupDescriptor& bindGroupDesc)
 {
 	WGPUBindGroup bindGroup = nullptr;
-	
-	// Create a Bind Group Descriptor
-	WGPUBindGroupDescriptor bindGroupDesc = createBindGroupDesc(bindGroupLayout, bindingCount, pBindings);
 	
 	// Create a Bind Group
 	wgpuDevicePushErrorScope(device, WGPUErrorFilter_Validation);
@@ -59,23 +55,4 @@ size_t bindingCount, WGPUBindGroupEntry* pBindings)
 	MY_ASSERT(bindGroup != nullptr);
 	
 	return bindGroup;
-}
-
-Bind bindBuffer(const WGPUDevice& device, int idx,
-WGPUBindGroupEntry* pBindings)
-{
-	Bind bind;
-	
-	// Create the Binding Layout
-	bind.bindingLayout = createLayoutBinding(sizeof(mat4x4));
-	
-	// Create the Bind Group Layout
-	bind.bindGroupLayout = createLayoutBindGroup(device, &bind.bindingLayout);
-	MY_ASSERT(bind.bindGroupLayout != nullptr);
-	
-	// Create the Bind Group
-	bind.bindGroup = createBindGroup(device, bind.bindGroupLayout, 1, pBindings);
-	MY_ASSERT(bind.bindGroup != nullptr);
-	
-	return bind;
 }

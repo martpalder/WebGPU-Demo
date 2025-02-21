@@ -26,7 +26,7 @@ WGPUShaderModuleDescriptor createShaderModDesc(WGPUChainedStruct* shaderCodeChai
 
 // Bind Group
 WGPUBindGroupDescriptor createBindGroupDesc(const WGPUBindGroupLayout& bindGroupLayout,
-size_t bindingCount, WGPUBindGroupEntry* pBindings);
+size_t bindingCount, WGPUBindGroupEntry* pBindings, const char* label);
 
 // Render Pass
 WGPURenderPassDescriptor createRenderPassDesc(const Attachments& attach, bool bDepthStencil);

@@ -2,7 +2,13 @@
 #ifndef LAYOUT_HPP_INCLUDED
 #define LAYOUT_HPP_INCLUDED
 
-#include <webgpu/webgpu.h>
+#include "./stdafx.h"
+
+typedef struct {
+	WGPUBindGroupLayoutEntry bindingLayout;
+	WGPUBindGroupLayout bindGroupLayout;
+	WGPUPipelineLayout pipelineLayout;
+} Layouts;
 
 // Buffer
 WGPUVertexBufferLayout createLayoutBufferVert(size_t vertexSz, size_t attribCount,
